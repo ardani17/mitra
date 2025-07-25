@@ -1,26 +1,29 @@
 @extends('layouts.app')
 
 @section('content')
-<div class="container mx-auto px-4 py-8">
-    <div class="flex justify-between items-center mb-6">
-        <h1 class="text-3xl font-bold text-slate-800">Manajemen Proyek</h1>
-        <div class="flex space-x-2">
+<div class="container mx-auto px-4 py-6 sm:py-8">
+    <div class="flex flex-col sm:flex-row sm:justify-between sm:items-center mb-4 sm:mb-6 space-y-4 sm:space-y-0">
+        <h1 class="text-2xl sm:text-3xl font-bold text-slate-800">Manajemen Proyek</h1>
+        <div class="flex flex-col sm:flex-row space-y-2 sm:space-y-0 sm:space-x-2">
             <a href="{{ route('projects.export', request()->query()) }}" 
-               class="bg-green-500 hover:bg-green-700 text-white font-bold py-2 px-4 rounded inline-flex items-center">
-                <svg class="w-4 h-4 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+               class="bg-green-500 hover:bg-green-700 text-white font-bold py-2 px-3 sm:px-4 rounded inline-flex items-center justify-center text-sm sm:text-base">
+                <svg class="w-4 h-4 mr-1 sm:mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 10v6m0 0l-3-3m3 3l3-3m2 8H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"></path>
                 </svg>
-                Export Excel
+                <span class="hidden sm:inline">Export Excel</span>
+                <span class="sm:hidden">Export</span>
             </a>
             <a href="{{ route('projects.import.form') }}" 
-               class="bg-purple-500 hover:bg-purple-700 text-white font-bold py-2 px-4 rounded inline-flex items-center">
-                <svg class="w-4 h-4 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+               class="bg-purple-500 hover:bg-purple-700 text-white font-bold py-2 px-3 sm:px-4 rounded inline-flex items-center justify-center text-sm sm:text-base">
+                <svg class="w-4 h-4 mr-1 sm:mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M7 16a4 4 0 01-.88-7.903A5 5 0 1115.9 6L16 6a5 5 0 011 9.9M15 13l-3-3m0 0l-3 3m3-3v12"></path>
                 </svg>
-                Import Excel
+                <span class="hidden sm:inline">Import Excel</span>
+                <span class="sm:hidden">Import</span>
             </a>
-            <a href="{{ route('projects.create') }}" class="bg-blue-600 hover:bg-blue-700 text-white font-bold py-2 px-4 rounded">
-                Buat Proyek Baru
+            <a href="{{ route('projects.create') }}" class="bg-blue-600 hover:bg-blue-700 text-white font-bold py-2 px-3 sm:px-4 rounded text-center text-sm sm:text-base">
+                <span class="hidden sm:inline">Buat Proyek Baru</span>
+                <span class="sm:hidden">+ Proyek</span>
             </a>
         </div>
     </div>
@@ -125,9 +128,10 @@
         </form>
     </div>
 
-    <!-- Projects Table -->
+    <!-- Projects Display -->
     <div class="bg-white rounded-lg shadow-md overflow-hidden">
-        <div class="overflow-x-auto">
+        <!-- Desktop Table View -->
+        <div class="hidden lg:block overflow-x-auto">
             <table class="min-w-full divide-y divide-gray-200">
                 <thead class="bg-blue-600">
                     <tr>
@@ -293,13 +297,178 @@
                     </tr>
                     @empty
                     <tr>
-                        <td colspan="8" class="px-6 py-8 text-center text-sm text-gray-500">
+                        <td colspan="9" class="px-6 py-8 text-center text-sm text-gray-500">
                             Tidak ada proyek ditemukan.
                         </td>
                     </tr>
                     @endforelse
                 </tbody>
             </table>
+        </div>
+
+        <!-- Mobile Card View -->
+        <div class="lg:hidden">
+            @forelse($projects as $index => $project)
+            <div class="border-b border-gray-200 p-4 hover:bg-gray-50 transition-colors duration-200">
+                <!-- Project Header -->
+                <div class="flex justify-between items-start mb-3">
+                    <div class="flex-1 min-w-0">
+                        <h3 class="text-sm font-semibold text-gray-900 truncate" title="{{ $project->name }}">
+                            {{ $project->name }}
+                        </h3>
+                        <p class="text-xs text-blue-600 font-mono mt-1">{{ $project->code }}</p>
+                        <p class="text-xs text-gray-500 mt-1 line-clamp-2">{{ Str::limit($project->description, 60) }}</p>
+                    </div>
+                    <div class="ml-3 flex flex-col items-end space-y-1">
+                        <span class="text-xs font-medium text-gray-500">#{{ $projects->firstItem() + $index }}</span>
+                        <span class="inline-flex px-2 py-1 text-xs font-semibold rounded-full 
+                              @if($project->type == 'konstruksi') bg-blue-100 text-blue-800
+                              @elseif($project->type == 'maintenance') bg-green-100 text-green-800
+                              @else bg-gray-100 text-gray-800 @endif">
+                            @if($project->type == 'konstruksi') Konst
+                            @elseif($project->type == 'maintenance') Maint
+                            @else {{ ucfirst($project->type) }}
+                            @endif
+                        </span>
+                    </div>
+                </div>
+
+                <!-- Status and Progress -->
+                <div class="grid grid-cols-2 gap-3 mb-3">
+                    <div>
+                        <label class="text-xs font-medium text-gray-500">Status Proyek</label>
+                        <div class="mt-1">
+                            <span class="inline-flex px-2 py-1 text-xs font-semibold rounded-full 
+                                  @if($project->status == 'completed') bg-green-100 text-green-800
+                                  @elseif($project->status == 'in_progress') bg-blue-100 text-blue-800
+                                  @elseif($project->status == 'planning') bg-yellow-100 text-yellow-800
+                                  @elseif($project->status == 'cancelled') bg-red-100 text-red-800
+                                  @else bg-gray-100 text-gray-800 @endif">
+                                @if($project->status == 'planning') Perencanaan
+                                @elseif($project->status == 'in_progress') Sedang Berjalan
+                                @elseif($project->status == 'completed') Selesai
+                                @elseif($project->status == 'cancelled') Dibatalkan
+                                @else {{ ucfirst($project->status) }}
+                                @endif
+                            </span>
+                            @php
+                                $progressPercentage = 0;
+                                if ($project->status == 'planning') $progressPercentage = 25;
+                                elseif ($project->status == 'in_progress') $progressPercentage = 60;
+                                elseif ($project->status == 'completed') $progressPercentage = 100;
+                                elseif ($project->status == 'cancelled') $progressPercentage = 0;
+                                
+                                $timelineProgress = $project->timelines()->avg('progress_percentage') ?? $progressPercentage;
+                                $actualProgress = max($progressPercentage, $timelineProgress);
+                            @endphp
+                            <div class="mt-2">
+                                <div class="flex justify-between text-xs text-gray-600 mb-1">
+                                    <span>Progress</span>
+                                    <span>{{ number_format($actualProgress, 0) }}%</span>
+                                </div>
+                                <div class="w-full bg-gray-200 rounded-full h-2">
+                                    <div class="h-2 rounded-full transition-all duration-300 
+                                              @if($project->status == 'completed') bg-green-500
+                                              @elseif($project->status == 'in_progress') bg-blue-500
+                                              @elseif($project->status == 'planning') bg-yellow-500
+                                              @elseif($project->status == 'cancelled') bg-red-500
+                                              @else bg-gray-500 @endif" 
+                                         style="width: {{ $actualProgress }}%"></div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    <div>
+                        <label class="text-xs font-medium text-gray-500">Status Tagihan</label>
+                        <div class="mt-1">
+                            <span class="inline-flex px-2 py-1 text-xs font-semibold rounded-full {{ $project->billing_status_badge_color }}">
+                                @if($project->billing_status == 'not_billed') Belum Ditagih
+                                @elseif($project->billing_status == 'partially_billed') Sebagian
+                                @elseif($project->billing_status == 'fully_billed') Lunas
+                                @else Belum Ditagih
+                                @endif
+                            </span>
+                            <div class="mt-2">
+                                <div class="flex justify-between text-xs text-gray-600 mb-1">
+                                    <span>{{ number_format($project->billing_percentage, 0) }}%</span>
+                                    <span>{{ \App\Helpers\FormatHelper::formatRupiah($project->total_billed_amount) }}</span>
+                                </div>
+                                <div class="w-full bg-gray-200 rounded-full h-2">
+                                    <div class="h-2 rounded-full transition-all duration-300 
+                                              @if($project->billing_status == 'fully_billed') bg-green-500
+                                              @elseif($project->billing_status == 'partially_billed') bg-yellow-500
+                                              @else bg-red-500 @endif" 
+                                         style="width: {{ min($project->billing_percentage, 100) }}%"></div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Financial Info -->
+                <div class="grid grid-cols-2 gap-3 mb-3">
+                    <div>
+                        <label class="text-xs font-medium text-gray-500">Nilai Rencana</label>
+                        <div class="text-sm font-semibold text-gray-900 mt-1">
+                            {{ \App\Helpers\FormatHelper::formatRupiah($project->planned_total_value ?? $project->planned_budget) }}
+                        </div>
+                        @if($project->planned_service_value || $project->planned_material_value)
+                        <div class="text-xs text-gray-500 mt-1">
+                            J: {{ \App\Helpers\FormatHelper::formatRupiah($project->planned_service_value ?? 0) }}<br>
+                            M: {{ \App\Helpers\FormatHelper::formatRupiah($project->planned_material_value ?? 0) }}
+                        </div>
+                        @endif
+                    </div>
+                    <div>
+                        <label class="text-xs font-medium text-gray-500">Nilai Akhir</label>
+                        @if($project->final_total_value)
+                        <div class="text-sm font-semibold text-green-600 mt-1">
+                            {{ \App\Helpers\FormatHelper::formatRupiah($project->final_total_value) }}
+                        </div>
+                        @if($project->final_service_value || $project->final_material_value)
+                        <div class="text-xs text-gray-500 mt-1">
+                            J: {{ \App\Helpers\FormatHelper::formatRupiah($project->final_service_value ?? 0) }}<br>
+                            M: {{ \App\Helpers\FormatHelper::formatRupiah($project->final_material_value ?? 0) }}
+                        </div>
+                        @endif
+                        @else
+                        <div class="text-sm text-gray-400 mt-1">-</div>
+                        @endif
+                    </div>
+                </div>
+
+                <!-- Date and Actions -->
+                <div class="flex justify-between items-center pt-3 border-t border-gray-100">
+                    <div>
+                        <label class="text-xs font-medium text-gray-500">Tanggal Mulai</label>
+                        <div class="text-sm text-gray-900 mt-1">
+                            @if($project->start_date)
+                                {{ $project->start_date->format('d/m/Y') }}
+                            @else
+                                -
+                            @endif
+                        </div>
+                    </div>
+                    <div class="flex space-x-3">
+                        <a href="{{ route('projects.show', $project) }}" 
+                           class="bg-blue-500 hover:bg-blue-600 text-white px-3 py-2 rounded text-xs font-medium transition-colors duration-200">
+                            Lihat
+                        </a>
+                        <a href="{{ route('projects.edit', $project) }}" 
+                           class="bg-indigo-500 hover:bg-indigo-600 text-white px-3 py-2 rounded text-xs font-medium transition-colors duration-200">
+                            Edit
+                        </a>
+                    </div>
+                </div>
+            </div>
+            @empty
+            <div class="p-8 text-center text-gray-500">
+                <svg class="w-12 h-12 mx-auto text-gray-300 mb-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"></path>
+                </svg>
+                <p class="text-sm">Tidak ada proyek ditemukan.</p>
+            </div>
+            @endforelse
         </div>
         
         <!-- Pagination -->

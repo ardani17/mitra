@@ -132,3 +132,198 @@
 .pagination-wrapper span:not([aria-current]) {
     @apply bg-gray-100 text-gray-400 border border-gray-200 cursor-not-allowed;
 }
+
+/* Mobile Responsive Utilities */
+@media (max-width: 640px) {
+    .container {
+        @apply px-2;
+    }
+    
+    /* Mobile-first navigation */
+    .nav-primary {
+        @apply px-2;
+    }
+    
+    /* Mobile card improvements */
+    .mobile-card {
+        @apply p-3 mb-3 bg-white rounded-lg shadow-sm border border-gray-100;
+    }
+    
+    /* Touch-friendly buttons */
+    .btn-mobile {
+        @apply min-h-[44px] px-4 py-3 text-sm font-medium rounded-lg transition-colors duration-200;
+    }
+    
+    /* Mobile table alternatives */
+    .mobile-table-row {
+        @apply border-b border-gray-200 p-4 hover:bg-gray-50 transition-colors duration-200;
+    }
+    
+    /* Mobile form inputs */
+    .form-input-mobile {
+        @apply w-full px-3 py-3 text-base border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent;
+    }
+    
+    /* Mobile typography */
+    .text-mobile-lg {
+        @apply text-lg font-semibold;
+    }
+    
+    .text-mobile-base {
+        @apply text-base;
+    }
+    
+    .text-mobile-sm {
+        @apply text-sm;
+    }
+    
+    .text-mobile-xs {
+        @apply text-xs;
+    }
+}
+
+/* Tablet responsive utilities */
+@media (min-width: 641px) and (max-width: 1024px) {
+    /* Tablet-specific adjustments */
+    .tablet-grid-2 {
+        @apply grid-cols-2;
+    }
+    
+    .tablet-grid-3 {
+        @apply grid-cols-3;
+    }
+    
+    .tablet-text-sm {
+        @apply text-sm;
+    }
+}
+
+/* Line clamp utility for mobile */
+.line-clamp-2 {
+    display: -webkit-box;
+    -webkit-line-clamp: 2;
+    -webkit-box-orient: vertical;
+    overflow: hidden;
+}
+
+.line-clamp-3 {
+    display: -webkit-box;
+    -webkit-line-clamp: 3;
+    -webkit-box-orient: vertical;
+    overflow: hidden;
+}
+
+/* Mobile-specific spacing */
+.mobile-spacing {
+    @apply space-y-3;
+}
+
+.mobile-spacing-sm {
+    @apply space-y-2;
+}
+
+/* Mobile-friendly progress bars */
+.progress-bar-mobile {
+    @apply h-2 bg-gray-200 rounded-full overflow-hidden;
+}
+
+.progress-bar-mobile .progress-fill {
+    @apply h-full transition-all duration-300 ease-in-out;
+}
+
+/* Mobile status badges */
+.status-badge-mobile {
+    @apply inline-flex items-center px-2 py-1 rounded-full text-xs font-medium;
+}
+
+/* Mobile action buttons */
+.action-buttons-mobile {
+    @apply flex space-x-2;
+}
+
+.action-buttons-mobile .btn {
+    @apply flex-1 text-center py-2 px-3 text-xs font-medium rounded transition-colors duration-200;
+}
+
+/* Mobile filter section */
+.mobile-filter {
+    @apply bg-white rounded-lg shadow-sm border border-gray-100 p-4 mb-4;
+}
+
+/* Mobile pagination */
+@media (max-width: 640px) {
+    .pagination-wrapper nav {
+        @apply flex justify-center;
+    }
+    
+    .pagination-wrapper nav > div {
+        @apply flex space-x-1;
+    }
+    
+    .pagination-wrapper a,
+    .pagination-wrapper span {
+        @apply px-2 py-1 text-xs;
+    }
+}
+
+/* Mobile dashboard cards */
+.dashboard-card-mobile {
+    @apply bg-white rounded-lg shadow-sm p-4 border border-gray-100;
+}
+
+/* Mobile chart containers */
+.chart-container-mobile {
+    @apply bg-gray-50 rounded-lg p-3;
+}
+
+.chart-container-mobile h4 {
+    @apply text-sm font-semibold text-gray-900 mb-3;
+}
+
+.chart-container-mobile .chart-wrapper {
+    @apply relative h-48;
+}
+
+.chart-container-mobile .chart-legend {
+    @apply mt-3 text-xs;
+}
+
+/* Mobile-specific animations */
+@media (max-width: 640px) {
+    .fade-in-mobile {
+        animation: fadeInMobile 0.3s ease-in-out;
+    }
+    
+    @keyframes fadeInMobile {
+        from {
+            opacity: 0;
+            transform: translateY(10px);
+        }
+        to {
+            opacity: 1;
+            transform: translateY(0);
+        }
+    }
+}
+
+/* Mobile scrollable containers */
+.mobile-scroll-x {
+    @apply overflow-x-auto;
+    -webkit-overflow-scrolling: touch;
+}
+
+.mobile-scroll-y {
+    @apply overflow-y-auto;
+    -webkit-overflow-scrolling: touch;
+}
+
+/* Mobile-friendly modals */
+@media (max-width: 640px) {
+    .modal-mobile {
+        @apply fixed inset-0 z-50 flex items-end justify-center;
+    }
+    
+    .modal-content-mobile {
+        @apply w-full max-h-[90vh] bg-white rounded-t-xl shadow-xl;
+    }
+}
