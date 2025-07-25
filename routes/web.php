@@ -17,6 +17,12 @@ Route::get('/', function () {
 
 Route::get('/dashboard', [DashboardController::class, 'index'])->middleware(['auth', 'verified'])->name('dashboard');
 
+// Dashboard API routes
+Route::middleware('auth')->group(function () {
+    Route::get('/api/dashboard/analytics', [DashboardController::class, 'analytics'])->name('api.dashboard.analytics');
+    Route::get('/api/dashboard/years', [DashboardController::class, 'getAvailableYears'])->name('api.dashboard.years');
+});
+
 Route::middleware('auth')->group(function () {
     Route::get('/documentation', function () {
         return view('documentation');
