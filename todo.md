@@ -119,31 +119,36 @@
     - [x] Perbaikan input amount untuk menangani format rupiah
 
 ## 6. Fitur Utama Berdasarkan Role
-- [ ] Direktur:
-  - [ ] Dashboard overview semua proyek
-  - [ ] Approval pengeluaran
-  - [ ] Laporan keuangan perusahaan
-  - [ ] Analisis profitabilitas
+- [x] **Dashboard Role-Specific (SELESAI):**
+  - [x] Dashboard Direktur dengan KPI lengkap dan overview perusahaan
+  - [x] Dashboard Project Manager fokus manajemen proyek dan budget tracking
+  - [x] Dashboard Finance Manager untuk keuangan dan cash flow
+  - [x] Dashboard Staf untuk tugas dan pengeluaran personal
+- [x] Direktur:
+  - [x] Dashboard overview semua proyek
+  - [x] Approval pengeluaran
+  - [x] Laporan keuangan perusahaan
+  - [x] Analisis profitabilitas
   - [ ] Manajemen user
-  - [ ] Import/export data
-- [ ] Project Manager:
-  - [ ] Manajemen proyek (fiber optic, penanaman tiang, dll)
-  - [ ] Approval pengeluaran proyek
-  - [ ] Tracking anggaran (plan vs aktual)
-  - [ ] Timeline proyek (mulai - selesai)
-  - [ ] Progress report
-  - [ ] Import proyek
-- [ ] Finance Manager:
-  - [ ] Manajemen penagihan
-  - [ ] Review pengeluaran
-  - [ ] Tracking pendapatan
-  - [ ] Laporan keuangan
-  - [ ] Cash flow analysis
-  - [ ] Export laporan
-- [ ] Staf:
-  - [ ] Input data proyek
-  - [ ] Update status proyek
-  - [ ] Pengajuan pengeluaran
+  - [x] Import/export data
+- [x] Project Manager:
+  - [x] Manajemen proyek (fiber optic, penanaman tiang, dll)
+  - [x] Approval pengeluaran proyek
+  - [x] Tracking anggaran (plan vs aktual)
+  - [x] Timeline proyek (mulai - selesai)
+  - [x] Progress report
+  - [x] Import proyek
+- [x] Finance Manager:
+  - [x] Manajemen penagihan
+  - [x] Review pengeluaran
+  - [x] Tracking pendapatan
+  - [x] Laporan keuangan
+  - [x] Cash flow analysis
+  - [x] Export laporan
+- [x] Staf:
+  - [x] Input data proyek
+  - [x] Update status proyek
+  - [x] Pengajuan pengeluaran
 
 ## 7. Fitur Keuangan dan Laporan
 - [x] Perhitungan anggaran plan vs aktual

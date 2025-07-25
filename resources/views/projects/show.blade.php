@@ -44,6 +44,18 @@
                         {{ ucfirst($project->status) }}
                     </span>
                 </div>
+                @if($project->location)
+                <div>
+                    <span class="text-sm text-gray-600">Lokasi:</span>
+                    <p class="font-medium">{{ $project->location }}</p>
+                </div>
+                @endif
+                @if($project->client)
+                <div>
+                    <span class="text-sm text-gray-600">Client:</span>
+                    <p class="font-medium">{{ $project->client }}</p>
+                </div>
+                @endif
             </div>
         </div>
 

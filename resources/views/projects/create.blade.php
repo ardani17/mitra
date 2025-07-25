@@ -132,9 +132,34 @@
                 
                 <div>
                     <label class="block text-sm font-medium text-gray-700 mb-2">Lokasi</label>
-                    <input type="text" name="location" value="{{ old('location') }}"
-                           class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500">
+                    <div class="relative">
+                        <input type="text" name="location" id="location_input" value="{{ old('location') }}"
+                               class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
+                               placeholder="Ketik untuk mencari lokasi yang sudah ada..."
+                               autocomplete="off">
+                        <div id="location_suggestions" class="absolute z-10 w-full bg-white border border-gray-300 rounded-md shadow-lg mt-1 hidden max-h-60 overflow-y-auto">
+                            <!-- Suggestions will be populated here -->
+                        </div>
+                    </div>
+                    <p class="mt-1 text-xs text-gray-500">Lokasi yang pernah digunakan akan muncul sebagai saran</p>
                     @error('location')
+                        <p class="mt-1 text-sm text-red-600">{{ $message }}</p>
+                    @enderror
+                </div>
+                
+                <div>
+                    <label class="block text-sm font-medium text-gray-700 mb-2">Client</label>
+                    <div class="relative">
+                        <input type="text" name="client" id="client_input" value="{{ old('client') }}"
+                               class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
+                               placeholder="Ketik untuk mencari client yang sudah ada..."
+                               autocomplete="off">
+                        <div id="client_suggestions" class="absolute z-10 w-full bg-white border border-gray-300 rounded-md shadow-lg mt-1 hidden max-h-60 overflow-y-auto">
+                            <!-- Suggestions will be populated here -->
+                        </div>
+                    </div>
+                    <p class="mt-1 text-xs text-gray-500">Client yang pernah digunakan akan muncul sebagai saran</p>
+                    @error('client')
                         <p class="mt-1 text-sm text-red-600">{{ $message }}</p>
                     @enderror
                 </div>
@@ -292,6 +317,204 @@ document.addEventListener('DOMContentLoaded', function() {
     
     // Calculate duration on page load if both dates exist
     calculateDuration();
+    
+    // Location autocomplete functionality
+    const locationInput = document.getElementById('location_input');
+    const locationSuggestions = document.getElementById('location_suggestions');
+    let debounceTimer;
+    
+    // Load popular locations on focus
+    locationInput.addEventListener('focus', function() {
+        if (this.value.trim() === '') {
+            loadPopularLocations();
+        }
+    });
+    
+    // Search locations on input
+    locationInput.addEventListener('input', function() {
+        const query = this.value.trim();
+        
+        clearTimeout(debounceTimer);
+        debounceTimer = setTimeout(() => {
+            if (query.length >= 1) {
+                searchLocations(query);
+            } else if (query.length === 0) {
+                loadPopularLocations();
+            } else {
+                hideSuggestions();
+            }
+        }, 300);
+    });
+    
+    // Hide suggestions when clicking outside
+    document.addEventListener('click', function(e) {
+        if (!locationInput.contains(e.target) && !locationSuggestions.contains(e.target)) {
+            hideSuggestions();
+        }
+    });
+    
+    // Load popular locations
+    function loadPopularLocations() {
+        fetch('{{ route("api.projects.locations.popular") }}')
+            .then(response => response.json())
+            .then(locations => {
+                displaySuggestions(locations, 'Lokasi Populer');
+            })
+            .catch(error => {
+                console.error('Error loading popular locations:', error);
+            });
+    }
+    
+    // Search locations
+    function searchLocations(query) {
+        fetch(`{{ route("api.projects.locations.search") }}?q=${encodeURIComponent(query)}`)
+            .then(response => response.json())
+            .then(locations => {
+                displaySuggestions(locations, 'Hasil Pencarian');
+            })
+            .catch(error => {
+                console.error('Error searching locations:', error);
+            });
+    }
+    
+    // Display suggestions
+    function displaySuggestions(locations, title) {
+        if (locations.length === 0) {
+            hideSuggestions();
+            return;
+        }
+        
+        let html = '';
+        if (title && locations.length > 0) {
+            html += `<div class="px-3 py-2 text-xs font-medium text-gray-500 bg-gray-50 border-b">${title}</div>`;
+        }
+        
+        locations.forEach(location => {
+            html += `
+                <div class="px-3 py-2 hover:bg-blue-50 cursor-pointer border-b border-gray-100 last:border-b-0 location-suggestion"
+                     data-location="${location}">
+                    <div class="text-sm text-gray-900">${location}</div>
+                </div>
+            `;
+        });
+        
+        locationSuggestions.innerHTML = html;
+        locationSuggestions.classList.remove('hidden');
+        
+        // Add click event listeners to suggestions
+        document.querySelectorAll('.location-suggestion').forEach(suggestion => {
+            suggestion.addEventListener('click', function() {
+                const location = this.getAttribute('data-location');
+                locationInput.value = location;
+                hideSuggestions();
+            });
+        });
+    }
+    
+    // Hide suggestions
+    function hideSuggestions() {
+        locationSuggestions.classList.add('hidden');
+        locationSuggestions.innerHTML = '';
+    }
+    
+    // Client autocomplete functionality
+    const clientInput = document.getElementById('client_input');
+    const clientSuggestions = document.getElementById('client_suggestions');
+    let clientDebounceTimer;
+    
+    // Load popular clients on focus
+    clientInput.addEventListener('focus', function() {
+        if (this.value.trim() === '') {
+            loadPopularClients();
+        }
+    });
+    
+    // Search clients on input
+    clientInput.addEventListener('input', function() {
+        const query = this.value.trim();
+        
+        clearTimeout(clientDebounceTimer);
+        clientDebounceTimer = setTimeout(() => {
+            if (query.length >= 1) {
+                searchClients(query);
+            } else if (query.length === 0) {
+                loadPopularClients();
+            } else {
+                hideClientSuggestions();
+            }
+        }, 300);
+    });
+    
+    // Hide client suggestions when clicking outside
+    document.addEventListener('click', function(e) {
+        if (!clientInput.contains(e.target) && !clientSuggestions.contains(e.target)) {
+            hideClientSuggestions();
+        }
+    });
+    
+    // Load popular clients
+    function loadPopularClients() {
+        fetch('{{ route("api.projects.clients.popular") }}')
+            .then(response => response.json())
+            .then(clients => {
+                displayClientSuggestions(clients, 'Client Populer');
+            })
+            .catch(error => {
+                console.error('Error loading popular clients:', error);
+            });
+    }
+    
+    // Search clients
+    function searchClients(query) {
+        fetch(`{{ route("api.projects.clients.search") }}?q=${encodeURIComponent(query)}`)
+            .then(response => response.json())
+            .then(clients => {
+                displayClientSuggestions(clients, 'Hasil Pencarian');
+            })
+            .catch(error => {
+                console.error('Error searching clients:', error);
+            });
+    }
+    
+    // Display client suggestions
+    function displayClientSuggestions(clients, title) {
+        if (clients.length === 0) {
+            hideClientSuggestions();
+            return;
+        }
+        
+        let html = '';
+        if (title && clients.length > 0) {
+            html += `<div class="px-3 py-2 text-xs font-medium text-gray-500 bg-gray-50 border-b">${title}</div>`;
+        }
+        
+        clients.forEach(client => {
+            html += `
+                <div class="px-3 py-2 hover:bg-blue-50 cursor-pointer border-b border-gray-100 last:border-b-0 client-suggestion"
+                     data-client="${client}">
+                    <div class="text-sm text-gray-900">${client}</div>
+                </div>
+            `;
+        });
+        
+        clientSuggestions.innerHTML = html;
+        clientSuggestions.classList.remove('hidden');
+        
+        // Add click event listeners to client suggestions
+        document.querySelectorAll('.client-suggestion').forEach(suggestion => {
+            suggestion.addEventListener('click', function() {
+                const client = this.getAttribute('data-client');
+                clientInput.value = client;
+                hideClientSuggestions();
+            });
+        });
+    }
+    
+    // Hide client suggestions
+    function hideClientSuggestions() {
+        clientSuggestions.classList.add('hidden');
+        clientSuggestions.innerHTML = '';
+    }
 });
 </script>
 @endsection

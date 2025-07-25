@@ -24,7 +24,7 @@ class ProjectRequest extends FormRequest
         return [
             'name' => 'required|string|max:255',
             'description' => 'nullable|string',
-            'type' => 'required|in:konstruksi,maintenance,other',
+            'type' => 'required|in:konstruksi,maintenance,psb,other',
             'status' => 'required|in:draft,planning,in_progress,completed,cancelled',
             'priority' => 'required|in:low,medium,high,urgent',
             'planned_service_value' => 'nullable|numeric|min:0',
@@ -36,6 +36,7 @@ class ProjectRequest extends FormRequest
             'start_date' => 'required|date',
             'end_date' => 'nullable|date|after_or_equal:start_date',
             'location' => 'nullable|string|max:255',
+            'client' => 'nullable|string|max:255',
             'notes' => 'nullable|string',
         ];
     }

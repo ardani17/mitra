@@ -17,6 +17,7 @@ class Project extends Model
         'type',
         'client_name',
         'client_type',
+        'client',
         'planned_budget',
         'planned_service_value',
         'planned_material_value',

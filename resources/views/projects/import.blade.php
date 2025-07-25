@@ -65,8 +65,8 @@
                             <ul class="list-disc list-inside ml-4 space-y-1">
                                 <li>Tanggal dalam format: YYYY-MM-DD (contoh: 2025-08-01)</li>
                                 <li>Nilai dalam angka tanpa titik atau koma (contoh: 50000000)</li>
-                                <li>Tipe proyek: fiber_optic, tower_installation, maintenance, upgrade, other</li>
-                                <li>Status: draft, planning, in_progress, on_hold, completed, cancelled</li>
+                                <li>Tipe proyek: konstruksi, maintenance, other</li>
+                                <li>Status: planning, in_progress, completed, cancelled</li>
                                 <li>Prioritas: low, medium, high, urgent</li>
                             </ul>
                             <p>4. <strong>Upload file Excel</strong> yang sudah diisi menggunakan form di bawah</p>
@@ -128,8 +128,8 @@
                                 </thead>
                                 <tbody class="divide-y divide-gray-200">
                                     <tr>
-                                        <td class="px-4 py-2 text-sm">Proyek Fiber Optic Jakarta</td>
-                                        <td class="px-4 py-2 text-sm">fiber_optic</td>
+                                        <td class="px-4 py-2 text-sm">Proyek Konstruksi Jakarta</td>
+                                        <td class="px-4 py-2 text-sm">konstruksi</td>
                                         <td class="px-4 py-2 text-sm">planning</td>
                                         <td class="px-4 py-2 text-sm">high</td>
                                         <td class="px-4 py-2 text-sm">50000000</td>
@@ -137,7 +137,7 @@
                                     <tr>
                                         <td class="px-4 py-2 text-sm">Maintenance Tower Bekasi</td>
                                         <td class="px-4 py-2 text-sm">maintenance</td>
-                                        <td class="px-4 py-2 text-sm">draft</td>
+                                        <td class="px-4 py-2 text-sm">in_progress</td>
                                         <td class="px-4 py-2 text-sm">medium</td>
                                         <td class="px-4 py-2 text-sm">15000000</td>
                                     </tr>

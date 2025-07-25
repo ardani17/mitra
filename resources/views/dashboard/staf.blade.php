@@ -1,39 +1,101 @@
 <x-app-layout>
     <x-slot name="header">
-        <h2 class="font-semibold text-xl text-gray-800 leading-tight">
-            {{ __('Dashboard Staf') }}
-        </h2>
+        <div class="flex justify-between items-center">
+            <h2 class="font-semibold text-xl text-gray-800 leading-tight">
+                {{ __('Dashboard Staf') }}
+            </h2>
+            <div class="text-sm text-gray-600">
+                {{ now()->format('d F Y, H:i') }}
+            </div>
+        </div>
     </x-slot>
 
     <div class="py-12">
         <div class="max-w-7xl mx-auto sm:px-6 lg:px-8">
-            <!-- Statistik Staf -->
-            <div class="grid grid-cols-1 md:grid-cols-4 gap-6 mb-6">
-                <div class="bg-white overflow-hidden shadow-sm sm:rounded-lg">
-                    <div class="p-6 text-gray-900">
-                        <h3 class="text-lg font-semibold text-gray-700">Proyek Aktif</h3>
-                        <p class="text-3xl font-bold text-blue-600">{{ $activeProjects }}</p>
+            <!-- Welcome Section -->
+            <div class="bg-gradient-to-r from-indigo-600 to-indigo-800 rounded-lg shadow-lg p-6 mb-8 text-white">
+                <h1 class="text-3xl font-bold mb-2">Selamat Datang, {{ Auth::user()->name }}</h1>
+                <p class="text-indigo-100">Kelola tugas dan pengeluaran proyek Anda</p>
+            </div>
+
+            <!-- Staff Statistics -->
+            <div class="grid grid-cols-1 md:grid-cols-4 gap-6 mb-8">
+                <div class="bg-gradient-to-br from-blue-500 to-blue-600 text-white rounded-xl p-6 shadow-lg">
+                    <div class="flex items-center justify-between">
+                        <div>
+                            <h3 class="text-lg font-semibold opacity-90">Proyek Aktif</h3>
+                            <p class="text-3xl font-bold">{{ $activeProjects }}</p>
+                            <p class="text-sm opacity-75">Sedang berjalan</p>
+                        </div>
+                        <div class="text-4xl opacity-75">
+                            🚀
+                        </div>
                     </div>
                 </div>
 
-                <div class="bg-white overflow-hidden shadow-sm sm:rounded-lg">
-                    <div class="p-6 text-gray-900">
-                        <h3 class="text-lg font-semibold text-gray-700">Total Expenses Saya</h3>
-                        <p class="text-3xl font-bold text-green-600">{{ $myExpenses }}</p>
+                <div class="bg-gradient-to-br from-green-500 to-green-600 text-white rounded-xl p-6 shadow-lg">
+                    <div class="flex items-center justify-between">
+                        <div>
+                            <h3 class="text-lg font-semibold opacity-90">Total Pengeluaran</h3>
+                            <p class="text-3xl font-bold">{{ $myExpenses }}</p>
+                            <p class="text-sm opacity-75">Yang saya buat</p>
+                        </div>
+                        <div class="text-4xl opacity-75">
+                            📝
+                        </div>
                     </div>
                 </div>
 
-                <div class="bg-white overflow-hidden shadow-sm sm:rounded-lg">
-                    <div class="p-6 text-gray-900">
-                        <h3 class="text-lg font-semibold text-gray-700">Pending Approval</h3>
-                        <p class="text-3xl font-bold text-yellow-600">{{ $myPendingExpenses }}</p>
+                <div class="bg-gradient-to-br from-yellow-500 to-yellow-600 text-white rounded-xl p-6 shadow-lg">
+                    <div class="flex items-center justify-between">
+                        <div>
+                            <h3 class="text-lg font-semibold opacity-90">Menunggu Persetujuan</h3>
+                            <p class="text-3xl font-bold">{{ $myPendingExpenses }}</p>
+                            <p class="text-sm opacity-75">Menunggu persetujuan</p>
+                        </div>
+                        <div class="text-4xl opacity-75">
+                            ⏳
+                        </div>
                     </div>
                 </div>
 
-                <div class="bg-white overflow-hidden shadow-sm sm:rounded-lg">
-                    <div class="p-6 text-gray-900">
-                        <h3 class="text-lg font-semibold text-gray-700">Approved</h3>
-                        <p class="text-3xl font-bold text-purple-600">{{ $myApprovedExpenses }}</p>
+                <div class="bg-gradient-to-br from-purple-500 to-purple-600 text-white rounded-xl p-6 shadow-lg">
+                    <div class="flex items-center justify-between">
+                        <div>
+                            <h3 class="text-lg font-semibold opacity-90">Disetujui</h3>
+                            <p class="text-3xl font-bold">{{ $myApprovedExpenses }}</p>
+                            <p class="text-sm opacity-75">Sudah disetujui</p>
+                        </div>
+                        <div class="text-4xl opacity-75">
+                            ✅
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Expense Summary -->
+            <div class="bg-white rounded-lg shadow-lg p-6 mb-8">
+                <h3 class="text-xl font-bold text-gray-800 mb-4">Ringkasan Pengeluaran Saya</h3>
+                <div class="grid grid-cols-1 md:grid-cols-3 gap-6">
+                    <div class="text-center">
+                        <h4 class="text-lg font-semibold text-gray-700">Total Pengajuan</h4>
+                        <p class="text-2xl font-bold text-blue-600">{{ $myExpenses }}</p>
+                        <p class="text-sm text-gray-500">Semua expense yang dibuat</p>
+                    </div>
+                    <div class="text-center">
+                        <h4 class="text-lg font-semibold text-gray-700">Tingkat Keberhasilan</h4>
+                        @php
+                            $successRate = $myExpenses > 0 ? ($myApprovedExpenses / $myExpenses) * 100 : 0;
+                        @endphp
+                        <p class="text-2xl font-bold text-green-600">{{ number_format($successRate, 1) }}%</p>
+                        <div class="w-full bg-gray-200 rounded-full h-3 mt-2">
+                            <div class="bg-green-500 h-3 rounded-full transition-all duration-300" style="width: {{ $successRate }}%"></div>
+                        </div>
+                    </div>
+                    <div class="text-center">
+                        <h4 class="text-lg font-semibold text-gray-700">Menunggu Review</h4>
+                        <p class="text-2xl font-bold text-yellow-600">{{ $myPendingExpenses }}</p>
+                        <p class="text-sm text-gray-500">Butuh tindak lanjut</p>
                     </div>
                 </div>
             </div>
@@ -121,16 +183,16 @@
                 </div>
             </div>
 
-            <!-- Quick Actions -->
+            <!-- Aksi Cepat -->
             <div class="bg-white overflow-hidden shadow-sm sm:rounded-lg">
                 <div class="p-6">
-                    <h3 class="text-lg font-semibold text-gray-700 mb-4">Quick Actions</h3>
+                    <h3 class="text-lg font-semibold text-gray-700 mb-4">Aksi Cepat</h3>
                     <div class="grid grid-cols-2 md:grid-cols-4 gap-4">
                         <a href="{{ route('expenses.create') }}" class="bg-blue-500 hover:bg-blue-700 text-white font-bold py-2 px-4 rounded text-center">
-                            Buat Expense
+                            Buat Pengeluaran
                         </a>
                         <a href="{{ route('expenses.index') }}" class="bg-green-500 hover:bg-green-700 text-white font-bold py-2 px-4 rounded text-center">
-                            Lihat Expenses
+                            Lihat Pengeluaran
                         </a>
                         <a href="{{ route('projects.index') }}" class="bg-yellow-500 hover:bg-yellow-700 text-white font-bold py-2 px-4 rounded text-center">
                             Lihat Proyek

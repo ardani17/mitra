@@ -230,7 +230,7 @@
                                 <div class="w-full">
                                     <div class="flex justify-between text-xs text-gray-600 mb-1">
                                         <span>{{ number_format($project->billing_percentage, 0) }}%</span>
-                                        <span>{{ formatRupiahShort($project->total_billed_amount) }}</span>
+                                        <span>{{ \App\Helpers\FormatHelper::formatRupiah($project->total_billed_amount) }}</span>
                                     </div>
                                     <div class="w-full bg-gray-200 rounded-full h-1.5">
                                         <div class="h-1.5 rounded-full transition-all duration-300 
@@ -251,24 +251,24 @@
                         </td>
                         <td class="px-4 py-4 text-sm">
                             <div class="font-medium text-gray-900">
-                                {{ formatRupiah($project->planned_total_value ?? $project->planned_budget) }}
+                                {{ \App\Helpers\FormatHelper::formatRupiah($project->planned_total_value ?? $project->planned_budget) }}
                             </div>
                             @if($project->planned_service_value || $project->planned_material_value)
                             <div class="text-xs text-gray-500">
-                                J: {{ formatRupiahShort($project->planned_service_value ?? 0) }}<br>
-                                M: {{ formatRupiahShort($project->planned_material_value ?? 0) }}
+                                J: {{ \App\Helpers\FormatHelper::formatRupiah($project->planned_service_value ?? 0) }}<br>
+                                M: {{ \App\Helpers\FormatHelper::formatRupiah($project->planned_material_value ?? 0) }}
                             </div>
                             @endif
                         </td>
                         <td class="px-4 py-4 text-sm">
                             @if($project->final_total_value)
                             <div class="font-medium text-green-600">
-                                {{ formatRupiah($project->final_total_value) }}
+                                {{ \App\Helpers\FormatHelper::formatRupiah($project->final_total_value) }}
                             </div>
                             @if($project->final_service_value || $project->final_material_value)
                             <div class="text-xs text-gray-500">
-                                J: {{ formatRupiahShort($project->final_service_value ?? 0) }}<br>
-                                M: {{ formatRupiahShort($project->final_material_value ?? 0) }}
+                                J: {{ \App\Helpers\FormatHelper::formatRupiah($project->final_service_value ?? 0) }}<br>
+                                M: {{ \App\Helpers\FormatHelper::formatRupiah($project->final_material_value ?? 0) }}
                             </div>
                             @endif
                             @else

@@ -12,6 +12,7 @@ use Illuminate\Support\Facades\Auth;
 use Illuminate\Foundation\Auth\Access\AuthorizesRequests;
 use App\Exports\ExpensesExport;
 use Maatwebsite\Excel\Facades\Excel;
+use App\Helpers\ActivityLogger;
 
 class ExpenseController extends Controller
 {
@@ -28,7 +29,7 @@ class ExpenseController extends Controller
     {
         $this->authorize('viewAny', ProjectExpense::class);
         
-        $query = ProjectExpense::with(['project', 'user', 'approvals.approver']);
+        $query = ProjectExpense::with(['project', 'approvals.approver']);
         
         // Search filter
         if ($request->filled('search')) {
@@ -125,12 +126,8 @@ class ExpenseController extends Controller
         // Buat approval records untuk workflow
         $this->createApprovalWorkflow($expense);
         
-        // Log activity
-        $expense->project->activities()->create([
-            'user_id' => Auth::id(),
-            'activity_type' => 'expense_created',
-            'description' => 'Pengeluaran dibuat: ' . $expense->description . ' - Rp ' . number_format($expense->amount, 0, ',', '.')
-        ]);
+        // Log activity using ActivityLogger
+        ActivityLogger::logExpenseCreated($expense);
         
         return redirect()->route('expenses.index')->with('success', 'Pengeluaran berhasil dibuat dan menunggu persetujuan.');
     }
@@ -185,7 +182,7 @@ class ExpenseController extends Controller
      */
     public function show(string $id)
     {
-        $expense = ProjectExpense::with(['project', 'user', 'approvals.approver'])->findOrFail($id);
+        $expense = ProjectExpense::with(['project', 'approvals.approver'])->findOrFail($id);
         $this->authorize('view', $expense);
         
         return view('expenses.show', compact('expense'));
@@ -342,12 +339,8 @@ class ExpenseController extends Controller
             }
         }
         
-        // Log activity
-        $expense->project->activities()->create([
-            'user_id' => $user->id,
-            'activity_type' => 'expense_' . $request->status,
-            'description' => 'Pengeluaran ' . ($request->status === 'approved' ? 'disetujui' : 'ditolak') . ' oleh ' . $user->name . ': ' . $expense->description
-        ]);
+        // Log activity using ActivityLogger
+        ActivityLogger::logExpenseApproval($expense, $approval);
         
         $message = $request->status === 'approved' ? 'Pengeluaran berhasil disetujui.' : 'Pengeluaran ditolak.';
         return redirect()->back()->with('success', $message);
@@ -360,7 +353,7 @@ class ExpenseController extends Controller
     {
         $this->authorize('viewAny', ProjectExpense::class);
         
-        $query = ProjectExpense::with(['project', 'user', 'approvals.approver']);
+        $query = ProjectExpense::with(['project', 'approvals.approver']);
         
         // Apply same filters as index method
         if ($request->filled('search')) {

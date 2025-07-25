@@ -28,7 +28,7 @@ class ProjectsExport implements FromCollection, WithHeadings, WithMapping, WithS
             return $this->projects;
         }
 
-        return Project::with(['user'])->get();
+        return Project::all();
     }
 
     /**
@@ -80,7 +80,7 @@ class ProjectsExport implements FromCollection, WithHeadings, WithMapping, WithS
             $project->final_total_value ?? 0,
             $project->start_date ? $project->start_date->format('Y-m-d') : '',
             $project->end_date ? $project->end_date->format('Y-m-d') : '',
-            $project->user->name ?? '',
+            'System',
             $project->created_at->format('Y-m-d H:i:s'),
             $project->notes
         ];

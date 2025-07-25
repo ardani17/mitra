@@ -51,6 +51,9 @@
                     <x-nav-link :href="route('reports.index')" :active="request()->routeIs('reports.*')">
                         {{ __('Laporan') }}
                     </x-nav-link>
+                    <x-nav-link :href="route('excel.index')" :active="request()->routeIs('excel.*')">
+                        {{ __('Excel') }}
+                    </x-nav-link>
                     <x-nav-link :href="route('documentation')" :active="request()->routeIs('documentation')">
                         {{ __('Dokumentasi') }}
                     </x-nav-link>
@@ -147,6 +150,18 @@
                 <x-responsive-nav-link :href="route('billing-batches.index')" :active="request()->routeIs('billing-batches.*')">
                     {{ __('Penagihan') }}
                 </x-responsive-nav-link>
+                
+                @if(auth()->user()->hasRole(['direktur', 'finance_manager', 'project_manager']))
+                <x-responsive-nav-link :href="route('reports.index')" :active="request()->routeIs('reports.*')">
+                    {{ __('Laporan') }}
+                </x-responsive-nav-link>
+                <x-responsive-nav-link :href="route('excel.index')" :active="request()->routeIs('excel.*')">
+                    {{ __('Excel') }}
+                </x-responsive-nav-link>
+                <x-responsive-nav-link :href="route('documentation')" :active="request()->routeIs('documentation')">
+                    {{ __('Dokumentasi') }}
+                </x-responsive-nav-link>
+                @endif
             @endif
         </div>
 

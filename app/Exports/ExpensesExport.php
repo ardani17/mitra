@@ -74,7 +74,7 @@ class ExpensesExport implements FromCollection, WithHeadings, WithMapping, WithS
             $expense->expense_date ? $expense->expense_date->format('d/m/Y') : '',
             $expense->receipt_number ?? '',
             $this->getStatusLabel($expense->status),
-            $expense->user->name ?? '',
+            'System',
             $expense->created_at->format('d/m/Y H:i'),
             $financeStatus,
             $managerStatus,

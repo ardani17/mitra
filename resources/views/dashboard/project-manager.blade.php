@@ -1,41 +1,70 @@
 <x-app-layout>
     <x-slot name="header">
-        <h2 class="font-semibold text-xl text-gray-800 leading-tight">
-            {{ __('Dashboard Project Manager') }}
-        </h2>
+        <div class="flex justify-between items-center">
+            <h2 class="font-semibold text-xl text-gray-800 leading-tight">
+                {{ __('Dashboard Project Manager') }}
+            </h2>
+            <div class="text-sm text-gray-600">
+                {{ now()->format('d F Y, H:i') }}
+            </div>
+        </div>
     </x-slot>
 
     <div class="py-12">
         <div class="max-w-7xl mx-auto sm:px-6 lg:px-8">
-            <!-- Statistik Proyek -->
-            <div class="grid grid-cols-1 md:grid-cols-3 gap-6 mb-6">
-                <div class="bg-white overflow-hidden shadow-sm sm:rounded-lg">
-                    <div class="p-6 text-gray-900">
-                        <h3 class="text-lg font-semibold text-gray-700">Total Proyek</h3>
-                        <p class="text-3xl font-bold text-blue-600">{{ $totalProjects }}</p>
+            <!-- Welcome Section -->
+            <div class="bg-gradient-to-r from-green-600 to-green-800 rounded-lg shadow-lg p-6 mb-8 text-white">
+                <h1 class="text-3xl font-bold mb-2">Selamat Datang, {{ Auth::user()->name }}</h1>
+                <p class="text-green-100">Kelola dan monitor semua proyek dengan efisien</p>
+            </div>
+
+            <!-- Project Statistics -->
+            <div class="grid grid-cols-1 md:grid-cols-3 gap-6 mb-8">
+                <div class="bg-gradient-to-br from-blue-500 to-blue-600 text-white rounded-xl p-6 shadow-lg">
+                    <div class="flex items-center justify-between">
+                        <div>
+                            <h3 class="text-lg font-semibold opacity-90">Total Proyek</h3>
+                            <p class="text-3xl font-bold">{{ $totalProjects }}</p>
+                            <p class="text-sm opacity-75">Semua proyek</p>
+                        </div>
+                        <div class="text-4xl opacity-75">
+                            📋
+                        </div>
                     </div>
                 </div>
 
-                <div class="bg-white overflow-hidden shadow-sm sm:rounded-lg">
-                    <div class="p-6 text-gray-900">
-                        <h3 class="text-lg font-semibold text-gray-700">Proyek Aktif</h3>
-                        <p class="text-3xl font-bold text-green-600">{{ $myActiveProjects }}</p>
+                <div class="bg-gradient-to-br from-green-500 to-green-600 text-white rounded-xl p-6 shadow-lg">
+                    <div class="flex items-center justify-between">
+                        <div>
+                            <h3 class="text-lg font-semibold opacity-90">Proyek Aktif</h3>
+                            <p class="text-3xl font-bold">{{ $myActiveProjects }}</p>
+                            <p class="text-sm opacity-75">Sedang berjalan</p>
+                        </div>
+                        <div class="text-4xl opacity-75">
+                            🚀
+                        </div>
                     </div>
                 </div>
 
-                <div class="bg-white overflow-hidden shadow-sm sm:rounded-lg">
-                    <div class="p-6 text-gray-900">
-                        <h3 class="text-lg font-semibold text-gray-700">Proyek Selesai</h3>
-                        <p class="text-3xl font-bold text-purple-600">{{ $completedProjects }}</p>
+                <div class="bg-gradient-to-br from-purple-500 to-purple-600 text-white rounded-xl p-6 shadow-lg">
+                    <div class="flex items-center justify-between">
+                        <div>
+                            <h3 class="text-lg font-semibold opacity-90">Proyek Selesai</h3>
+                            <p class="text-3xl font-bold">{{ $completedProjects }}</p>
+                            <p class="text-sm opacity-75">Berhasil diselesaikan</p>
+                        </div>
+                        <div class="text-4xl opacity-75">
+                            ✅
+                        </div>
                     </div>
                 </div>
             </div>
 
-            <!-- Budget Tracking -->
+            <!-- Pelacakan Anggaran -->
             <div class="grid grid-cols-1 md:grid-cols-3 gap-6 mb-6">
                 <div class="bg-white overflow-hidden shadow-sm sm:rounded-lg">
                     <div class="p-6 text-gray-900">
-                        <h3 class="text-lg font-semibold text-gray-700">Total Budget</h3>
+                        <h3 class="text-lg font-semibold text-gray-700">Total Anggaran</h3>
                         <p class="text-2xl font-bold text-blue-600">Rp {{ number_format($totalBudget) }}</p>
                     </div>
                 </div>
@@ -49,7 +78,7 @@
 
                 <div class="bg-white overflow-hidden shadow-sm sm:rounded-lg">
                     <div class="p-6 text-gray-900">
-                        <h3 class="text-lg font-semibold text-gray-700">Utilisasi Budget</h3>
+                        <h3 class="text-lg font-semibold text-gray-700">Utilisasi Anggaran</h3>
                         <p class="text-2xl font-bold text-orange-600">{{ number_format($budgetUtilization, 1) }}%</p>
                         <div class="w-full bg-gray-200 rounded-full h-2.5 mt-2">
                             <div class="bg-orange-600 h-2.5 rounded-full" style="width: {{ min($budgetUtilization, 100) }}%"></div>
@@ -58,7 +87,7 @@
                 </div>
             </div>
 
-            <!-- Charts dan Alerts -->
+            <!-- Grafik dan Peringatan -->
             <div class="grid grid-cols-1 md:grid-cols-2 gap-6 mb-6">
                 <!-- Proyek berdasarkan Tipe -->
                 <div class="bg-white overflow-hidden shadow-sm sm:rounded-lg">
@@ -75,20 +104,20 @@
                     </div>
                 </div>
 
-                <!-- Alerts -->
+                <!-- Peringatan -->
                 <div class="bg-white overflow-hidden shadow-sm sm:rounded-lg">
                     <div class="p-6">
-                        <h3 class="text-lg font-semibold text-gray-700 mb-4">Alerts</h3>
+                        <h3 class="text-lg font-semibold text-gray-700 mb-4">Peringatan</h3>
                         <div class="space-y-3">
                             <div class="flex justify-between items-center">
-                                <span>Pengeluaran Pending</span>
+                                <span>Pengeluaran Tertunda</span>
                                 <span class="bg-yellow-100 text-yellow-800 px-2 py-1 rounded-full text-sm font-semibold">
                                     {{ $pendingExpenses }}
                                 </span>
                             </div>
                             @if(isset($urgentProjects) && $urgentProjects->count() > 0)
                                 <div class="bg-red-50 border border-red-200 rounded p-3">
-                                    <h4 class="font-semibold text-red-800">Proyek Overdue</h4>
+                                    <h4 class="font-semibold text-red-800">Proyek Terlambat</h4>
                                     <p class="text-sm text-red-600">{{ $urgentProjects->count() }} proyek melewati deadline</p>
                                 </div>
                             @endif
@@ -138,10 +167,10 @@
             </div>
             @endif
 
-            <!-- Quick Actions -->
+            <!-- Aksi Cepat -->
             <div class="bg-white overflow-hidden shadow-sm sm:rounded-lg">
                 <div class="p-6">
-                    <h3 class="text-lg font-semibold text-gray-700 mb-4">Quick Actions</h3>
+                    <h3 class="text-lg font-semibold text-gray-700 mb-4">Aksi Cepat</h3>
                     <div class="grid grid-cols-2 md:grid-cols-4 gap-4">
                         <a href="{{ route('projects.index') }}" class="bg-blue-500 hover:bg-blue-700 text-white font-bold py-2 px-4 rounded text-center">
                             Lihat Proyek

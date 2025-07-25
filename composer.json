@@ -28,7 +28,8 @@
             "Database\\Seeders\\": "database/seeders/"
         },
         "files": [
-            "app/Helpers/FormatHelper.php"
+            "app/Helpers/FormatHelper.php",
+            "app/Helpers/ActivityLogger.php"
         ]
     },
     "autoload-dev": {

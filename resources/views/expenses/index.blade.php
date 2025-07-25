@@ -224,7 +224,7 @@
                         </td>
                         <td class="px-3 py-4 text-sm">
                             <div class="font-medium text-gray-900">
-                                {{ formatRupiah($expense->amount) }}
+                                {{ \App\Helpers\FormatHelper::formatRupiah($expense->amount) }}
                             </div>
                             @if($expense->receipt_number)
                             <div class="text-xs text-gray-500">{{ Str::limit($expense->receipt_number, 8) }}</div>

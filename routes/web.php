@@ -36,6 +36,15 @@ Route::middleware('auth')->group(function () {
     Route::get('/projects-template', [ProjectController::class, 'downloadTemplate'])->name('projects.template');
     Route::get('/projects-import', [ProjectController::class, 'importForm'])->name('projects.import.form');
     Route::post('/projects-import', [ProjectController::class, 'import'])->name('projects.import');
+    Route::post('/projects-import-confirm', [ProjectController::class, 'importConfirm'])->name('projects.import.confirm');
+    
+    // API routes untuk autocomplete lokasi
+    Route::get('/api/projects/locations/search', [ProjectController::class, 'searchLocations'])->name('api.projects.locations.search');
+    Route::get('/api/projects/locations/popular', [ProjectController::class, 'getPopularLocations'])->name('api.projects.locations.popular');
+    
+    // API routes untuk autocomplete client
+    Route::get('/api/projects/clients/search', [ProjectController::class, 'searchClients'])->name('api.projects.clients.search');
+    Route::get('/api/projects/clients/popular', [ProjectController::class, 'getPopularClients'])->name('api.projects.clients.popular');
     
     // Expense routes
     Route::resource('expenses', ExpenseController::class);
@@ -85,12 +94,28 @@ Route::middleware('auth')->group(function () {
     Route::get('/reports/profitability', [ReportController::class, 'profitability'])->name('reports.profitability');
     Route::get('/reports/export-financial', [ReportController::class, 'exportFinancial'])->name('reports.export.financial');
     
+    // Activity Report routes
+    Route::get('/reports/activities', [App\Http\Controllers\ActivityReportController::class, 'index'])->name('reports.activities');
+    Route::get('/reports/activities/{id}', [App\Http\Controllers\ActivityReportController::class, 'show'])->name('reports.activities.show');
+    Route::get('/api/activities/recent', [App\Http\Controllers\ActivityReportController::class, 'recent'])->name('api.activities.recent');
+    Route::get('/api/activities/statistics', [App\Http\Controllers\ActivityReportController::class, 'statistics'])->name('api.activities.statistics');
+    
     // Document routes
     Route::get('/documents', [App\Http\Controllers\ProjectDocumentController::class, 'index'])->name('documents.index');
     Route::post('/documents', [App\Http\Controllers\ProjectDocumentController::class, 'store'])->name('documents.store');
     Route::get('/documents/{document}', [App\Http\Controllers\ProjectDocumentController::class, 'show'])->name('documents.show');
     Route::get('/documents/{document}/download', [App\Http\Controllers\ProjectDocumentController::class, 'download'])->name('documents.download');
     Route::delete('/documents/{document}', [App\Http\Controllers\ProjectDocumentController::class, 'destroy'])->name('documents.destroy');
+    
+    // Excel Export/Import routes
+    Route::prefix('excel')->name('excel.')->group(function () {
+        Route::get('/', [App\Http\Controllers\ExcelController::class, 'index'])->name('index');
+        Route::get('/export/{type}', [App\Http\Controllers\ExcelController::class, 'export'])->name('export');
+        Route::post('/import/{type}', [App\Http\Controllers\ExcelController::class, 'import'])->name('import');
+        Route::get('/template/{type}', [App\Http\Controllers\ExcelController::class, 'downloadTemplate'])->name('template');
+        Route::get('/import-logs', [App\Http\Controllers\ExcelController::class, 'importLogs'])->name('import-logs');
+        Route::get('/import-logs/{id}', [App\Http\Controllers\ExcelController::class, 'importLogDetail'])->name('import-log-detail');
+    });
 });
 
 require __DIR__.'/auth.php';

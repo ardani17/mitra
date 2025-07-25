@@ -6,6 +6,8 @@ use App\Http\Controllers\Controller;
 use Illuminate\Http\Request;
 use App\Http\Requests\ProjectRequest;
 use App\Models\Project;
+use App\Models\ProjectLocation;
+use App\Models\ProjectClient;
 use App\Models\Company;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Foundation\Auth\Access\AuthorizesRequests;
@@ -13,6 +15,7 @@ use App\Exports\ProjectsExport;
 use App\Exports\ProjectTemplateExport;
 use App\Imports\ProjectsImport;
 use Maatwebsite\Excel\Facades\Excel;
+use App\Helpers\ActivityLogger;
 
 class ProjectController extends Controller
 {
@@ -93,6 +96,7 @@ class ProjectController extends Controller
         $types = [
             'konstruksi' => 'Konstruksi', 
             'maintenance' => 'Maintenance', 
+            'psb' => 'PSB',
             'other' => 'Other'
         ];
         $statuses = [
@@ -136,12 +140,18 @@ class ProjectController extends Controller
         
         $project = Project::create($data);
         
-        // Log activity
-        $project->activities()->create([
-            'user_id' => Auth::id(),
-            'activity_type' => 'project_created',
-            'description' => 'Proyek dibuat: ' . $project->name
-        ]);
+        // Simpan atau update lokasi jika ada
+        if (!empty($data['location'])) {
+            ProjectLocation::addOrUpdateLocation($data['location']);
+        }
+        
+        // Simpan atau update client jika ada
+        if (!empty($data['client'])) {
+            ProjectClient::addOrUpdateClient($data['client']);
+        }
+        
+        // Log activity using ActivityLogger
+        ActivityLogger::logProjectCreated($project);
         
         return redirect()->route('projects.index')->with('success', 'Proyek berhasil dibuat.');
     }
@@ -168,6 +178,7 @@ class ProjectController extends Controller
         $types = [
             'konstruksi' => 'Konstruksi', 
             'maintenance' => 'Maintenance', 
+            'psb' => 'PSB',
             'other' => 'Other'
         ];
         $statuses = [
@@ -194,6 +205,9 @@ class ProjectController extends Controller
         $project = Project::findOrFail($id);
         $this->authorize('update', $project);
         
+        // Store original data for comparison
+        $originalData = $project->getOriginal();
+        
         $data = $request->validated();
         
         // Auto-calculate planned_total_value
@@ -207,21 +221,20 @@ class ProjectController extends Controller
         // Set planned_budget to planned_total_value for backward compatibility
         $data['planned_budget'] = $data['planned_total_value'];
         
-        $oldStatus = $project->status;
         $project->update($data);
         
-        // Log activity jika status berubah
-        if ($oldStatus !== $request->status) {
-            $project->activities()->create([
-                'user_id' => Auth::id(),
-                'activity_type' => 'status_changed',
-                'description' => "Status proyek berubah dari {$oldStatus} ke {$request->status}",
-                'changes' => [
-                    'old_status' => $oldStatus,
-                    'new_status' => $request->status
-                ]
-            ]);
+        // Simpan atau update lokasi jika ada
+        if (!empty($data['location'])) {
+            ProjectLocation::addOrUpdateLocation($data['location']);
         }
+        
+        // Simpan atau update client jika ada
+        if (!empty($data['client'])) {
+            ProjectClient::addOrUpdateClient($data['client']);
+        }
+        
+        // Log activity using ActivityLogger
+        ActivityLogger::logProjectUpdated($project, $originalData);
         
         return redirect()->route('projects.show', $project->id)->with('success', 'Proyek berhasil diperbarui.');
     }
@@ -288,19 +301,11 @@ class ProjectController extends Controller
             'status' => 'required|in:planning,in_progress,completed,cancelled'
         ]);
         
-        $oldStatus = $project->status;
+        $originalData = $project->getOriginal();
         $project->update(['status' => $request->status]);
         
-        // Log activity
-        $project->activities()->create([
-            'user_id' => Auth::id(),
-            'activity_type' => 'status_updated',
-            'description' => "Status proyek diperbarui dari {$oldStatus} ke {$request->status}",
-            'changes' => [
-                'old_status' => $oldStatus,
-                'new_status' => $request->status
-            ]
-        ]);
+        // Log activity using ActivityLogger
+        ActivityLogger::logProjectUpdated($project, $originalData);
         
         return redirect()->back()->with('success', 'Status proyek berhasil diperbarui.');
     }
@@ -343,7 +348,7 @@ class ProjectController extends Controller
     {
         $this->authorize('viewAny', Project::class);
         
-        $query = Project::with(['user']);
+        $query = Project::query();
         
         // Apply same filters as index
         if ($request->has('search') && $request->search) {
@@ -379,7 +384,8 @@ class ProjectController extends Controller
         
         $filename = 'template_import_proyek.xlsx';
         
-        return Excel::download(new ProjectTemplateExport, $filename);
+        // Use comprehensive export as template
+        return Excel::download(new \App\Exports\ComprehensiveProjectsExport(null, true), $filename);
     }
     
     /**
@@ -393,9 +399,9 @@ class ProjectController extends Controller
     }
     
     /**
-     * Import projects from Excel
+     * Preview import data before saving
      */
-    public function import(Request $request)
+    public function importPreview(Request $request)
     {
         $this->authorize('create', Project::class);
         
@@ -404,15 +410,75 @@ class ProjectController extends Controller
         ]);
         
         try {
-            $import = new ProjectsImport();
-            Excel::import($import, $request->file('file'));
+            // Store file temporarily
+            $file = $request->file('file');
+            $filename = time() . '_' . $file->getClientOriginalName();
+            $path = $file->storeAs('temp', $filename);
+            
+            // Process file for preview
+            $import = new \App\Imports\ComprehensiveProjectsImport();
+            $import->setPreviewMode(true); // Set preview mode
+            Excel::import($import, storage_path('app/' . $path));
+            
+            $validData = $import->getValidData();
+            $invalidData = $import->getInvalidData();
+            $errors = $import->getErrors();
+            
+            return view('projects.import-preview', compact(
+                'validData', 
+                'invalidData', 
+                'errors', 
+                'filename'
+            ));
+            
+        } catch (\Exception $e) {
+            return redirect()->back()
+                ->with('error', 'Terjadi kesalahan saat memproses file: ' . $e->getMessage());
+        }
+    }
+    
+    /**
+     * Confirm and execute import
+     */
+    public function importConfirm(Request $request)
+    {
+        $this->authorize('create', Project::class);
+        
+        $request->validate([
+            'filename' => 'required|string',
+            'import_valid_only' => 'boolean'
+        ]);
+        
+        try {
+            $filename = $request->filename;
+            $path = storage_path('app/temp/' . $filename);
+            
+            if (!file_exists($path)) {
+                return redirect()->route('projects.import.form')
+                    ->with('error', 'File tidak ditemukan atau sudah kedaluwarsa. Silakan upload ulang file Excel Anda.');
+            }
+            
+            // Process import with confirmation
+            $import = new \App\Imports\ComprehensiveProjectsImport();
+            $import->setConfirmMode(true);
+            $import->setImportValidOnly($request->boolean('import_valid_only', true));
+            
+            Excel::import($import, $path);
+            
+            // Clean up temp file safely
+            if (file_exists($path)) {
+                unlink($path);
+            }
             
             $successCount = $import->getSuccessCount();
             $errorCount = $import->getErrorCount();
             $errors = $import->getErrors();
             
-            if ($import->hasErrors()) {
-                return redirect()->back()
+            // Log import activity
+            ActivityLogger::logDataImport('projects', $successCount, $errorCount);
+            
+            if ($errorCount > 0 && !$request->boolean('import_valid_only')) {
+                return redirect()->route('projects.index')
                     ->with('warning', "Import selesai dengan {$successCount} data berhasil dan {$errorCount} data gagal.")
                     ->with('import_errors', $errors);
             }
@@ -421,8 +487,75 @@ class ProjectController extends Controller
                 ->with('success', "Import berhasil! {$successCount} proyek telah ditambahkan.");
                 
         } catch (\Exception $e) {
-            return redirect()->back()
+            // Clean up temp file if exists
+            if (isset($path) && file_exists($path)) {
+                unlink($path);
+            }
+            
+            return redirect()->route('projects.import.form')
                 ->with('error', 'Terjadi kesalahan saat import: ' . $e->getMessage());
         }
+    }
+    
+    /**
+     * Import projects from Excel (legacy method - redirect to preview)
+     */
+    public function import(Request $request)
+    {
+        return $this->importPreview($request);
+    }
+    
+    /**
+     * API endpoint untuk autocomplete lokasi
+     */
+    public function searchLocations(Request $request)
+    {
+        $search = $request->get('q', '');
+        
+        if (empty($search)) {
+            // Jika tidak ada pencarian, return lokasi populer
+            $locations = ProjectLocation::getPopularLocations(10);
+        } else {
+            // Jika ada pencarian, cari berdasarkan nama
+            $locations = ProjectLocation::searchLocations($search, 10);
+        }
+        
+        return response()->json($locations);
+    }
+    
+    /**
+     * API endpoint untuk mendapatkan semua lokasi populer
+     */
+    public function getPopularLocations()
+    {
+        $locations = ProjectLocation::getPopularLocations(20);
+        return response()->json($locations);
+    }
+    
+    /**
+     * API endpoint untuk autocomplete client
+     */
+    public function searchClients(Request $request)
+    {
+        $search = $request->get('q', '');
+        
+        if (empty($search)) {
+            // Jika tidak ada pencarian, return client populer
+            $clients = ProjectClient::getPopularClients(10);
+        } else {
+            // Jika ada pencarian, cari berdasarkan nama
+            $clients = ProjectClient::searchClients($search, 10);
+        }
+        
+        return response()->json($clients);
+    }
+    
+    /**
+     * API endpoint untuk mendapatkan semua client populer
+     */
+    public function getPopularClients()
+    {
+        $clients = ProjectClient::getPopularClients(20);
+        return response()->json($clients);
     }
 }

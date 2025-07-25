@@ -1,39 +1,74 @@
 <x-app-layout>
     <x-slot name="header">
-        <h2 class="font-semibold text-xl text-gray-800 leading-tight">
-            {{ __('Dashboard Finance Manager') }}
-        </h2>
+        <div class="flex justify-between items-center">
+            <h2 class="font-semibold text-xl text-gray-800 leading-tight">
+                {{ __('Dashboard Finance Manager') }}
+            </h2>
+            <div class="text-sm text-gray-600">
+                {{ now()->format('d F Y, H:i') }}
+            </div>
+        </div>
     </x-slot>
 
     <div class="py-12">
         <div class="max-w-7xl mx-auto sm:px-6 lg:px-8">
-            <!-- Statistik Keuangan -->
-            <div class="grid grid-cols-1 md:grid-cols-4 gap-6 mb-6">
-                <div class="bg-white overflow-hidden shadow-sm sm:rounded-lg">
-                    <div class="p-6 text-gray-900">
-                        <h3 class="text-lg font-semibold text-gray-700">Total Revenue</h3>
-                        <p class="text-2xl font-bold text-green-600">Rp {{ number_format($totalRevenue) }}</p>
+            <!-- Welcome Section -->
+            <div class="bg-gradient-to-r from-emerald-600 to-emerald-800 rounded-lg shadow-lg p-6 mb-8 text-white">
+                <h1 class="text-3xl font-bold mb-2">Selamat Datang, {{ Auth::user()->name }}</h1>
+                <p class="text-emerald-100">Kelola keuangan dan cash flow perusahaan</p>
+            </div>
+
+            <!-- Financial KPIs -->
+            <div class="grid grid-cols-1 md:grid-cols-4 gap-6 mb-8">
+                <div class="bg-gradient-to-br from-green-500 to-green-600 text-white rounded-xl p-6 shadow-lg">
+                    <div class="flex items-center justify-between">
+                        <div>
+                            <h3 class="text-lg font-semibold opacity-90">Total Pendapatan</h3>
+                            <p class="text-2xl font-bold">{{ \App\Helpers\FormatHelper::formatRupiah($totalRevenue) }}</p>
+                            <p class="text-sm opacity-75">Pendapatan terkonfirmasi</p>
+                        </div>
+                        <div class="text-4xl opacity-75">
+                            💰
+                        </div>
                     </div>
                 </div>
 
-                <div class="bg-white overflow-hidden shadow-sm sm:rounded-lg">
-                    <div class="p-6 text-gray-900">
-                        <h3 class="text-lg font-semibold text-gray-700">Pending Invoices</h3>
-                        <p class="text-2xl font-bold text-yellow-600">Rp {{ number_format($pendingInvoices) }}</p>
+                <div class="bg-gradient-to-br from-yellow-500 to-yellow-600 text-white rounded-xl p-6 shadow-lg">
+                    <div class="flex items-center justify-between">
+                        <div>
+                            <h3 class="text-lg font-semibold opacity-90">Invoice Tertunda</h3>
+                            <p class="text-2xl font-bold">{{ \App\Helpers\FormatHelper::formatRupiah($pendingInvoices) }}</p>
+                            <p class="text-sm opacity-75">Menunggu pembayaran</p>
+                        </div>
+                        <div class="text-4xl opacity-75">
+                            ⏳
+                        </div>
                     </div>
                 </div>
 
-                <div class="bg-white overflow-hidden shadow-sm sm:rounded-lg">
-                    <div class="p-6 text-gray-900">
-                        <h3 class="text-lg font-semibold text-gray-700">Overdue Invoices</h3>
-                        <p class="text-2xl font-bold text-red-600">Rp {{ number_format($overdueInvoices) }}</p>
+                <div class="bg-gradient-to-br from-red-500 to-red-600 text-white rounded-xl p-6 shadow-lg">
+                    <div class="flex items-center justify-between">
+                        <div>
+                            <h3 class="text-lg font-semibold opacity-90">Invoice Terlambat</h3>
+                            <p class="text-2xl font-bold">{{ \App\Helpers\FormatHelper::formatRupiah($overdueInvoices) }}</p>
+                            <p class="text-sm opacity-75">Perlu tindak lanjut</p>
+                        </div>
+                        <div class="text-4xl opacity-75">
+                            🚨
+                        </div>
                     </div>
                 </div>
 
-                <div class="bg-white overflow-hidden shadow-sm sm:rounded-lg">
-                    <div class="p-6 text-gray-900">
-                        <h3 class="text-lg font-semibold text-gray-700">Total Expenses</h3>
-                        <p class="text-2xl font-bold text-purple-600">Rp {{ number_format($totalExpenses) }}</p>
+                <div class="bg-gradient-to-br from-purple-500 to-purple-600 text-white rounded-xl p-6 shadow-lg">
+                    <div class="flex items-center justify-between">
+                        <div>
+                            <h3 class="text-lg font-semibold opacity-90">Total Pengeluaran</h3>
+                            <p class="text-2xl font-bold">{{ \App\Helpers\FormatHelper::formatRupiah($totalExpenses) }}</p>
+                            <p class="text-sm opacity-75">Pengeluaran disetujui</p>
+                        </div>
+                        <div class="text-4xl opacity-75">
+                            💸
+                        </div>
                     </div>
                 </div>
             </div>
@@ -58,7 +93,7 @@
             <!-- Pending Approvals -->
             <div class="bg-white overflow-hidden shadow-sm sm:rounded-lg mb-6">
                 <div class="p-6">
-                    <h3 class="text-lg font-semibold text-gray-700 mb-4">Pending Approvals</h3>
+                    <h3 class="text-lg font-semibold text-gray-700 mb-4">Persetujuan Tertunda</h3>
                     <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
                         <div class="bg-yellow-50 border border-yellow-200 rounded p-4">
                             <h4 class="font-semibold text-yellow-800">Pengeluaran Pending</h4>
@@ -115,7 +150,7 @@
             <!-- Quick Actions -->
             <div class="bg-white overflow-hidden shadow-sm sm:rounded-lg">
                 <div class="p-6">
-                    <h3 class="text-lg font-semibold text-gray-700 mb-4">Quick Actions</h3>
+                    <h3 class="text-lg font-semibold text-gray-700 mb-4">Aksi Cepat</h3>
                     <div class="grid grid-cols-2 md:grid-cols-4 gap-4">
                         <a href="{{ route('billings.index') }}" class="bg-blue-500 hover:bg-blue-700 text-white font-bold py-2 px-4 rounded text-center">
                             Lihat Penagihan

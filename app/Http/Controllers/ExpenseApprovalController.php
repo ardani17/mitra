@@ -26,7 +26,7 @@ class ExpenseApprovalController extends Controller
             abort(403, 'Anda tidak memiliki izin untuk mengakses halaman ini.');
         }
         
-        $query = ExpenseApproval::with(['expense.project', 'expense.user'])
+        $query = ExpenseApproval::with(['expense.project'])
             ->where('level', $userRole)
             ->where('status', 'pending');
         
