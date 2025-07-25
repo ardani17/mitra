@@ -1,39 +1,43 @@
 @extends('layouts.app')
 
 @section('content')
-<div class="container mx-auto px-4 py-8">
-    <div class="flex justify-between items-center mb-6">
-        <h1 class="text-3xl font-bold text-gray-800">Buat Proyek Baru</h1>
-        <a href="{{ route('projects.index') }}" class="bg-gray-600 hover:bg-gray-700 text-white font-bold py-2 px-4 rounded">
-            Kembali ke Proyek
+<div class="container mx-auto px-4 py-6 sm:py-8">
+    <div class="flex flex-col sm:flex-row sm:justify-between sm:items-center mb-4 sm:mb-6 space-y-4 sm:space-y-0">
+        <div class="min-w-0 flex-1">
+            <h1 class="text-2xl sm:text-3xl font-bold text-gray-800">Buat Proyek Baru</h1>
+        </div>
+        <a href="{{ route('projects.index') }}" class="bg-gray-600 hover:bg-gray-700 text-white font-bold py-2 px-3 sm:px-4 rounded text-center text-sm sm:text-base">
+            <span class="hidden sm:inline">Kembali ke Proyek</span>
+            <span class="sm:hidden">Kembali</span>
         </a>
     </div>
 
-    <div class="bg-white rounded-lg shadow-md p-6">
+    <div class="bg-white rounded-lg shadow-md p-4 sm:p-6">
         <form action="{{ route('projects.store') }}" method="POST">
             @csrf
             
-            <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
-                <div>
+            <div class="grid grid-cols-1 lg:grid-cols-2 gap-4 sm:gap-6">
+                <div class="lg:col-span-2">
                     <label class="block text-sm font-medium text-gray-700 mb-2">Nama Proyek *</label>
                     <input type="text" name="name" value="{{ old('name') }}" required
-                           class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500">
+                           class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 text-sm sm:text-base">
                     @error('name')
                         <p class="mt-1 text-sm text-red-600">{{ $message }}</p>
                     @enderror
                 </div>
                 
-                <div>
+                <div class="lg:col-span-2">
                     <label class="block text-sm font-medium text-gray-700 mb-2">Kode Proyek</label>
-                    <div class="w-full px-3 py-2 border border-gray-300 rounded-md bg-gray-50 text-gray-500">
-                        Akan di-generate otomatis (PRJ-YYYY-MM-XXX)
+                    <div class="w-full px-3 py-2 border border-gray-300 rounded-md bg-gray-50 text-gray-500 text-sm sm:text-base">
+                        <span class="hidden sm:inline">Akan di-generate otomatis (PRJ-YYYY-MM-XXX)</span>
+                        <span class="sm:hidden">Auto-generate (PRJ-YYYY-MM-XXX)</span>
                     </div>
                     <p class="mt-1 text-xs text-gray-500">Kode proyek akan dibuat otomatis berdasarkan tahun dan bulan</p>
                 </div>
                 
                 <div>
                     <label class="block text-sm font-medium text-gray-700 mb-2">Tipe Proyek *</label>
-                    <select name="type" required class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500">
+                    <select name="type" required class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 text-sm sm:text-base">
                         <option value="">Pilih Tipe</option>
                         @foreach($types as $key => $label)
                             <option value="{{ $key }}" {{ old('type') == $key ? 'selected' : '' }}>
@@ -50,7 +54,7 @@
                 <div>
                     <label class="block text-sm font-medium text-gray-700 mb-2">Nilai Jasa Plan (Rp)</label>
                     <input type="text" name="planned_service_value_display" id="planned_service_value_display" value="{{ old('planned_service_value') ? number_format(old('planned_service_value'), 0, ',', '.') : '' }}"
-                           class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
+                           class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 text-sm sm:text-base"
                            placeholder="0">
                     <input type="hidden" name="planned_service_value" id="planned_service_value" value="{{ old('planned_service_value') }}">
                     @error('planned_service_value')
@@ -61,7 +65,7 @@
                 <div>
                     <label class="block text-sm font-medium text-gray-700 mb-2">Nilai Material Plan (Rp)</label>
                     <input type="text" name="planned_material_value_display" id="planned_material_value_display" value="{{ old('planned_material_value') ? number_format(old('planned_material_value'), 0, ',', '.') : '' }}"
-                           class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
+                           class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 text-sm sm:text-base"
                            placeholder="0">
                     <input type="hidden" name="planned_material_value" id="planned_material_value" value="{{ old('planned_material_value') }}">
                     @error('planned_material_value')
@@ -72,7 +76,7 @@
                 <div>
                     <label class="block text-sm font-medium text-gray-700 mb-2">Total Nilai Plan (Rp)</label>
                     <input type="text" name="planned_total_value_display" id="planned_total_value_display" value="{{ old('planned_total_value') ? number_format(old('planned_total_value'), 0, ',', '.') : '' }}"
-                           class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 bg-gray-50"
+                           class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 bg-gray-50 text-sm sm:text-base"
                            placeholder="0" readonly>
                     <input type="hidden" name="planned_total_value" id="planned_total_value" value="{{ old('planned_total_value') }}">
                     <p class="mt-1 text-xs text-gray-500">Otomatis dihitung dari nilai jasa + material</p>
@@ -83,7 +87,7 @@
                 
                 <div>
                     <label class="block text-sm font-medium text-gray-700 mb-2">Status *</label>
-                    <select name="status" required class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500">
+                    <select name="status" required class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 text-sm sm:text-base">
                         <option value="">Pilih Status</option>
                         @foreach($statuses as $key => $label)
                             <option value="{{ $key }}" {{ old('status') == $key ? 'selected' : '' }}>
@@ -98,7 +102,7 @@
                 
                 <div>
                     <label class="block text-sm font-medium text-gray-700 mb-2">Prioritas *</label>
-                    <select name="priority" required class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500">
+                    <select name="priority" required class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 text-sm sm:text-base">
                         <option value="">Pilih Prioritas</option>
                         @foreach($priorities as $key => $label)
                             <option value="{{ $key }}" {{ old('priority') == $key ? 'selected' : '' }}>
@@ -114,7 +118,7 @@
                 <div>
                     <label class="block text-sm font-medium text-gray-700 mb-2">Tanggal Mulai *</label>
                     <input type="date" name="start_date" id="start_date" value="{{ old('start_date') }}" required
-                           class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500">
+                           class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 text-sm sm:text-base">
                     @error('start_date')
                         <p class="mt-1 text-sm text-red-600">{{ $message }}</p>
                     @enderror
@@ -123,7 +127,7 @@
                 <div>
                     <label class="block text-sm font-medium text-gray-700 mb-2">Tanggal Selesai</label>
                     <input type="date" name="end_date" id="end_date" value="{{ old('end_date') }}"
-                           class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500">
+                           class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 text-sm sm:text-base">
                     <div id="duration_info" class="mt-1 text-xs text-gray-500"></div>
                     @error('end_date')
                         <p class="mt-1 text-sm text-red-600">{{ $message }}</p>
@@ -134,8 +138,8 @@
                     <label class="block text-sm font-medium text-gray-700 mb-2">Lokasi</label>
                     <div class="relative">
                         <input type="text" name="location" id="location_input" value="{{ old('location') }}"
-                               class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
-                               placeholder="Ketik untuk mencari lokasi yang sudah ada..."
+                               class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 text-sm sm:text-base"
+                               placeholder="Ketik untuk mencari lokasi..."
                                autocomplete="off">
                         <div id="location_suggestions" class="absolute z-10 w-full bg-white border border-gray-300 rounded-md shadow-lg mt-1 hidden max-h-60 overflow-y-auto">
                             <!-- Suggestions will be populated here -->
@@ -151,8 +155,8 @@
                     <label class="block text-sm font-medium text-gray-700 mb-2">Client</label>
                     <div class="relative">
                         <input type="text" name="client" id="client_input" value="{{ old('client') }}"
-                               class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
-                               placeholder="Ketik untuk mencari client yang sudah ada..."
+                               class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 text-sm sm:text-base"
+                               placeholder="Ketik untuk mencari client..."
                                autocomplete="off">
                         <div id="client_suggestions" class="absolute z-10 w-full bg-white border border-gray-300 rounded-md shadow-lg mt-1 hidden max-h-60 overflow-y-auto">
                             <!-- Suggestions will be populated here -->
@@ -165,36 +169,36 @@
                 </div>
             </div>
             
-            <div class="mt-6">
+            <div class="mt-4 sm:mt-6">
                 <label class="block text-sm font-medium text-gray-700 mb-2">Deskripsi</label>
                 <textarea name="description" rows="4" 
-                          class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500">{{ old('description') }}</textarea>
+                          class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 text-sm sm:text-base">{{ old('description') }}</textarea>
                 @error('description')
                     <p class="mt-1 text-sm text-red-600">{{ $message }}</p>
                 @enderror
             </div>
             
-            <div class="mt-6">
+            <div class="mt-4 sm:mt-6">
                 <label class="block text-sm font-medium text-gray-700 mb-2">Catatan</label>
                 <textarea name="notes" rows="3" 
-                          class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500">{{ old('notes') }}</textarea>
+                          class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 text-sm sm:text-base">{{ old('notes') }}</textarea>
                 @error('notes')
                     <p class="mt-1 text-sm text-red-600">{{ $message }}</p>
                 @enderror
             </div>
             
-            <div class="mt-8 flex justify-end">
-                <a href="{{ route('projects.index') }}" class="bg-gray-300 hover:bg-gray-400 text-gray-800 font-bold py-2 px-4 rounded mr-2">
+            <div class="mt-6 sm:mt-8 flex flex-col sm:flex-row sm:justify-end space-y-2 sm:space-y-0 sm:space-x-2">
+                <a href="{{ route('projects.index') }}" class="bg-gray-300 hover:bg-gray-400 text-gray-800 font-bold py-2 px-3 sm:px-4 rounded text-center text-sm sm:text-base order-2 sm:order-1">
                     Batal
                 </a>
-                <button type="submit" class="bg-blue-600 hover:bg-blue-700 text-white font-bold py-2 px-4 rounded">
+                <button type="submit" class="bg-blue-600 hover:bg-blue-700 text-white font-bold py-2 px-3 sm:px-4 rounded text-sm sm:text-base order-1 sm:order-2">
                     Buat Proyek
                 </button>
             </div>
         </form>
     </div>
     
-    <div class="mt-6 bg-blue-50 border border-blue-200 rounded-lg p-4">
+    <div class="mt-4 sm:mt-6 bg-blue-50 border border-blue-200 rounded-lg p-3 sm:p-4">
         <div class="flex">
             <div class="flex-shrink-0">
                 <svg class="h-5 w-5 text-blue-400" fill="currentColor" viewBox="0 0 20 20">
@@ -203,8 +207,9 @@
             </div>
             <div class="ml-3">
                 <h3 class="text-sm font-medium text-blue-800">Informasi Proyek</h3>
-                <div class="mt-2 text-sm text-blue-700">
-                    <p>Proyek akan dibuat dengan kode otomatis dan dapat dikelola melalui timeline, pengeluaran, dan penagihan setelah dibuat.</p>
+                <div class="mt-2 text-xs sm:text-sm text-blue-700">
+                    <p class="hidden sm:block">Proyek akan dibuat dengan kode otomatis dan dapat dikelola melalui timeline, pengeluaran, dan penagihan setelah dibuat.</p>
+                    <p class="sm:hidden">Proyek akan dibuat dengan kode otomatis dan dapat dikelola setelah dibuat.</p>
                 </div>
             </div>
         </div>

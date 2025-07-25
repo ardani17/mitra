@@ -79,26 +79,26 @@
                 <div class="grid grid-cols-1 md:grid-cols-2 gap-6 mt-4">
                     <div>
                         <label class="block text-sm font-medium text-gray-700 mb-2">Rate PPh (%) *</label>
-                        <input type="number" name="pph_rate" id="pph_rate" step="0.1" min="0" max="100" required
+                        <input type="number" name="pph_rate" id="pph_rate" step="0.01" min="0" max="100" required
                                class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500" 
                                value="{{ old('pph_rate', $billingBatch->pph_rate) }}" onchange="calculateTotals()" oninput="calculateTotals()"
-                               placeholder="Contoh: 2.5">
+                               placeholder="Contoh: 1.75">
                         @error('pph_rate')
                             <p class="mt-1 text-sm text-red-600">{{ $message }}</p>
                         @enderror
-                        <p class="text-xs text-gray-500 mt-1">Masukkan rate PPh dalam persen (contoh: 2.5 untuk 2.5%)</p>
+                        <p class="text-xs text-gray-500 mt-1">Masukkan rate PPh dalam persen (contoh: 1.75 untuk 1.75%)</p>
                     </div>
 
                     <div>
                         <label class="block text-sm font-medium text-gray-700 mb-2">Rate PPN (%) *</label>
-                        <input type="number" name="ppn_rate" id="ppn_rate" step="0.1" min="0" max="100" required
+                        <input type="number" name="ppn_rate" id="ppn_rate" step="0.01" min="0" max="100" required
                                class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500" 
                                value="{{ old('ppn_rate', $billingBatch->ppn_rate) }}" onchange="calculateTotals()" oninput="calculateTotals()"
-                               placeholder="Contoh: 11">
+                               placeholder="Contoh: 11.50">
                         @error('ppn_rate')
                             <p class="mt-1 text-sm text-red-600">{{ $message }}</p>
                         @enderror
-                        <p class="text-xs text-gray-500 mt-1">Masukkan rate PPN dalam persen (contoh: 11 untuk 11%)</p>
+                        <p class="text-xs text-gray-500 mt-1">Masukkan rate PPN dalam persen (contoh: 11.50 untuk 11.50%)</p>
                     </div>
                 </div>
 

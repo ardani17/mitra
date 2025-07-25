@@ -1,22 +1,25 @@
 @extends('layouts.app')
 
 @section('content')
-<div class="container mx-auto px-8 lg:px-16 xl:px-24 py-8 max-w-6xl">
-    <div class="flex justify-between items-center mb-6">
-        <h1 class="text-3xl font-bold text-gray-800">Ajukan Pengeluaran Baru</h1>
-        <a href="{{ route('expenses.index') }}" class="bg-gray-600 hover:bg-gray-700 text-white font-bold py-2 px-4 rounded">
-            Kembali ke Pengeluaran
+<div class="container mx-auto px-4 py-6 sm:py-8">
+    <div class="flex flex-col sm:flex-row sm:justify-between sm:items-center mb-4 sm:mb-6 space-y-4 sm:space-y-0">
+        <div class="min-w-0 flex-1">
+            <h1 class="text-2xl sm:text-3xl font-bold text-gray-800">Ajukan Pengeluaran Baru</h1>
+        </div>
+        <a href="{{ route('expenses.index') }}" class="bg-gray-600 hover:bg-gray-700 text-white font-bold py-2 px-3 sm:px-4 rounded text-center text-sm sm:text-base">
+            <span class="hidden sm:inline">Kembali ke Pengeluaran</span>
+            <span class="sm:hidden">Kembali</span>
         </a>
     </div>
 
-    <div class="bg-white rounded-lg shadow-md p-6">
+    <div class="bg-white rounded-lg shadow-md p-4 sm:p-6">
         <form action="{{ route('expenses.store') }}" method="POST">
             @csrf
             
-            <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
-                <div>
+            <div class="grid grid-cols-1 lg:grid-cols-2 gap-4 sm:gap-6">
+                <div class="lg:col-span-2">
                     <label class="block text-sm font-medium text-gray-700 mb-2">Proyek *</label>
-                    <select name="project_id" required class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500">
+                    <select name="project_id" required class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 text-sm sm:text-base">
                         <option value="">Pilih Proyek</option>
                         @foreach($projects as $proj)
                             <option value="{{ $proj->id }}" {{ (old('project_id') == $proj->id || (isset($project) && $project->id == $proj->id)) ? 'selected' : '' }}>
@@ -31,7 +34,7 @@
                 
                 <div>
                     <label class="block text-sm font-medium text-gray-700 mb-2">Kategori *</label>
-                    <select name="category" required class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500">
+                    <select name="category" required class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 text-sm sm:text-base">
                         <option value="">Pilih Kategori</option>
                         @foreach($categories as $key => $label)
                             <option value="{{ $key }}" {{ old('category') == $key ? 'selected' : '' }}>
@@ -47,7 +50,7 @@
                 <div>
                     <label class="block text-sm font-medium text-gray-700 mb-2">Tanggal Pengeluaran *</label>
                     <input type="date" name="expense_date" value="{{ old('expense_date', date('Y-m-d')) }}" required
-                           class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500">
+                           class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 text-sm sm:text-base">
                     @error('expense_date')
                         <p class="mt-1 text-sm text-red-600">{{ $message }}</p>
                     @enderror
@@ -56,8 +59,8 @@
                 <div>
                     <label class="block text-sm font-medium text-gray-700 mb-2">Jumlah (Rp) *</label>
                     <input type="text" name="amount" value="{{ old('amount') }}" required
-                           class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
-                           placeholder="Masukkan jumlah dalam rupiah"
+                           class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 text-sm sm:text-base"
+                           placeholder="Masukkan jumlah..."
                            oninput="formatCurrency(this)">
                     @error('amount')
                         <p class="mt-1 text-sm text-red-600">{{ $message }}</p>
@@ -65,28 +68,28 @@
                 </div>
             </div>
             
-            <div class="mt-6">
+            <div class="mt-4 sm:mt-6">
                 <label class="block text-sm font-medium text-gray-700 mb-2">Deskripsi *</label>
                 <textarea name="description" rows="4" required
-                          class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
-                          placeholder="Jelaskan detail pengeluaran ini...">{{ old('description') }}</textarea>
+                          class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 text-sm sm:text-base"
+                          placeholder="Jelaskan detail pengeluaran...">{{ old('description') }}</textarea>
                 @error('description')
                     <p class="mt-1 text-sm text-red-600">{{ $message }}</p>
                 @enderror
             </div>
             
-            <div class="mt-8 flex justify-end">
-                <a href="{{ route('expenses.index') }}" class="bg-gray-300 hover:bg-gray-400 text-gray-800 font-bold py-2 px-4 rounded mr-2">
+            <div class="mt-6 sm:mt-8 flex flex-col sm:flex-row sm:justify-end space-y-2 sm:space-y-0 sm:space-x-2">
+                <a href="{{ route('expenses.index') }}" class="bg-gray-300 hover:bg-gray-400 text-gray-800 font-bold py-2 px-3 sm:px-4 rounded text-center text-sm sm:text-base order-2 sm:order-1">
                     Batal
                 </a>
-                <button type="submit" class="bg-blue-600 hover:bg-blue-700 text-white font-bold py-2 px-4 rounded">
+                <button type="submit" class="bg-blue-600 hover:bg-blue-700 text-white font-bold py-2 px-3 sm:px-4 rounded text-sm sm:text-base order-1 sm:order-2">
                     Ajukan Pengeluaran
                 </button>
             </div>
         </form>
     </div>
     
-    <div class="mt-6 bg-blue-50 border border-blue-200 rounded-lg p-4">
+    <div class="mt-4 sm:mt-6 bg-blue-50 border border-blue-200 rounded-lg p-3 sm:p-4">
         <div class="flex">
             <div class="flex-shrink-0">
                 <svg class="h-5 w-5 text-blue-400" fill="currentColor" viewBox="0 0 20 20">
@@ -95,8 +98,9 @@
             </div>
             <div class="ml-3">
                 <h3 class="text-sm font-medium text-blue-800">Catatan</h3>
-                <div class="mt-2 text-sm text-blue-700">
-                    <p>Pengeluaran akan dibuat dengan status "Draft". Setelah dibuat, Anda dapat mengajukan pengeluaran untuk proses persetujuan.</p>
+                <div class="mt-2 text-xs sm:text-sm text-blue-700">
+                    <p class="hidden sm:block">Pengeluaran akan dibuat dengan status "Draft". Setelah dibuat, Anda dapat mengajukan pengeluaran untuk proses persetujuan.</p>
+                    <p class="sm:hidden">Pengeluaran akan dibuat dengan status "Draft" dan dapat diajukan untuk persetujuan.</p>
                 </div>
             </div>
         </div>
