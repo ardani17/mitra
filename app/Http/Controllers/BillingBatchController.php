@@ -38,13 +38,18 @@ class BillingBatchController extends Controller
             $query->whereDate('billing_date', '<=', $request->date_to);
         }
 
-        // Search by batch code or invoice number
+        // Search by batch code, invoice number, or project code
         if ($request->filled('search')) {
             $search = $request->search;
             $query->where(function($q) use ($search) {
                 $q->where('batch_code', 'like', "%{$search}%")
                   ->orWhere('invoice_number', 'like', "%{$search}%")
-                  ->orWhere('tax_invoice_number', 'like', "%{$search}%");
+                  ->orWhere('tax_invoice_number', 'like', "%{$search}%")
+                  ->orWhere('sp_number', 'like', "%{$search}%")
+                  ->orWhereHas('projectBillings.project', function($projectQuery) use ($search) {
+                      $projectQuery->where('code', 'like', "%{$search}%")
+                                   ->orWhere('name', 'like', "%{$search}%");
+                  });
             });
         }
 

@@ -39,8 +39,8 @@
             <div>
                 <label class="block text-sm font-medium text-gray-700 mb-2">Pencarian</label>
                 <div class="flex">
-                    <input type="text" name="search" value="{{ request('search') }}" placeholder="Kode batch, invoice..." 
-                           class="flex-1 px-3 py-2 border border-gray-300 rounded-l-md focus:outline-none focus:ring-2 focus:ring-blue-500">
+                <input type="text" name="search" value="{{ request('search') }}" placeholder="Kode batch, invoice, SP, kode proyek..." 
+                       class="flex-1 px-3 py-2 border border-gray-300 rounded-l-md focus:outline-none focus:ring-2 focus:ring-blue-500">
                     <button type="submit" class="bg-blue-600 hover:bg-blue-700 text-white px-4 py-2 rounded-r-md">
                         Cari
                     </button>
