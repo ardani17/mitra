@@ -346,31 +346,92 @@ class BillingBatchController extends Controller
     }
 
     /**
+     * Show the form for confirming deletion
+     */
+    public function confirmDelete(BillingBatch $billingBatch)
+    {
+        $billingBatch->load([
+            'projectBillings.project',
+            'statusLogs.user',
+            'documents'
+        ]);
+
+        return view('billing-batches.confirm-delete', compact('billingBatch'));
+    }
+
+    /**
      * Remove the specified resource from storage.
      */
     public function destroy(BillingBatch $billingBatch)
     {
-        // Only allow deletion if status is draft
-        if ($billingBatch->status !== BillingBatch::STATUS_DRAFT) {
-            return redirect()->route('billing-batches.index')
-                ->with('error', 'Batch billing hanya dapat dihapus dalam status draft.');
+        // Check if batch can be deleted
+        $canDelete = $billingBatch->canBeDeleted();
+        if (!$canDelete['can_delete']) {
+            return redirect()->route('billing-batches.show', $billingBatch)
+                ->with('error', 'Batch billing tidak dapat dihapus: ' . implode(', ', $canDelete['blockers']));
         }
 
-        DB::transaction(function () use ($billingBatch) {
-            // Remove batch reference from project billings
-            $billingBatch->projectBillings()->update([
-                'billing_batch_id' => null,
-                'base_amount' => 0,
-                'pph_amount' => 0,
-                'received_amount' => 0
+        try {
+            DB::transaction(function () use ($billingBatch) {
+                // Log deletion attempt
+                \Log::info('Starting billing batch deletion', [
+                    'batch_id' => $billingBatch->id,
+                    'batch_code' => $billingBatch->batch_code,
+                    'user_id' => auth()->id()
+                ]);
+
+                // Get deletion summary for logging
+                $summary = $billingBatch->getDeletionSummary();
+
+                // 1. Delete documents and their physical files
+                $deletedFiles = 0;
+                foreach ($billingBatch->documents as $document) {
+                    // Delete physical file if exists
+                    if ($document->file_path && \Storage::disk('public')->exists($document->file_path)) {
+                        \Storage::disk('public')->delete($document->file_path);
+                        $deletedFiles++;
+                    }
+                    $document->delete();
+                }
+                if ($deletedFiles > 0) {
+                    \Log::info("Deleted {$deletedFiles} physical files");
+                }
+
+                // 2. Delete status logs
+                $deletedLogs = $billingBatch->statusLogs()->delete();
+                \Log::info("Deleted {$deletedLogs} status logs");
+
+                // 3. Remove batch reference from project billings (reset to individual status)
+                $updatedBillings = $billingBatch->projectBillings()->update([
+                    'billing_batch_id' => null,
+                    'base_amount' => 0,
+                    'pph_amount' => 0,
+                    'received_amount' => 0
+                ]);
+                \Log::info("Reset {$updatedBillings} project billings to individual status");
+
+                // 4. Delete the batch itself
+                $billingBatch->delete();
+
+                \Log::info('Billing batch deletion completed successfully', [
+                    'batch_code' => $summary['batch_code'],
+                    'summary' => $summary
+                ]);
+            });
+
+            return redirect()->route('billing-batches.index')
+                ->with('success', 'Batch billing berhasil dihapus. Penagihan proyek dikembalikan ke status individual.');
+
+        } catch (\Exception $e) {
+            \Log::error('Failed to delete billing batch ' . $billingBatch->id . ': ' . $e->getMessage(), [
+                'batch_id' => $billingBatch->id,
+                'error' => $e->getMessage(),
+                'trace' => $e->getTraceAsString()
             ]);
-
-            // Delete the batch (documents and logs will be deleted by cascade)
-            $billingBatch->delete();
-        });
-
-        return redirect()->route('billing-batches.index')
-            ->with('success', 'Batch billing berhasil dihapus.');
+            
+            return redirect()->route('billing-batches.show', $billingBatch)
+                ->with('error', 'Gagal menghapus batch billing: ' . $e->getMessage());
+        }
     }
 
     /**

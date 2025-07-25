@@ -16,6 +16,9 @@
                 <a href="{{ route('billing-batches.edit', $billingBatch) }}" class="bg-blue-600 hover:bg-blue-700 text-white font-bold py-2 px-4 rounded">
                     Edit Batch
                 </a>
+                <a href="{{ route('billing-batches.confirm-delete', $billingBatch) }}" class="bg-red-600 hover:bg-red-700 text-white font-bold py-2 px-4 rounded">
+                    Hapus Batch
+                </a>
             @endif
         </div>
     </div>

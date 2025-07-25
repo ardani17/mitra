@@ -94,6 +94,72 @@ class Project extends Model
     }
 
     /**
+     * Check if project can be safely deleted
+     */
+    public function canBeDeleted(): array
+    {
+        $warnings = [];
+        $blockers = [];
+
+        // Check for active billings
+        $activeBillings = $this->billings()->whereNotNull('invoice_number')->count();
+        if ($activeBillings > 0) {
+            $warnings[] = "Proyek memiliki {$activeBillings} tagihan aktif yang akan ikut terhapus";
+        }
+
+        // Check for approved expenses
+        $approvedExpenses = $this->expenses()->where('status', 'approved')->count();
+        if ($approvedExpenses > 0) {
+            $warnings[] = "Proyek memiliki {$approvedExpenses} pengeluaran yang sudah disetujui";
+        }
+
+        // Check for pending expense approvals
+        $pendingExpenses = $this->expenses()->where('status', 'pending')->count();
+        if ($pendingExpenses > 0) {
+            $warnings[] = "Proyek memiliki {$pendingExpenses} pengeluaran yang menunggu persetujuan";
+        }
+
+        // Check for documents
+        $documentsCount = $this->documents()->count();
+        if ($documentsCount > 0) {
+            $warnings[] = "Proyek memiliki {$documentsCount} dokumen yang akan ikut terhapus";
+        }
+
+        // Check if project is completed and billed
+        if ($this->status === 'completed' && $this->billing_status === 'fully_billed') {
+            $warnings[] = "Proyek sudah selesai dan sudah ditagih penuh - pertimbangkan untuk mengarsipkan daripada menghapus";
+        }
+
+        return [
+            'can_delete' => empty($blockers),
+            'warnings' => $warnings,
+            'blockers' => $blockers
+        ];
+    }
+
+    /**
+     * Get deletion summary for confirmation
+     */
+    public function getDeletionSummary(): array
+    {
+        return [
+            'project_name' => $this->name,
+            'project_code' => $this->code,
+            'expenses_count' => $this->expenses()->count(),
+            'expense_approvals_count' => \App\Models\ExpenseApproval::whereIn('expense_id', $this->expenses()->pluck('id'))->count(),
+            'activities_count' => $this->activities()->count(),
+            'timelines_count' => $this->timelines()->count(),
+            'billings_count' => $this->billings()->count(),
+            'revenues_count' => $this->revenues()->count(),
+            'revenue_items_count' => \App\Models\RevenueItem::whereIn('revenue_id', $this->revenues()->pluck('id'))->count(),
+            'documents_count' => $this->documents()->count(),
+            'profit_analyses_count' => $this->profitAnalyses()->count(),
+            'total_billed_amount' => $this->total_billed_amount,
+            'total_expenses_amount' => $this->total_expenses
+        ];
+    }
+
+    /**
      * Boot method untuk handle cascade delete
      */
     protected static function boot()
@@ -101,21 +167,90 @@ class Project extends Model
         parent::boot();
 
         static::deleting(function ($project) {
-            // Delete related records when project is deleted
-            $project->expenses()->delete();
-            $project->activities()->delete();
-            $project->timelines()->delete();
-            $project->billings()->delete();
-            $project->revenues()->delete();
-            $project->profitAnalyses()->delete();
-            
-            // Delete documents and their files
-            foreach ($project->documents as $document) {
-                // Delete physical file if exists
-                if ($document->file_path && \Storage::exists($document->file_path)) {
-                    \Storage::delete($document->file_path);
+            try {
+                \DB::beginTransaction();
+
+                // Log deletion attempt
+                \Log::info('Starting project deletion', [
+                    'project_id' => $project->id,
+                    'project_name' => $project->name,
+                    'user_id' => auth()->id()
+                ]);
+
+                // Get deletion summary for logging
+                $summary = $project->getDeletionSummary();
+
+                // 1. Delete expense approvals first (through expenses)
+                $expenseIds = $project->expenses()->pluck('id');
+                if ($expenseIds->isNotEmpty()) {
+                    $deletedApprovals = \App\Models\ExpenseApproval::whereIn('expense_id', $expenseIds)->delete();
+                    \Log::info("Deleted {$deletedApprovals} expense approvals");
                 }
-                $document->delete();
+
+                // 2. Delete revenue items before deleting revenues
+                $totalRevenueItems = 0;
+                foreach ($project->revenues as $revenue) {
+                    $itemsCount = $revenue->revenueItems()->count();
+                    $revenue->revenueItems()->delete();
+                    $totalRevenueItems += $itemsCount;
+                }
+                if ($totalRevenueItems > 0) {
+                    \Log::info("Deleted {$totalRevenueItems} revenue items");
+                }
+
+                // 3. Delete documents and their physical files
+                $deletedFiles = 0;
+                foreach ($project->documents as $document) {
+                    // Delete physical file if exists
+                    if ($document->file_path && \Storage::exists($document->file_path)) {
+                        \Storage::delete($document->file_path);
+                        $deletedFiles++;
+                    }
+                    $document->delete();
+                }
+                if ($deletedFiles > 0) {
+                    \Log::info("Deleted {$deletedFiles} physical files");
+                }
+
+                // 4. Delete main related records
+                $deletedExpenses = $project->expenses()->delete();
+                $deletedActivities = $project->activities()->delete();
+                $deletedTimelines = $project->timelines()->delete();
+                $deletedBillings = $project->billings()->delete();
+                $deletedRevenues = $project->revenues()->delete();
+                $deletedProfitAnalyses = $project->profitAnalyses()->delete();
+
+                \Log::info('Deleted related records', [
+                    'expenses' => $deletedExpenses,
+                    'activities' => $deletedActivities,
+                    'timelines' => $deletedTimelines,
+                    'billings' => $deletedBillings,
+                    'revenues' => $deletedRevenues,
+                    'profit_analyses' => $deletedProfitAnalyses
+                ]);
+
+                // 5. Log deletion activity for audit trail
+                \App\Helpers\ActivityLogger::log(
+                    $project->id, 
+                    'deleted', 
+                    'Project deleted with all related data: ' . json_encode($summary)
+                );
+
+                \DB::commit();
+
+                \Log::info('Project deletion completed successfully', [
+                    'project_id' => $project->id,
+                    'summary' => $summary
+                ]);
+
+            } catch (\Exception $e) {
+                \DB::rollback();
+                \Log::error('Failed to delete project ' . $project->id . ': ' . $e->getMessage(), [
+                    'project_id' => $project->id,
+                    'error' => $e->getMessage(),
+                    'trace' => $e->getTraceAsString()
+                ]);
+                throw new \Exception('Gagal menghapus proyek: ' . $e->getMessage());
             }
         });
     }

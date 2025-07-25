@@ -242,4 +242,69 @@ class BillingBatch extends Model
     {
         return $query->where('created_at', '<=', now()->subDays($days));
     }
+
+    /**
+     * Check if billing batch can be safely deleted
+     */
+    public function canBeDeleted(): array
+    {
+        $warnings = [];
+        $blockers = [];
+
+        // Check if status is not draft
+        if ($this->status !== self::STATUS_DRAFT) {
+            $blockers[] = "Batch penagihan hanya dapat dihapus dalam status draft. Status saat ini: {$this->status_label}";
+        }
+
+        // Check for project billings
+        $projectBillingsCount = $this->projectBillings()->count();
+        if ($projectBillingsCount > 0) {
+            $warnings[] = "Batch memiliki {$projectBillingsCount} penagihan proyek yang akan dikembalikan ke status individual";
+        }
+
+        // Check for documents
+        $documentsCount = $this->documents()->count();
+        if ($documentsCount > 0) {
+            $warnings[] = "Batch memiliki {$documentsCount} dokumen yang akan dihapus permanen";
+        }
+
+        // Check for status logs
+        $statusLogsCount = $this->statusLogs()->count();
+        if ($statusLogsCount > 0) {
+            $warnings[] = "Batch memiliki {$statusLogsCount} log status yang akan dihapus";
+        }
+
+        // Check if batch has been sent or processed
+        if ($this->sent_date) {
+            $warnings[] = "Batch sudah pernah dikirim pada " . $this->sent_date->format('d M Y H:i');
+        }
+
+        // Check total amount
+        if ($this->total_billing_amount > 0) {
+            $warnings[] = "Batch memiliki nilai billing sebesar Rp " . number_format($this->total_billing_amount, 0, ',', '.');
+        }
+
+        return [
+            'can_delete' => empty($blockers),
+            'warnings' => $warnings,
+            'blockers' => $blockers
+        ];
+    }
+
+    /**
+     * Get deletion summary for confirmation
+     */
+    public function getDeletionSummary(): array
+    {
+        return [
+            'batch_code' => $this->batch_code,
+            'project_billings_count' => $this->projectBillings()->count(),
+            'documents_count' => $this->documents()->count(),
+            'status_logs_count' => $this->statusLogs()->count(),
+            'total_billing_amount' => $this->total_billing_amount,
+            'status' => $this->status,
+            'client_type' => $this->client_type,
+            'billing_date' => $this->billing_date
+        ];
+    }
 }

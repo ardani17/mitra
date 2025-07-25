@@ -17,6 +17,11 @@
                 Edit Proyek
             </a>
             @endcan
+            @can('delete', $project)
+            <a href="{{ route('projects.confirm-delete', $project) }}" class="bg-red-600 hover:bg-red-700 text-white font-bold py-2 px-4 rounded">
+                Hapus Proyek
+            </a>
+            @endcan
         </div>
     </div>
 

@@ -240,6 +240,21 @@ class ProjectController extends Controller
     }
 
     /**
+     * Show delete confirmation page
+     */
+    public function confirmDelete(string $id)
+    {
+        $project = Project::findOrFail($id);
+        $this->authorize('delete', $project);
+        
+        // Check if project can be deleted
+        $deleteCheck = $project->canBeDeleted();
+        $deletionSummary = $project->getDeletionSummary();
+        
+        return view('projects.confirm-delete', compact('project', 'deleteCheck', 'deletionSummary'));
+    }
+
+    /**
      * Remove the specified resource from storage.
      */
     public function destroy(string $id)
@@ -247,22 +262,21 @@ class ProjectController extends Controller
         $project = Project::findOrFail($id);
         $this->authorize('delete', $project);
         
+        // Check if project can be deleted
+        $deleteCheck = $project->canBeDeleted();
+        
+        if (!$deleteCheck['can_delete']) {
+            return redirect()->back()->with('error', 
+                'Proyek tidak dapat dihapus: ' . implode(', ', $deleteCheck['blockers']));
+        }
+        
         // Log activity sebelum delete
         $projectName = $project->name;
         $projectCode = $project->code;
-        
-        // Count related data for confirmation
-        $relatedData = [
-            'expenses' => $project->expenses()->count(),
-            'timelines' => $project->timelines()->count(),
-            'billings' => $project->billings()->count(),
-            'revenues' => $project->revenues()->count(),
-            'documents' => $project->documents()->count(),
-            'activities' => $project->activities()->count(),
-        ];
+        $deletionSummary = $project->getDeletionSummary();
         
         try {
-            // Delete project (cascade delete akan handle relasi)
+            // Delete project (cascade delete akan handle semua relasi)
             $project->delete();
             
             // Log successful deletion
@@ -270,22 +284,31 @@ class ProjectController extends Controller
                 'project_name' => $projectName,
                 'project_code' => $projectCode,
                 'deleted_by' => Auth::user()->name,
-                'related_data_deleted' => $relatedData
+                'deletion_summary' => $deletionSummary
             ]);
             
-            return redirect()->route('projects.index')->with('success', 
-                "Proyek '{$projectName}' berhasil dihapus beserta semua data terkait.");
+            $message = "Proyek '{$projectName}' berhasil dihapus beserta semua data terkait:";
+            $message .= "\n- {$deletionSummary['expenses_count']} pengeluaran";
+            $message .= "\n- {$deletionSummary['expense_approvals_count']} persetujuan pengeluaran";
+            $message .= "\n- {$deletionSummary['activities_count']} aktivitas";
+            $message .= "\n- {$deletionSummary['timelines_count']} timeline";
+            $message .= "\n- {$deletionSummary['billings_count']} tagihan";
+            $message .= "\n- {$deletionSummary['revenues_count']} pendapatan";
+            $message .= "\n- {$deletionSummary['documents_count']} dokumen";
+            
+            return redirect()->route('projects.index')->with('success', $message);
                 
         } catch (\Exception $e) {
             \Log::error('Failed to delete project', [
                 'project_id' => $id,
                 'project_name' => $projectName,
                 'error' => $e->getMessage(),
-                'user' => Auth::user()->name
+                'user' => Auth::user()->name,
+                'deletion_summary' => $deletionSummary
             ]);
             
             return redirect()->back()->with('error', 
-                'Terjadi kesalahan saat menghapus proyek. Silakan coba lagi.');
+                'Terjadi kesalahan saat menghapus proyek: ' . $e->getMessage());
         }
     }
     

@@ -37,6 +37,7 @@ Route::middleware('auth')->group(function () {
     
     // Project routes
     Route::resource('projects', ProjectController::class);
+    Route::get('/projects/{id}/confirm-delete', [ProjectController::class, 'confirmDelete'])->name('projects.confirm-delete');
     Route::post('/projects/{id}/status', [ProjectController::class, 'updateStatus'])->name('projects.update-status');
     Route::get('/projects-export', [ProjectController::class, 'export'])->name('projects.export');
     Route::get('/projects-template', [ProjectController::class, 'downloadTemplate'])->name('projects.template');
@@ -72,6 +73,7 @@ Route::middleware('auth')->group(function () {
     Route::post('/billing-batches/{billingBatch}/update-status', [BillingBatchController::class, 'updateStatus'])->name('billing-batches.update-status');
     Route::post('/billing-batches/{billingBatch}/upload-document', [BillingBatchController::class, 'uploadDocument'])->name('billing-batches.upload-document');
     Route::delete('/billing-batches/{billingBatch}/documents/{document}', [BillingBatchController::class, 'deleteDocument'])->name('billing-batches.delete-document');
+    Route::get('/billing-batches/{billingBatch}/confirm-delete', [BillingBatchController::class, 'confirmDelete'])->name('billing-batches.confirm-delete');
     
     // Redirect old billing routes to new batch system
     Route::get('/penagihan', function() {
