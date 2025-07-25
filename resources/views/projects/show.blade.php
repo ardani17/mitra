@@ -1,35 +1,38 @@
 @extends('layouts.app')
 
 @section('content')
-<div class="container mx-auto px-4 py-8">
+<div class="container mx-auto px-4 py-6 sm:py-8">
     <!-- Header -->
-    <div class="flex justify-between items-center mb-6">
-        <div>
-            <h1 class="text-3xl font-bold text-gray-800">{{ $project->name }}</h1>
-            <p class="text-gray-600 mt-1">Kode: {{ $project->code }}</p>
+    <div class="flex flex-col sm:flex-row sm:justify-between sm:items-center mb-4 sm:mb-6 space-y-4 sm:space-y-0">
+        <div class="min-w-0 flex-1">
+            <h1 class="text-2xl sm:text-3xl font-bold text-gray-800 truncate">{{ $project->name }}</h1>
+            <p class="text-gray-600 mt-1 text-sm sm:text-base">Kode: {{ $project->code }}</p>
         </div>
-        <div class="flex space-x-2">
-            <a href="{{ route('projects.index') }}" class="bg-gray-600 hover:bg-gray-700 text-white font-bold py-2 px-4 rounded">
-                Kembali ke Proyek
+        <div class="flex flex-col sm:flex-row space-y-2 sm:space-y-0 sm:space-x-2">
+            <a href="{{ route('projects.index') }}" class="bg-gray-600 hover:bg-gray-700 text-white font-bold py-2 px-3 sm:px-4 rounded text-center text-sm sm:text-base">
+                <span class="hidden sm:inline">Kembali ke Proyek</span>
+                <span class="sm:hidden">Kembali</span>
             </a>
             @can('update', $project)
-            <a href="{{ route('projects.edit', $project) }}" class="bg-blue-600 hover:bg-blue-700 text-white font-bold py-2 px-4 rounded">
-                Edit Proyek
+            <a href="{{ route('projects.edit', $project) }}" class="bg-blue-600 hover:bg-blue-700 text-white font-bold py-2 px-3 sm:px-4 rounded text-center text-sm sm:text-base">
+                <span class="hidden sm:inline">Edit Proyek</span>
+                <span class="sm:hidden">Edit</span>
             </a>
             @endcan
             @can('delete', $project)
-            <a href="{{ route('projects.confirm-delete', $project) }}" class="bg-red-600 hover:bg-red-700 text-white font-bold py-2 px-4 rounded">
-                Hapus Proyek
+            <a href="{{ route('projects.confirm-delete', $project) }}" class="bg-red-600 hover:bg-red-700 text-white font-bold py-2 px-3 sm:px-4 rounded text-center text-sm sm:text-base">
+                <span class="hidden sm:inline">Hapus Proyek</span>
+                <span class="sm:hidden">Hapus</span>
             </a>
             @endcan
         </div>
     </div>
 
     <!-- Informasi Utama -->
-    <div class="grid grid-cols-1 lg:grid-cols-4 gap-6 mb-8">
+    <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 sm:gap-6 mb-6 sm:mb-8">
         <!-- Informasi Proyek -->
-        <div class="bg-white rounded-lg shadow-md p-6">
-            <h3 class="text-lg font-semibold text-gray-800 mb-4">Informasi Proyek</h3>
+        <div class="bg-white rounded-lg shadow-md p-4 sm:p-6">
+            <h3 class="text-base sm:text-lg font-semibold text-gray-800 mb-3 sm:mb-4">Informasi Proyek</h3>
             <div class="space-y-3">
                 <div>
                     <span class="text-sm text-gray-600">Kode:</span>
@@ -65,8 +68,8 @@
         </div>
 
         <!-- Nilai Plan -->
-        <div class="bg-white rounded-lg shadow-md p-6">
-            <h3 class="text-lg font-semibold text-gray-800 mb-4">Nilai Plan</h3>
+        <div class="bg-white rounded-lg shadow-md p-4 sm:p-6">
+            <h3 class="text-base sm:text-lg font-semibold text-gray-800 mb-3 sm:mb-4">Nilai Plan</h3>
             <div class="space-y-3">
                 <div>
                     <span class="text-sm text-gray-600">Budget Plan:</span>
@@ -88,8 +91,8 @@
         </div>
 
         <!-- Nilai Akhir -->
-        <div class="bg-white rounded-lg shadow-md p-6">
-            <h3 class="text-lg font-semibold text-gray-800 mb-4">Nilai Akhir</h3>
+        <div class="bg-white rounded-lg shadow-md p-4 sm:p-6">
+            <h3 class="text-base sm:text-lg font-semibold text-gray-800 mb-3 sm:mb-4">Nilai Akhir</h3>
             <div class="space-y-3">
                 <div>
                     <span class="text-sm text-gray-600">Nilai Jasa:</span>
@@ -107,8 +110,8 @@
         </div>
 
         <!-- Timeline -->
-        <div class="bg-white rounded-lg shadow-md p-6">
-            <h3 class="text-lg font-semibold text-gray-800 mb-4">Timeline</h3>
+        <div class="bg-white rounded-lg shadow-md p-4 sm:p-6">
+            <h3 class="text-base sm:text-lg font-semibold text-gray-800 mb-3 sm:mb-4">Timeline</h3>
             <div class="space-y-3">
                 <div>
                     <span class="text-sm text-gray-600">Tanggal Mulai:</span>
@@ -132,9 +135,9 @@
     </div>
 
     <!-- Informasi Tagihan -->
-    <div class="bg-white rounded-lg shadow-md p-6 mb-8">
-        <h3 class="text-lg font-semibold text-gray-800 mb-4">Informasi Tagihan</h3>
-        <div class="grid grid-cols-1 md:grid-cols-4 gap-6">
+    <div class="bg-white rounded-lg shadow-md p-4 sm:p-6 mb-6 sm:mb-8">
+        <h3 class="text-base sm:text-lg font-semibold text-gray-800 mb-3 sm:mb-4">Informasi Tagihan</h3>
+        <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 sm:gap-6">
             <!-- Status Tagihan -->
             <div class="bg-gray-50 p-4 rounded-lg">
                 <div class="flex items-center justify-between mb-2">
@@ -236,9 +239,9 @@
     </div>
 
     <!-- Ringkasan Keuangan -->
-    <div class="bg-white rounded-lg shadow-md p-6 mb-8">
-        <h3 class="text-lg font-semibold text-gray-800 mb-4">Ringkasan Keuangan</h3>
-        <div class="grid grid-cols-1 md:grid-cols-4 gap-4">
+    <div class="bg-white rounded-lg shadow-md p-4 sm:p-6 mb-6 sm:mb-8">
+        <h3 class="text-base sm:text-lg font-semibold text-gray-800 mb-3 sm:mb-4">Ringkasan Keuangan</h3>
+        <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-3 sm:gap-4">
             <div class="bg-blue-50 p-4 rounded-lg">
                 <div class="flex items-center">
                     <div class="p-2 bg-blue-500 rounded-full text-white mr-3">
@@ -309,33 +312,47 @@
     <!-- Tab Navigation -->
     <div class="bg-white rounded-lg shadow-md">
         <div class="border-b border-gray-200">
-            <nav class="-mb-px flex space-x-8 px-6" aria-label="Tabs">
-                <button onclick="showTab('ringkasan')" id="tab-ringkasan" class="tab-button active border-transparent text-gray-500 hover:text-gray-700 hover:border-gray-300 whitespace-nowrap py-4 px-1 border-b-2 font-medium text-sm">
+            <!-- Mobile Tab Dropdown -->
+            <div class="sm:hidden px-4 py-3">
+                <select id="mobileTabSelect" onchange="showTab(this.value)" class="w-full border border-gray-300 rounded-md px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500">
+                    <option value="ringkasan">Ringkasan</option>
+                    <option value="timeline">Timeline</option>
+                    <option value="pengeluaran">Pengeluaran</option>
+                    <option value="penagihan">Penagihan</option>
+                    <option value="aktivitas">Aktivitas</option>
+                    <option value="pendapatan">Pendapatan</option>
+                    <option value="dokumen">Dokumen</option>
+                </select>
+            </div>
+            
+            <!-- Desktop Tab Navigation -->
+            <nav class="hidden sm:flex -mb-px space-x-4 lg:space-x-8 px-4 sm:px-6 overflow-x-auto" aria-label="Tabs">
+                <button onclick="showTab('ringkasan')" id="tab-ringkasan" class="tab-button active border-transparent text-gray-500 hover:text-gray-700 hover:border-gray-300 whitespace-nowrap py-3 sm:py-4 px-1 border-b-2 font-medium text-xs sm:text-sm">
                     Ringkasan
                 </button>
-                <button onclick="showTab('timeline')" id="tab-timeline" class="tab-button border-transparent text-gray-500 hover:text-gray-700 hover:border-gray-300 whitespace-nowrap py-4 px-1 border-b-2 font-medium text-sm">
+                <button onclick="showTab('timeline')" id="tab-timeline" class="tab-button border-transparent text-gray-500 hover:text-gray-700 hover:border-gray-300 whitespace-nowrap py-3 sm:py-4 px-1 border-b-2 font-medium text-xs sm:text-sm">
                     Timeline
                 </button>
-                <button onclick="showTab('pengeluaran')" id="tab-pengeluaran" class="tab-button border-transparent text-gray-500 hover:text-gray-700 hover:border-gray-300 whitespace-nowrap py-4 px-1 border-b-2 font-medium text-sm">
+                <button onclick="showTab('pengeluaran')" id="tab-pengeluaran" class="tab-button border-transparent text-gray-500 hover:text-gray-700 hover:border-gray-300 whitespace-nowrap py-3 sm:py-4 px-1 border-b-2 font-medium text-xs sm:text-sm">
                     Pengeluaran
                 </button>
-                <button onclick="showTab('penagihan')" id="tab-penagihan" class="tab-button border-transparent text-gray-500 hover:text-gray-700 hover:border-gray-300 whitespace-nowrap py-4 px-1 border-b-2 font-medium text-sm">
+                <button onclick="showTab('penagihan')" id="tab-penagihan" class="tab-button border-transparent text-gray-500 hover:text-gray-700 hover:border-gray-300 whitespace-nowrap py-3 sm:py-4 px-1 border-b-2 font-medium text-xs sm:text-sm">
                     Penagihan
                 </button>
-                <button onclick="showTab('aktivitas')" id="tab-aktivitas" class="tab-button border-transparent text-gray-500 hover:text-gray-700 hover:border-gray-300 whitespace-nowrap py-4 px-1 border-b-2 font-medium text-sm">
+                <button onclick="showTab('aktivitas')" id="tab-aktivitas" class="tab-button border-transparent text-gray-500 hover:text-gray-700 hover:border-gray-300 whitespace-nowrap py-3 sm:py-4 px-1 border-b-2 font-medium text-xs sm:text-sm">
                     Aktivitas
                 </button>
-                <button onclick="showTab('pendapatan')" id="tab-pendapatan" class="tab-button border-transparent text-gray-500 hover:text-gray-700 hover:border-gray-300 whitespace-nowrap py-4 px-1 border-b-2 font-medium text-sm">
+                <button onclick="showTab('pendapatan')" id="tab-pendapatan" class="tab-button border-transparent text-gray-500 hover:text-gray-700 hover:border-gray-300 whitespace-nowrap py-3 sm:py-4 px-1 border-b-2 font-medium text-xs sm:text-sm">
                     Pendapatan
                 </button>
-                <button onclick="showTab('dokumen')" id="tab-dokumen" class="tab-button border-transparent text-gray-500 hover:text-gray-700 hover:border-gray-300 whitespace-nowrap py-4 px-1 border-b-2 font-medium text-sm">
+                <button onclick="showTab('dokumen')" id="tab-dokumen" class="tab-button border-transparent text-gray-500 hover:text-gray-700 hover:border-gray-300 whitespace-nowrap py-3 sm:py-4 px-1 border-b-2 font-medium text-xs sm:text-sm">
                     Dokumen
                 </button>
             </nav>
         </div>
 
         <!-- Tab Content -->
-        <div class="p-6">
+        <div class="p-4 sm:p-6">
             <!-- Tab Ringkasan -->
             <div id="content-ringkasan" class="tab-content">
                 <h3 class="text-lg font-semibold text-gray-800 mb-4">Ringkasan Progress</h3>

@@ -1,33 +1,36 @@
 @extends('layouts.app')
 
 @section('content')
-<div class="container mx-auto px-4 py-8">
+<div class="container mx-auto px-4 py-6 sm:py-8">
     <!-- Header -->
-    <div class="flex justify-between items-center mb-6">
-        <div>
-            <h1 class="text-3xl font-bold text-gray-800">{{ $billingBatch->batch_code }}</h1>
-            <p class="text-gray-600 mt-1">Detail Batch Penagihan</p>
+    <div class="flex flex-col sm:flex-row sm:justify-between sm:items-center mb-4 sm:mb-6 space-y-4 sm:space-y-0">
+        <div class="min-w-0 flex-1">
+            <h1 class="text-2xl sm:text-3xl font-bold text-gray-800 truncate">{{ $billingBatch->batch_code }}</h1>
+            <p class="text-gray-600 mt-1 text-sm sm:text-base">Detail Batch Penagihan</p>
         </div>
-        <div class="flex space-x-2">
-            <a href="{{ route('billing-batches.index') }}" class="bg-gray-600 hover:bg-gray-700 text-white font-bold py-2 px-4 rounded">
-                Kembali ke Batch
+        <div class="flex flex-col sm:flex-row space-y-2 sm:space-y-0 sm:space-x-2">
+            <a href="{{ route('billing-batches.index') }}" class="bg-gray-600 hover:bg-gray-700 text-white font-bold py-2 px-3 sm:px-4 rounded text-center text-sm sm:text-base">
+                <span class="hidden sm:inline">Kembali ke Batch</span>
+                <span class="sm:hidden">Kembali</span>
             </a>
             @if($billingBatch->status === 'draft')
-                <a href="{{ route('billing-batches.edit', $billingBatch) }}" class="bg-blue-600 hover:bg-blue-700 text-white font-bold py-2 px-4 rounded">
-                    Edit Batch
+                <a href="{{ route('billing-batches.edit', $billingBatch) }}" class="bg-blue-600 hover:bg-blue-700 text-white font-bold py-2 px-3 sm:px-4 rounded text-center text-sm sm:text-base">
+                    <span class="hidden sm:inline">Edit Batch</span>
+                    <span class="sm:hidden">Edit</span>
                 </a>
-                <a href="{{ route('billing-batches.confirm-delete', $billingBatch) }}" class="bg-red-600 hover:bg-red-700 text-white font-bold py-2 px-4 rounded">
-                    Hapus Batch
+                <a href="{{ route('billing-batches.confirm-delete', $billingBatch) }}" class="bg-red-600 hover:bg-red-700 text-white font-bold py-2 px-3 sm:px-4 rounded text-center text-sm sm:text-base">
+                    <span class="hidden sm:inline">Hapus Batch</span>
+                    <span class="sm:hidden">Hapus</span>
                 </a>
             @endif
         </div>
     </div>
 
     <!-- Informasi Utama -->
-    <div class="grid grid-cols-1 lg:grid-cols-4 gap-6 mb-8">
+    <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 sm:gap-6 mb-6 sm:mb-8">
         <!-- Informasi Batch -->
-        <div class="bg-white rounded-lg shadow-md p-6">
-            <h3 class="text-lg font-semibold text-gray-800 mb-4">Informasi Batch</h3>
+        <div class="bg-white rounded-lg shadow-md p-4 sm:p-6">
+            <h3 class="text-base sm:text-lg font-semibold text-gray-800 mb-3 sm:mb-4">Informasi Batch</h3>
             <div class="space-y-3">
                 <div>
                     <span class="text-sm text-gray-600">Kode Batch:</span>
@@ -58,8 +61,8 @@
         </div>
 
         <!-- Tipe Klien & Invoice -->
-        <div class="bg-white rounded-lg shadow-md p-6">
-            <h3 class="text-lg font-semibold text-gray-800 mb-4">Detail Klien</h3>
+        <div class="bg-white rounded-lg shadow-md p-4 sm:p-6">
+            <h3 class="text-base sm:text-lg font-semibold text-gray-800 mb-3 sm:mb-4">Detail Klien</h3>
             <div class="space-y-3">
                 <div>
                     <span class="text-sm text-gray-600">Tipe Klien:</span>
@@ -89,8 +92,8 @@
         </div>
 
         <!-- Nilai Base & PPN -->
-        <div class="bg-white rounded-lg shadow-md p-6">
-            <h3 class="text-lg font-semibold text-gray-800 mb-4">Nilai & Pajak</h3>
+        <div class="bg-white rounded-lg shadow-md p-4 sm:p-6">
+            <h3 class="text-base sm:text-lg font-semibold text-gray-800 mb-3 sm:mb-4">Nilai & Pajak</h3>
             <div class="space-y-3">
                 <div>
                     <span class="text-sm text-gray-600">Total Base:</span>
@@ -112,8 +115,8 @@
         </div>
 
         <!-- Nilai Diterima -->
-        <div class="bg-white rounded-lg shadow-md p-6">
-            <h3 class="text-lg font-semibold text-gray-800 mb-4">Nilai Diterima</h3>
+        <div class="bg-white rounded-lg shadow-md p-4 sm:p-6">
+            <h3 class="text-base sm:text-lg font-semibold text-gray-800 mb-3 sm:mb-4">Nilai Diterima</h3>
             <div class="space-y-3">
                 <div>
                     <span class="text-sm text-gray-600">Setelah PPh:</span>
@@ -128,9 +131,9 @@
     </div>
 
     <!-- Ringkasan Keuangan -->
-    <div class="bg-white rounded-lg shadow-md p-6 mb-8">
-        <h3 class="text-lg font-semibold text-gray-800 mb-4">Ringkasan Keuangan</h3>
-        <div class="grid grid-cols-1 md:grid-cols-4 gap-4">
+    <div class="bg-white rounded-lg shadow-md p-4 sm:p-6 mb-6 sm:mb-8">
+        <h3 class="text-base sm:text-lg font-semibold text-gray-800 mb-3 sm:mb-4">Ringkasan Keuangan</h3>
+        <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-3 sm:gap-4">
             <div class="bg-blue-50 p-4 rounded-lg">
                 <div class="flex items-center">
                     <div class="p-2 bg-blue-500 rounded-full text-white mr-3">
@@ -192,30 +195,93 @@
     <!-- Tab Navigation -->
     <div class="bg-white rounded-lg shadow-md">
         <div class="border-b border-gray-200">
-            <nav class="-mb-px flex space-x-8 px-6" aria-label="Tabs">
-                <button onclick="showTab('penagihan')" id="tab-penagihan" class="tab-button active border-transparent text-gray-500 hover:text-gray-700 hover:border-gray-300 whitespace-nowrap py-4 px-1 border-b-2 font-medium text-sm">
+            <!-- Mobile Tab Dropdown -->
+            <div class="sm:hidden px-4 py-3">
+                <select id="mobileTabSelect" onchange="showTab(this.value)" class="w-full border border-gray-300 rounded-md px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500">
+                    <option value="penagihan">Penagihan Proyek</option>
+                    <option value="dokumen">Dokumen</option>
+                    <option value="status">Riwayat Status</option>
+                    <option value="aksi">Aksi Status</option>
+                </select>
+            </div>
+            
+            <!-- Desktop Tab Navigation -->
+            <nav class="hidden sm:flex -mb-px space-x-4 lg:space-x-8 px-4 sm:px-6 overflow-x-auto" aria-label="Tabs">
+                <button onclick="showTab('penagihan')" id="tab-penagihan" class="tab-button active border-transparent text-gray-500 hover:text-gray-700 hover:border-gray-300 whitespace-nowrap py-3 sm:py-4 px-1 border-b-2 font-medium text-xs sm:text-sm">
                     Penagihan Proyek
                 </button>
-                <button onclick="showTab('dokumen')" id="tab-dokumen" class="tab-button border-transparent text-gray-500 hover:text-gray-700 hover:border-gray-300 whitespace-nowrap py-4 px-1 border-b-2 font-medium text-sm">
+                <button onclick="showTab('dokumen')" id="tab-dokumen" class="tab-button border-transparent text-gray-500 hover:text-gray-700 hover:border-gray-300 whitespace-nowrap py-3 sm:py-4 px-1 border-b-2 font-medium text-xs sm:text-sm">
                     Dokumen
                 </button>
-                <button onclick="showTab('status')" id="tab-status" class="tab-button border-transparent text-gray-500 hover:text-gray-700 hover:border-gray-300 whitespace-nowrap py-4 px-1 border-b-2 font-medium text-sm">
+                <button onclick="showTab('status')" id="tab-status" class="tab-button border-transparent text-gray-500 hover:text-gray-700 hover:border-gray-300 whitespace-nowrap py-3 sm:py-4 px-1 border-b-2 font-medium text-xs sm:text-sm">
                     Riwayat Status
                 </button>
-                <button onclick="showTab('aksi')" id="tab-aksi" class="tab-button border-transparent text-gray-500 hover:text-gray-700 hover:border-gray-300 whitespace-nowrap py-4 px-1 border-b-2 font-medium text-sm">
+                <button onclick="showTab('aksi')" id="tab-aksi" class="tab-button border-transparent text-gray-500 hover:text-gray-700 hover:border-gray-300 whitespace-nowrap py-3 sm:py-4 px-1 border-b-2 font-medium text-xs sm:text-sm">
                     Aksi Status
                 </button>
             </nav>
         </div>
 
         <!-- Tab Content -->
-        <div class="p-6">
+        <div class="p-4 sm:p-6">
             <!-- Tab Penagihan Proyek -->
             <div id="content-penagihan" class="tab-content">
-                <h3 class="text-lg font-semibold text-gray-800 mb-4">Penagihan Proyek ({{ $billingBatch->projectBillings->count() }})</h3>
+                <h3 class="text-base sm:text-lg font-semibold text-gray-800 mb-3 sm:mb-4">Penagihan Proyek ({{ $billingBatch->projectBillings->count() }})</h3>
                 
                 @if($billingBatch->projectBillings->count() > 0)
-                <div class="overflow-x-auto">
+                <!-- Mobile Card View -->
+                <div class="block sm:hidden space-y-4">
+                    @foreach($billingBatch->projectBillings as $billing)
+                    <div class="bg-white border border-gray-200 rounded-lg p-4 shadow-sm">
+                        <div class="flex justify-between items-start mb-3">
+                            <div class="flex-1 min-w-0">
+                                <h4 class="text-sm font-medium text-gray-900 truncate">{{ $billing->project->code }}</h4>
+                                <p class="text-xs text-gray-500 mt-1">{{ Str::limit($billing->project->name, 40) }}</p>
+                            </div>
+                            <span class="inline-flex px-2 py-1 text-xs font-semibold rounded-full ml-2
+                                  @if($billing->status == 'draft') bg-gray-100 text-gray-800
+                                  @elseif($billing->status == 'sent') bg-blue-100 text-blue-800
+                                  @elseif($billing->status == 'paid') bg-green-100 text-green-800
+                                  @else bg-yellow-100 text-yellow-800 @endif">
+                                {{ ucfirst($billing->status) }}
+                            </span>
+                        </div>
+                        
+                        <div class="space-y-2">
+                            <div class="flex justify-between">
+                                <span class="text-xs text-gray-600">Klien:</span>
+                                <div class="text-right">
+                                    <p class="text-xs font-medium text-gray-900">{{ Str::limit($billing->project->client_name, 20) }}</p>
+                                    <span class="inline-flex px-1 py-0.5 text-xs font-semibold rounded-full
+                                          @if($billing->project->client_type == 'wapu') bg-blue-100 text-blue-800
+                                          @else bg-green-100 text-green-800 @endif">
+                                        {{ $billing->project->client_type == 'wapu' ? 'WAPU' : 'Non-WAPU' }}
+                                    </span>
+                                </div>
+                            </div>
+                            <div class="flex justify-between">
+                                <span class="text-xs text-gray-600">Nilai Jasa:</span>
+                                <span class="text-xs font-medium text-gray-900">Rp {{ number_format($billing->nilai_jasa, 0, ',', '.') }}</span>
+                            </div>
+                            <div class="flex justify-between">
+                                <span class="text-xs text-gray-600">Nilai Material:</span>
+                                <span class="text-xs font-medium text-gray-900">Rp {{ number_format($billing->nilai_material, 0, ',', '.') }}</span>
+                            </div>
+                            <div class="flex justify-between">
+                                <span class="text-xs text-gray-600">PPN:</span>
+                                <span class="text-xs font-medium text-gray-900">Rp {{ number_format($billing->ppn_amount, 0, ',', '.') }}</span>
+                            </div>
+                            <div class="flex justify-between border-t pt-2">
+                                <span class="text-sm font-medium text-gray-900">Total:</span>
+                                <span class="text-sm font-bold text-gray-900">Rp {{ number_format($billing->total_amount, 0, ',', '.') }}</span>
+                            </div>
+                        </div>
+                    </div>
+                    @endforeach
+                </div>
+
+                <!-- Desktop Table View -->
+                <div class="hidden sm:block overflow-x-auto">
                     <table class="min-w-full divide-y divide-gray-200">
                         <thead class="bg-blue-600">
                             <tr>
@@ -286,17 +352,18 @@
 
             <!-- Tab Dokumen -->
             <div id="content-dokumen" class="tab-content hidden">
-                <div class="flex justify-between items-center mb-4">
-                    <h3 class="text-lg font-semibold text-gray-800">Dokumen Batch</h3>
+                <div class="flex flex-col sm:flex-row sm:justify-between sm:items-center mb-3 sm:mb-4 space-y-2 sm:space-y-0">
+                    <h3 class="text-base sm:text-lg font-semibold text-gray-800">Dokumen Batch</h3>
                     @if($billingBatch->status !== 'paid')
-                    <button onclick="openUploadModal()" class="bg-blue-600 hover:bg-blue-700 text-white font-bold py-2 px-4 rounded text-sm">
-                        Upload Dokumen
+                    <button onclick="openUploadModal()" class="bg-blue-600 hover:bg-blue-700 text-white font-bold py-2 px-3 sm:px-4 rounded text-sm">
+                        <span class="hidden sm:inline">Upload Dokumen</span>
+                        <span class="sm:hidden">Upload</span>
                     </button>
                     @endif
                 </div>
                 
                 @if($billingBatch->documents->count() > 0)
-                <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+                <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-3 sm:gap-4">
                     @foreach($billingBatch->documents as $document)
                     <div class="bg-white border border-gray-200 rounded-lg p-4 hover:shadow-md transition-shadow">
                         <div class="flex items-start justify-between">
@@ -363,7 +430,7 @@
 
             <!-- Tab Riwayat Status -->
             <div id="content-status" class="tab-content hidden">
-                <h3 class="text-lg font-semibold text-gray-800 mb-4">Riwayat Status</h3>
+                <h3 class="text-base sm:text-lg font-semibold text-gray-800 mb-3 sm:mb-4">Riwayat Status</h3>
                 
                 @if($billingBatch->statusLogs->count() > 0)
                 <div class="space-y-4">
@@ -401,7 +468,7 @@
 
             <!-- Tab Aksi Status -->
             <div id="content-aksi" class="tab-content hidden">
-                <h3 class="text-lg font-semibold text-gray-800 mb-4">Aksi Status</h3>
+                <h3 class="text-base sm:text-lg font-semibold text-gray-800 mb-3 sm:mb-4">Aksi Status</h3>
                 
                 @if($billingBatch->status === 'draft')
                     <div class="bg-blue-50 border border-blue-200 rounded-lg p-4 mb-4">
