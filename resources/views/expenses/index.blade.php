@@ -1,77 +1,79 @@
 @extends('layouts.app')
 
 @section('content')
-<div class="container mx-auto px-4 py-8">
-    <div class="flex justify-between items-center mb-6">
-        <h1 class="text-3xl font-bold text-slate-800">Manajemen Pengeluaran</h1>
-        <div class="flex space-x-2">
+<div class="container mx-auto px-4 py-6 sm:py-8">
+    <div class="flex flex-col sm:flex-row sm:justify-between sm:items-center mb-4 sm:mb-6 space-y-4 sm:space-y-0">
+        <h1 class="text-2xl sm:text-3xl font-bold text-slate-800">Manajemen Pengeluaran</h1>
+        <div class="flex flex-col sm:flex-row space-y-2 sm:space-y-0 sm:space-x-2">
             <a href="{{ route('expenses.export', request()->query()) }}" 
-               class="bg-green-500 hover:bg-green-700 text-white font-bold py-2 px-4 rounded inline-flex items-center">
-                <svg class="w-4 h-4 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+               class="bg-green-500 hover:bg-green-700 text-white font-bold py-2 px-3 sm:px-4 rounded inline-flex items-center justify-center text-sm sm:text-base">
+                <svg class="w-4 h-4 mr-1 sm:mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 10v6m0 0l-3-3m3 3l3-3m2 8H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"></path>
                 </svg>
-                Export Excel
+                <span class="hidden sm:inline">Export Excel</span>
+                <span class="sm:hidden">Export</span>
             </a>
-            <a href="{{ route('expenses.create') }}" class="bg-blue-600 hover:bg-blue-700 text-white font-bold py-2 px-4 rounded">
-                Ajukan Pengeluaran
+            <a href="{{ route('expenses.create') }}" class="bg-blue-600 hover:bg-blue-700 text-white font-bold py-2 px-3 sm:px-4 rounded text-center text-sm sm:text-base">
+                <span class="hidden sm:inline">Ajukan Pengeluaran</span>
+                <span class="sm:hidden">+ Pengeluaran</span>
             </a>
         </div>
     </div>
 
     <!-- Summary Cards -->
-    <div class="grid grid-cols-1 md:grid-cols-4 gap-6 mb-6">
-        <div class="card p-6 bg-gradient-to-r from-blue-50 to-blue-100">
+    <div class="grid grid-cols-2 sm:grid-cols-2 lg:grid-cols-4 gap-3 sm:gap-6 mb-4 sm:mb-6">
+        <div class="card p-3 sm:p-6 bg-gradient-to-r from-blue-50 to-blue-100">
             <div class="flex items-center">
-                <div class="p-3 rounded-full bg-blue-500 text-white">
-                    <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <div class="p-2 sm:p-3 rounded-full bg-blue-500 text-white">
+                    <svg class="w-4 h-4 sm:w-6 sm:h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"></path>
                     </svg>
                 </div>
-                <div class="ml-4">
-                    <p class="text-sm font-medium text-gray-600">Total Pengajuan</p>
-                    <p class="text-2xl font-bold text-gray-900">{{ $expenses->total() }}</p>
+                <div class="ml-2 sm:ml-4 min-w-0 flex-1">
+                    <p class="text-xs sm:text-sm font-medium text-gray-600 truncate">Total Pengajuan</p>
+                    <p class="text-lg sm:text-2xl font-bold text-gray-900">{{ $expenses->total() }}</p>
                 </div>
             </div>
         </div>
         
-        <div class="card p-6 bg-gradient-to-r from-yellow-50 to-yellow-100">
+        <div class="card p-3 sm:p-6 bg-gradient-to-r from-yellow-50 to-yellow-100">
             <div class="flex items-center">
-                <div class="p-3 rounded-full bg-yellow-500 text-white">
-                    <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <div class="p-2 sm:p-3 rounded-full bg-yellow-500 text-white">
+                    <svg class="w-4 h-4 sm:w-6 sm:h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z"></path>
                     </svg>
                 </div>
-                <div class="ml-4">
-                    <p class="text-sm font-medium text-gray-600">Menunggu Approval</p>
-                    <p class="text-2xl font-bold text-gray-900">{{ $expenses->where('status', 'submitted')->count() }}</p>
+                <div class="ml-2 sm:ml-4 min-w-0 flex-1">
+                    <p class="text-xs sm:text-sm font-medium text-gray-600 truncate">Menunggu</p>
+                    <p class="text-lg sm:text-2xl font-bold text-gray-900">{{ $expenses->where('status', 'submitted')->count() }}</p>
                 </div>
             </div>
         </div>
         
-        <div class="card p-6 bg-gradient-to-r from-green-50 to-green-100">
+        <div class="card p-3 sm:p-6 bg-gradient-to-r from-green-50 to-green-100">
             <div class="flex items-center">
-                <div class="p-3 rounded-full bg-green-500 text-white">
-                    <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <div class="p-2 sm:p-3 rounded-full bg-green-500 text-white">
+                    <svg class="w-4 h-4 sm:w-6 sm:h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"></path>
                     </svg>
                 </div>
-                <div class="ml-4">
-                    <p class="text-sm font-medium text-gray-600">Disetujui</p>
-                    <p class="text-2xl font-bold text-gray-900">{{ $expenses->where('status', 'approved')->count() }}</p>
+                <div class="ml-2 sm:ml-4 min-w-0 flex-1">
+                    <p class="text-xs sm:text-sm font-medium text-gray-600 truncate">Disetujui</p>
+                    <p class="text-lg sm:text-2xl font-bold text-gray-900">{{ $expenses->where('status', 'approved')->count() }}</p>
                 </div>
             </div>
         </div>
         
-        <div class="card p-6 bg-gradient-to-r from-red-50 to-red-100">
+        <div class="card p-3 sm:p-6 bg-gradient-to-r from-red-50 to-red-100">
             <div class="flex items-center">
-                <div class="p-3 rounded-full bg-red-500 text-white">
-                    <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <div class="p-2 sm:p-3 rounded-full bg-red-500 text-white">
+                    <svg class="w-4 h-4 sm:w-6 sm:h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 14l2-2m0 0l2-2m-2 2l-2-2m2 2l2 2m7-2a9 9 0 11-18 0 9 9 0 0118 0z"></path>
                     </svg>
                 </div>
-                <div class="ml-4">
-                    <p class="text-sm font-medium text-gray-600">Ditolak</p>
-                    <p class="text-2xl font-bold text-gray-900">{{ $expenses->where('status', 'rejected')->count() }}</p>
+                <div class="ml-2 sm:ml-4 min-w-0 flex-1">
+                    <p class="text-xs sm:text-sm font-medium text-gray-600 truncate">Ditolak</p>
+                    <p class="text-lg sm:text-2xl font-bold text-gray-900">{{ $expenses->where('status', 'rejected')->count() }}</p>
                 </div>
             </div>
         </div>
@@ -178,9 +180,10 @@
         </form>
     </div>
 
-    <!-- Expenses Table -->
+    <!-- Expenses Display -->
     <div class="bg-white rounded-lg shadow-md overflow-hidden">
-        <div class="overflow-hidden">
+        <!-- Desktop Table View -->
+        <div class="hidden lg:block overflow-x-auto">
             <table class="min-w-full divide-y divide-gray-200">
                 <thead class="bg-blue-600">
                     <tr>
@@ -307,6 +310,141 @@
                     @endforelse
                 </tbody>
             </table>
+        </div>
+
+        <!-- Mobile Card View -->
+        <div class="lg:hidden">
+            @forelse($expenses as $index => $expense)
+            <div class="border-b border-gray-200 p-4 hover:bg-gray-50 transition-colors duration-200">
+                <!-- Expense Header -->
+                <div class="flex justify-between items-start mb-3">
+                    <div class="flex-1 min-w-0">
+                        <h3 class="text-sm font-semibold text-gray-900 truncate" title="{{ $expense->description }}">
+                            {{ Str::limit($expense->description, 40) }}
+                        </h3>
+                        <p class="text-xs text-blue-600 font-mono mt-1">{{ $expense->project->code }}</p>
+                        <p class="text-xs text-gray-500 mt-1">{{ Str::limit($expense->project->name, 30) }}</p>
+                    </div>
+                    <div class="ml-3 flex flex-col items-end space-y-1">
+                        <span class="text-xs font-medium text-gray-500">#{{ $expenses->firstItem() + $index }}</span>
+                        <div class="text-sm font-bold text-gray-900">
+                            {{ \App\Helpers\FormatHelper::formatRupiah($expense->amount) }}
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Status and Details -->
+                <div class="grid grid-cols-2 gap-3 mb-3">
+                    <div>
+                        <label class="text-xs font-medium text-gray-500">Status</label>
+                        <div class="mt-1">
+                            <span class="inline-flex px-2 py-1 text-xs font-semibold rounded-full 
+                                  @if($expense->status == 'approved') bg-green-100 text-green-800
+                                  @elseif($expense->status == 'rejected') bg-red-100 text-red-800
+                                  @elseif($expense->status == 'submitted') bg-yellow-100 text-yellow-800
+                                  @else bg-gray-100 text-gray-800 @endif">
+                                @if($expense->status == 'draft') Draft
+                                @elseif($expense->status == 'submitted') Diajukan
+                                @elseif($expense->status == 'approved') Disetujui
+                                @elseif($expense->status == 'rejected') Ditolak
+                                @else {{ ucfirst($expense->status) }}
+                                @endif
+                            </span>
+                            
+                            <!-- Approval Status for Mobile -->
+                            @if($expense->status != 'draft')
+                            <div class="mt-2">
+                                @php
+                                    $approvals = $expense->approvals()->with('approver')->get();
+                                    $financeApproval = $approvals->where('level', 'finance_manager')->first();
+                                    $finalApproval = $approvals->whereIn('level', ['director', 'project_manager'])->first();
+                                @endphp
+                                
+                                <div class="flex space-x-2 text-xs">
+                                    <div class="flex items-center space-x-1">
+                                        @if($financeApproval && $financeApproval->status == 'approved')
+                                            <span class="text-green-500">✓</span>
+                                        @elseif($financeApproval && $financeApproval->status == 'rejected')
+                                            <span class="text-red-500">✗</span>
+                                        @else
+                                            <span class="text-gray-400">○</span>
+                                        @endif
+                                        <span class="text-gray-600">Finance</span>
+                                    </div>
+                                    <div class="flex items-center space-x-1">
+                                        @if($finalApproval && $finalApproval->status == 'approved')
+                                            <span class="text-green-500">✓</span>
+                                        @elseif($finalApproval && $finalApproval->status == 'rejected')
+                                            <span class="text-red-500">✗</span>
+                                        @else
+                                            <span class="text-gray-400">○</span>
+                                        @endif
+                                        <span class="text-gray-600">Manager</span>
+                                    </div>
+                                </div>
+                            </div>
+                            @endif
+                        </div>
+                    </div>
+                    <div>
+                        <label class="text-xs font-medium text-gray-500">Tanggal</label>
+                        <div class="mt-1">
+                            <div class="text-sm text-gray-900">{{ $expense->expense_date->format('d/m/Y') }}</div>
+                            <div class="text-xs text-gray-500">{{ $expense->created_at->diffForHumans() }}</div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Additional Info -->
+                <div class="mb-3">
+                    <div class="flex justify-between items-center text-xs">
+                        <div>
+                            <span class="text-gray-500">Pengaju:</span>
+                            <span class="font-medium text-gray-900">{{ Str::limit($expense->user->name, 20) }}</span>
+                        </div>
+                        @if($expense->category)
+                        <div>
+                            <span class="px-2 py-1 bg-gray-100 rounded text-xs">{{ Str::limit($expense->category, 15) }}</span>
+                        </div>
+                        @endif
+                    </div>
+                    @if($expense->receipt_number)
+                    <div class="mt-1 text-xs text-gray-500">
+                        <span>No. Kwitansi: {{ $expense->receipt_number }}</span>
+                    </div>
+                    @endif
+                </div>
+
+                <!-- Actions -->
+                <div class="flex justify-end space-x-2 pt-3 border-t border-gray-100">
+                    <a href="{{ route('expenses.show', $expense) }}" 
+                       class="bg-blue-500 hover:bg-blue-600 text-white px-3 py-2 rounded text-xs font-medium transition-colors duration-200">
+                        Lihat
+                    </a>
+                    
+                    @if($expense->status == 'draft' && $expense->user_id == auth()->id())
+                    <a href="{{ route('expenses.edit', $expense) }}" 
+                       class="bg-indigo-500 hover:bg-indigo-600 text-white px-3 py-2 rounded text-xs font-medium transition-colors duration-200">
+                        Edit
+                    </a>
+                    @endif
+                    
+                    @if($expense->status == 'submitted' && auth()->user()->hasRole(['finance_manager', 'direktur', 'project_manager']))
+                    <button onclick="showApprovalModal({{ $expense->id }}, '{{ $expense->description }}')" 
+                            class="bg-green-500 hover:bg-green-600 text-white px-3 py-2 rounded text-xs font-medium transition-colors duration-200">
+                        Approve
+                    </button>
+                    @endif
+                </div>
+            </div>
+            @empty
+            <div class="p-8 text-center text-gray-500">
+                <svg class="w-12 h-12 mx-auto text-gray-300 mb-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"></path>
+                </svg>
+                <p class="text-sm">Tidak ada pengeluaran ditemukan.</p>
+            </div>
+            @endforelse
         </div>
         
         <!-- Pagination -->
