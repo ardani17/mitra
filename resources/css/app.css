@@ -1,0 +1,134 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+/* Custom Blue Sky Theme */
+:root {
+    --primary-blue: #0ea5e9;
+    --primary-blue-dark: #0284c7;
+    --primary-blue-light: #38bdf8;
+    --sky-blue: #e0f2fe;
+    --sky-blue-light: #f0f9ff;
+    --cloud-white: #ffffff;
+    --text-dark: #1e293b;
+    --text-medium: #475569;
+    --text-light: #64748b;
+    --border-light: #e2e8f0;
+    --shadow-blue: rgba(14, 165, 233, 0.1);
+}
+
+/* Override default gray backgrounds with blue sky theme */
+.bg-gray-100 {
+    @apply bg-sky-50;
+}
+
+.bg-gray-50 {
+    @apply bg-sky-50;
+}
+
+.bg-white {
+    background-color: var(--cloud-white);
+}
+
+/* Navigation styling */
+.nav-primary {
+    background: linear-gradient(to right, #0ea5e9, #0284c7);
+    box-shadow: 0 4px 6px var(--shadow-blue);
+}
+
+/* Button improvements */
+.btn-primary {
+    @apply bg-sky-500 hover:bg-sky-600 text-white font-semibold py-2 px-4 rounded-lg shadow-md hover:shadow-lg transition-all duration-200;
+}
+
+.btn-secondary {
+    @apply bg-white hover:bg-sky-50 text-sky-600 border border-sky-300 font-semibold py-2 px-4 rounded-lg shadow-sm hover:shadow-md transition-all duration-200;
+}
+
+.btn-danger {
+    @apply bg-red-500 hover:bg-red-600 text-white font-semibold py-2 px-4 rounded-lg shadow-md hover:shadow-lg transition-all duration-200;
+}
+
+/* Card styling */
+.card {
+    @apply bg-white rounded-xl shadow-lg border border-sky-100;
+}
+
+.card-header {
+    @apply bg-gradient-to-r from-sky-500 to-sky-600 text-white px-6 py-4 rounded-t-xl;
+}
+
+/* Form styling */
+.form-input {
+    @apply w-full px-4 py-3 border border-sky-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-sky-500 focus:border-transparent bg-white;
+}
+
+.form-select {
+    @apply w-full px-4 py-3 border border-sky-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-sky-500 focus:border-transparent bg-white;
+}
+
+/* Table styling */
+.table-modern {
+    @apply bg-white rounded-xl overflow-hidden shadow-lg border border-sky-100;
+}
+
+.table-header {
+    @apply bg-gradient-to-r from-sky-500 to-sky-600 text-white;
+}
+
+.table-row {
+    @apply hover:bg-sky-50 transition-colors duration-150;
+}
+
+/* Status badges */
+.badge-success {
+    @apply bg-emerald-100 text-emerald-800 px-3 py-1 rounded-full text-sm font-medium;
+}
+
+.badge-warning {
+    @apply bg-amber-100 text-amber-800 px-3 py-1 rounded-full text-sm font-medium;
+}
+
+.badge-info {
+    @apply bg-sky-100 text-sky-800 px-3 py-1 rounded-full text-sm font-medium;
+}
+
+.badge-danger {
+    @apply bg-red-100 text-red-800 px-3 py-1 rounded-full text-sm font-medium;
+}
+
+/* Dashboard cards */
+.dashboard-card {
+    @apply bg-white rounded-xl shadow-lg p-6 border border-sky-100 hover:shadow-xl transition-shadow duration-200;
+}
+
+.dashboard-stat {
+    @apply bg-gradient-to-br from-sky-500 to-sky-600 text-white rounded-xl p-6 shadow-lg;
+}
+
+/* Pagination styling */
+.pagination-wrapper nav {
+    display: flex;
+    justify-content: center;
+}
+
+.pagination-wrapper nav > div {
+    @apply space-x-1;
+}
+
+.pagination-wrapper a,
+.pagination-wrapper span {
+    @apply px-3 py-2 text-sm font-medium rounded-md transition-colors duration-200;
+}
+
+.pagination-wrapper a {
+    @apply bg-white text-sky-600 border border-sky-300 hover:bg-sky-50 hover:border-sky-400;
+}
+
+.pagination-wrapper span[aria-current="page"] {
+    @apply bg-sky-600 text-white border border-sky-600;
+}
+
+.pagination-wrapper span:not([aria-current]) {
+    @apply bg-gray-100 text-gray-400 border border-gray-200 cursor-not-allowed;
+}
