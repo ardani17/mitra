@@ -281,6 +281,9 @@ class DashboardController extends Controller
                 ];
             });
 
+        // Data Status Tagihan Berdasarkan Billing Batch
+        $billingStatusData = $this->getBillingStatusData($year);
+
         // Summary data
         $totalProjects = Project::whereYear('created_at', $year)->count();
         $totalValue = Project::whereYear('created_at', $year)->sum('planned_total_value') ?? 0;
@@ -312,7 +315,8 @@ class DashboardController extends Controller
                 'project_locations' => $projectLocations,
                 'billing_status' => $billingStatus,
                 'project_status' => $projectStatus,
-                'payment_status' => $paymentStatus
+                'payment_status' => $paymentStatus,
+                'billing_status_data' => $billingStatusData
             ]
         ]);
     }
@@ -596,5 +600,173 @@ class DashboardController extends Controller
                 }
                 break;
         }
+    }
+
+    /**
+     * Get billing status data berdasarkan billing batch
+     */
+    private function getBillingStatusData($year = null)
+    {
+        if (!$year) {
+            $year = date('Y');
+        }
+
+        // 1. Belum Ditagih - Proyek tanpa billing batch atau billing_status = 'not_billed'
+        $belumDigaih = Project::whereYear('created_at', $year)
+            ->where(function($query) {
+                $query->where('billing_status', 'not_billed')
+                      ->orWhereDoesntHave('billings.billingBatch');
+            })
+            ->select(DB::raw('COUNT(*) as count'), DB::raw('SUM(COALESCE(planned_total_value, 0)) as total_value'))
+            ->first();
+
+        // 2. Tertagih - Billing batch aktif tapi belum input faktur pajak
+        $tertagih = Project::whereYear('created_at', $year)
+            ->whereHas('billings.billingBatch', function($query) {
+                $query->whereIn('status', ['sent', 'area_verification', 'area_revision', 
+                                         'regional_verification', 'regional_revision', 'payment_entry_ho'])
+                      ->where(function($q) {
+                          $q->whereNull('tax_invoice_number')
+                            ->orWhere('tax_invoice_number', '');
+                      });
+            })
+            ->select(DB::raw('COUNT(*) as count'), DB::raw('SUM(COALESCE(planned_total_value, 0)) as total_value'))
+            ->first();
+
+        // 3. Sudah Input Faktur Pajak - Ada faktur pajak tapi belum lunas
+        $sudahInputFaktur = Project::whereYear('created_at', $year)
+            ->whereHas('billings.billingBatch', function($query) {
+                $query->whereNotNull('tax_invoice_number')
+                      ->where('tax_invoice_number', '!=', '')
+                      ->where('status', '!=', 'paid');
+            })
+            ->select(DB::raw('COUNT(*) as count'), DB::raw('SUM(COALESCE(planned_total_value, 0)) as total_value'))
+            ->first();
+
+        // 4. Lunas - Status paid
+        $lunas = Project::whereYear('created_at', $year)
+            ->whereHas('billings.billingBatch', function($query) {
+                $query->where('status', 'paid');
+            })
+            ->select(DB::raw('COUNT(*) as count'), DB::raw('SUM(COALESCE(planned_total_value, 0)) as total_value'))
+            ->first();
+
+        return [
+            [
+                'label' => 'Belum Ditagih',
+                'value' => $belumDigaih->count ?? 0,
+                'total_value' => $belumDigaih->total_value ?? 0,
+                'formatted_value' => 'Rp ' . number_format($belumDigaih->total_value ?? 0, 0, ',', '.')
+            ],
+            [
+                'label' => 'Tertagih',
+                'value' => $tertagih->count ?? 0,
+                'total_value' => $tertagih->total_value ?? 0,
+                'formatted_value' => 'Rp ' . number_format($tertagih->total_value ?? 0, 0, ',', '.')
+            ],
+            [
+                'label' => 'Sudah Input Faktur Pajak',
+                'value' => $sudahInputFaktur->count ?? 0,
+                'total_value' => $sudahInputFaktur->total_value ?? 0,
+                'formatted_value' => 'Rp ' . number_format($sudahInputFaktur->total_value ?? 0, 0, ',', '.')
+            ],
+            [
+                'label' => 'Lunas',
+                'value' => $lunas->count ?? 0,
+                'total_value' => $lunas->total_value ?? 0,
+                'formatted_value' => 'Rp ' . number_format($lunas->total_value ?? 0, 0, ',', '.')
+            ]
+        ];
+    }
+
+    /**
+     * Get billing status data dengan filter advanced
+     */
+    public function getBillingStatus(Request $request)
+    {
+        $query = Project::query();
+
+        // Apply filters
+        $this->applyProjectFilters($query, $request);
+
+        // 1. Belum Ditagih
+        $belumDigaihQuery = clone $query;
+        $belumDigaih = $belumDigaihQuery->where(function($q) {
+                $q->where('billing_status', 'not_billed')
+                  ->orWhereDoesntHave('billings.billingBatch');
+            })
+            ->select(DB::raw('COUNT(*) as count'), DB::raw('SUM(COALESCE(planned_total_value, 0)) as total_value'))
+            ->first();
+
+        // 2. Tertagih
+        $tertagihQuery = clone $query;
+        $tertagih = $tertagihQuery->whereHas('billings.billingBatch', function($q) {
+                $q->whereIn('status', ['sent', 'area_verification', 'area_revision', 
+                                     'regional_verification', 'regional_revision', 'payment_entry_ho'])
+                  ->where(function($subQ) {
+                      $subQ->whereNull('tax_invoice_number')
+                           ->orWhere('tax_invoice_number', '');
+                  });
+            })
+            ->select(DB::raw('COUNT(*) as count'), DB::raw('SUM(COALESCE(planned_total_value, 0)) as total_value'))
+            ->first();
+
+        // 3. Sudah Input Faktur Pajak
+        $sudahInputFakturQuery = clone $query;
+        $sudahInputFaktur = $sudahInputFakturQuery->whereHas('billings.billingBatch', function($q) {
+                $q->whereNotNull('tax_invoice_number')
+                  ->where('tax_invoice_number', '!=', '')
+                  ->where('status', '!=', 'paid');
+            })
+            ->select(DB::raw('COUNT(*) as count'), DB::raw('SUM(COALESCE(planned_total_value, 0)) as total_value'))
+            ->first();
+
+        // 4. Lunas
+        $lunasQuery = clone $query;
+        $lunas = $lunasQuery->whereHas('billings.billingBatch', function($q) {
+                $q->where('status', 'paid');
+            })
+            ->select(DB::raw('COUNT(*) as count'), DB::raw('SUM(COALESCE(planned_total_value, 0)) as total_value'))
+            ->first();
+
+        $data = [
+            [
+                'label' => 'Belum Ditagih',
+                'count' => $belumDigaih->count ?? 0,
+                'total_value' => $belumDigaih->total_value ?? 0,
+                'formatted_total_value' => 'Rp ' . number_format($belumDigaih->total_value ?? 0, 0, ',', '.')
+            ],
+            [
+                'label' => 'Tertagih',
+                'count' => $tertagih->count ?? 0,
+                'total_value' => $tertagih->total_value ?? 0,
+                'formatted_total_value' => 'Rp ' . number_format($tertagih->total_value ?? 0, 0, ',', '.')
+            ],
+            [
+                'label' => 'Sudah Input Faktur Pajak',
+                'count' => $sudahInputFaktur->count ?? 0,
+                'total_value' => $sudahInputFaktur->total_value ?? 0,
+                'formatted_total_value' => 'Rp ' . number_format($sudahInputFaktur->total_value ?? 0, 0, ',', '.')
+            ],
+            [
+                'label' => 'Lunas',
+                'count' => $lunas->count ?? 0,
+                'total_value' => $lunas->total_value ?? 0,
+                'formatted_total_value' => 'Rp ' . number_format($lunas->total_value ?? 0, 0, ',', '.')
+            ]
+        ];
+
+        // Summary data
+        $totalProjects = array_sum(array_column($data, 'count'));
+        $totalValue = array_sum(array_column($data, 'total_value'));
+
+        return response()->json([
+            'data' => $data,
+            'summary' => [
+                'total_projects' => $totalProjects,
+                'total_value' => $totalValue,
+                'formatted_total_value' => 'Rp ' . number_format($totalValue, 0, ',', '.')
+            ]
+        ]);
     }
 }

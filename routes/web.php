@@ -23,6 +23,7 @@ Route::middleware('auth')->group(function () {
     Route::get('/api/dashboard/analytics', [DashboardController::class, 'analytics'])->name('api.dashboard.analytics');
     Route::get('/api/dashboard/years', [DashboardController::class, 'getAvailableYears'])->name('api.dashboard.years');
     Route::get('/api/dashboard/project-types', [DashboardController::class, 'getProjectTypes'])->name('api.dashboard.project-types');
+    Route::get('/api/dashboard/billing-status', [DashboardController::class, 'getBillingStatus'])->name('api.dashboard.billing-status');
     Route::get('/api/dashboard/locations', [DashboardController::class, 'getLocations'])->name('api.dashboard.locations');
     Route::get('/api/dashboard/clients', [DashboardController::class, 'getClients'])->name('api.dashboard.clients');
 });

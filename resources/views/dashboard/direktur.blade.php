@@ -78,37 +78,25 @@
                 </div>
             </div>
 
-            <!-- Analisis Tipe Proyek dengan Filter Advanced -->
+            <!-- Filter Panel untuk Charts -->
             <div class="bg-white rounded-lg shadow-lg p-6 mb-8 mx-4 sm:mx-0">
                 <div class="flex flex-col sm:flex-row justify-between items-start sm:items-center mb-6 gap-4">
                     <div>
-                        <h3 class="text-xl font-bold text-gray-800">Analisis Tipe Proyek</h3>
-                        <p class="text-sm text-gray-600 mt-1">Distribusi dan performa proyek berdasarkan tipe</p>
+                        <h3 class="text-xl font-bold text-gray-800">Analisis Proyek</h3>
+                        <p class="text-sm text-gray-600 mt-1">Filter dan analisis data proyek berdasarkan berbagai kriteria</p>
                     </div>
                     <div class="flex flex-wrap gap-2">
                         <button id="resetFilters" class="text-sm text-gray-500 hover:text-gray-700 px-3 py-1 rounded border border-gray-300 hover:border-gray-400 transition-colors">
                             <svg class="w-4 h-4 inline mr-1" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15"></path>
                             </svg>
-                            Reset
-                        </button>
-                        <button id="exportChart" class="bg-blue-500 hover:bg-blue-600 text-white px-3 py-1 rounded text-sm transition-colors">
-                            <svg class="w-4 h-4 inline mr-1" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 10v6m0 0l-3-3m3 3l3-3m2 8H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"></path>
-                            </svg>
-                            Export
-                        </button>
-                        <button id="fullscreenChart" class="hidden lg:block bg-gray-500 hover:bg-gray-600 text-white px-3 py-1 rounded text-sm transition-colors">
-                            <svg class="w-4 h-4 inline mr-1" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 8V4m0 0h4M4 4l5 5m11-1V4m0 0h-4m4 0l-5 5M4 16v4m0 0h4m-4 0l5-5m11 5l-5-5m5 5v-4m0 4h-4"></path>
-                            </svg>
-                            Fullscreen
+                            Reset Filter
                         </button>
                     </div>
                 </div>
 
                 <!-- Advanced Filter Panel -->
-                <div class="bg-gray-50 rounded-lg p-4 mb-6">
+                <div class="bg-gray-50 rounded-lg p-4">
                     <!-- Mobile: Collapsible Filter -->
                     <div class="md:hidden mb-4">
                         <button id="toggleMobileFilters" class="w-full bg-blue-500 text-white px-4 py-2 rounded-lg flex items-center justify-between">
@@ -211,51 +199,135 @@
                         </div>
                     </div>
                 </div>
+            </div>
 
-                <!-- Chart Container -->
-                <div class="bg-gray-50 rounded-lg p-6">
-                    <div class="flex justify-between items-center mb-6">
-                        <h4 class="text-lg font-semibold text-gray-900">Distribusi Tipe Proyek</h4>
-                        <div class="text-sm text-gray-500" id="chartSubtitle">
-                            Semua periode
+            <!-- Charts Container - Side by Side -->
+            <div class="grid grid-cols-1 lg:grid-cols-2 gap-6 mb-8 mx-4 sm:mx-0">
+                <!-- Analisis Tipe Proyek -->
+                <div class="bg-white rounded-lg shadow-lg p-6">
+                    <div class="flex flex-col sm:flex-row justify-between items-start sm:items-center mb-6 gap-4">
+                        <div>
+                            <h3 class="text-xl font-bold text-gray-800">Analisis Tipe Proyek</h3>
+                            <p class="text-sm text-gray-600 mt-1">Distribusi dan performa proyek berdasarkan tipe</p>
+                        </div>
+                        <div class="flex flex-wrap gap-2">
+                            <button id="exportChart" class="bg-blue-500 hover:bg-blue-600 text-white px-3 py-1 rounded text-sm transition-colors">
+                                <svg class="w-4 h-4 inline mr-1" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 10v6m0 0l-3-3m3 3l3-3m2 8H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"></path>
+                                </svg>
+                                Export
+                            </button>
                         </div>
                     </div>
-                    
-                    <!-- Loading State -->
-                    <div id="chartLoading" class="text-center py-12">
-                        <div class="animate-spin rounded-full h-8 w-8 border-b-2 border-blue-500 mx-auto"></div>
-                        <p class="mt-2 text-gray-600 text-sm">Memuat data...</p>
-                    </div>
 
-                    <!-- Chart -->
-                    <div id="chartContainer" class="relative" style="display: none;">
-                        <div class="flex flex-col lg:flex-row items-center lg:items-start gap-6">
-                            <!-- Chart Canvas -->
-                            <div class="w-full lg:w-2/3 h-80">
-                                <canvas id="projectTypesChart"></canvas>
+                    <!-- Chart Container -->
+                    <div class="bg-gray-50 rounded-lg p-4">
+                        <div class="flex justify-between items-center mb-4">
+                            <h4 class="text-base font-semibold text-gray-900">Distribusi Tipe Proyek</h4>
+                            <div class="text-xs text-gray-500" id="chartSubtitle">
+                                Semua periode
                             </div>
-                            
-                            <!-- Legend -->
-                            <div class="w-full lg:w-1/3">
-                                <h5 class="text-sm font-semibold text-gray-700 mb-3">Keterangan</h5>
-                                <div id="chartLegend" class="space-y-2">
-                                    <!-- Legend items will be populated by JavaScript -->
+                        </div>
+                        
+                        <!-- Loading State -->
+                        <div id="chartLoading" class="text-center py-8">
+                            <div class="animate-spin rounded-full h-6 w-6 border-b-2 border-blue-500 mx-auto"></div>
+                            <p class="mt-2 text-gray-600 text-xs">Memuat data...</p>
+                        </div>
+
+                        <!-- Chart -->
+                        <div id="chartContainer" class="relative" style="display: none;">
+                            <div class="flex flex-col items-center gap-4">
+                                <!-- Chart Canvas -->
+                                <div class="w-full h-64">
+                                    <canvas id="projectTypesChart"></canvas>
+                                </div>
+                                
+                                <!-- Legend -->
+                                <div class="w-full">
+                                    <div id="chartLegend" class="grid grid-cols-1 gap-1 text-xs">
+                                        <!-- Legend items will be populated by JavaScript -->
+                                    </div>
                                 </div>
                             </div>
                         </div>
+
+                        <!-- No Data State -->
+                        <div id="noDataState" class="text-center py-8" style="display: none;">
+                            <div class="text-gray-400 mb-2">
+                                <svg class="w-8 h-8 mx-auto" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 19v-6a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2a2 2 0 002-2zm0 0V9a2 2 0 012-2h2a2 2 0 012 2v10m-6 0a2 2 0 002 2h2a2 2 0 002-2m0 0V5a2 2 0 012-2h2a2 2 0 012 2v14a2 2 0 01-2 2h-2a2 2 0 01-2-2z"></path>
+                                </svg>
+                            </div>
+                            <p class="text-gray-600 text-sm">Tidak ada data untuk filter yang dipilih</p>
+                            <button onclick="resetAllFilters()" class="mt-2 text-blue-500 hover:text-blue-600 text-xs">
+                                Reset filter untuk melihat semua data
+                            </button>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Analisis Status Tagihan -->
+                <div class="bg-white rounded-lg shadow-lg p-6">
+                    <div class="flex flex-col sm:flex-row justify-between items-start sm:items-center mb-6 gap-4">
+                        <div>
+                            <h3 class="text-xl font-bold text-gray-800">Analisis Status Tagihan</h3>
+                            <p class="text-sm text-gray-600 mt-1">Distribusi proyek berdasarkan status tagihan dan pembayaran</p>
+                        </div>
+                        <div class="flex flex-wrap gap-2">
+                            <button id="exportBillingChart" class="bg-green-500 hover:bg-green-600 text-white px-3 py-1 rounded text-sm transition-colors">
+                                <svg class="w-4 h-4 inline mr-1" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 10v6m0 0l-3-3m3 3l3-3m2 8H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"></path>
+                                </svg>
+                                Export
+                            </button>
+                        </div>
                     </div>
 
-                    <!-- No Data State -->
-                    <div id="noDataState" class="text-center py-12" style="display: none;">
-                        <div class="text-gray-400 mb-2">
-                            <svg class="w-12 h-12 mx-auto" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 19v-6a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2a2 2 0 002-2zm0 0V9a2 2 0 012-2h2a2 2 0 012 2v10m-6 0a2 2 0 002 2h2a2 2 0 002-2m0 0V5a2 2 0 012-2h2a2 2 0 012 2v14a2 2 0 01-2 2h-2a2 2 0 01-2-2z"></path>
-                            </svg>
+                    <!-- Chart Container -->
+                    <div class="bg-gray-50 rounded-lg p-4">
+                        <div class="flex justify-between items-center mb-4">
+                            <h4 class="text-base font-semibold text-gray-900">Status Tagihan Proyek</h4>
+                            <div class="text-xs text-gray-500" id="billingChartSubtitle">
+                                Semua periode
+                            </div>
                         </div>
-                        <p class="text-gray-600">Tidak ada data untuk filter yang dipilih</p>
-                        <button onclick="resetAllFilters()" class="mt-2 text-blue-500 hover:text-blue-600 text-sm">
-                            Reset filter untuk melihat semua data
-                        </button>
+                        
+                        <!-- Loading State -->
+                        <div id="billingChartLoading" class="text-center py-8">
+                            <div class="animate-spin rounded-full h-6 w-6 border-b-2 border-green-500 mx-auto"></div>
+                            <p class="mt-2 text-gray-600 text-xs">Memuat data tagihan...</p>
+                        </div>
+
+                        <!-- Chart -->
+                        <div id="billingChartContainer" class="relative" style="display: none;">
+                            <div class="flex flex-col items-center gap-4">
+                                <!-- Chart Canvas -->
+                                <div class="w-full h-64">
+                                    <canvas id="billingStatusChart"></canvas>
+                                </div>
+                                
+                                <!-- Legend -->
+                                <div class="w-full">
+                                    <div id="billingChartLegend" class="grid grid-cols-1 gap-1 text-xs">
+                                        <!-- Legend items will be populated by JavaScript -->
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- No Data State -->
+                        <div id="billingNoDataState" class="text-center py-8" style="display: none;">
+                            <div class="text-gray-400 mb-2">
+                                <svg class="w-8 h-8 mx-auto" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 19v-6a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2a2 2 0 002-2zm0 0V9a2 2 0 012-2h2a2 2 0 012 2v10m-6 0a2 2 0 002 2h2a2 2 0 002-2m0 0V5a2 2 0 012-2h2a2 2 0 012 2v14a2 2 0 01-2 2h-2a2 2 0 01-2-2z"></path>
+                                </svg>
+                            </div>
+                            <p class="text-gray-600 text-sm">Tidak ada data tagihan untuk filter yang dipilih</p>
+                            <button onclick="resetAllFilters()" class="mt-2 text-green-500 hover:text-green-600 text-xs">
+                                Reset filter untuk melihat semua data
+                            </button>
+                        </div>
                     </div>
                 </div>
             </div>
@@ -359,6 +431,7 @@
     <script>
         // Global variables
         let projectTypesChart = null;
+        let billingStatusChart = null;
         let currentFilters = {
             period: 'all',
             status: 'all',
@@ -383,6 +456,7 @@
             loadLocationOptions();
             loadClientOptions();
             loadProjectTypesData();
+            loadBillingStatusData();
             
             // Event listeners untuk filter
             document.getElementById('periodFilter').addEventListener('change', handlePeriodChange);
@@ -390,6 +464,10 @@
             document.getElementById('applyFilters').addEventListener('click', applyFilters);
             document.getElementById('resetFilters').addEventListener('click', resetAllFilters);
             document.getElementById('exportChart').addEventListener('click', exportChart);
+            
+            // Event listeners untuk billing chart
+            document.getElementById('resetBillingFilters').addEventListener('click', resetBillingFilters);
+            document.getElementById('exportBillingChart').addEventListener('click', exportBillingChart);
             
             // Mobile filter toggle
             const toggleButton = document.getElementById('toggleMobileFilters');
@@ -815,5 +893,243 @@
                 link.click();
             }
         }
+
+        // ========== BILLING STATUS CHART FUNCTIONS ==========
+
+        // Load billing status data with filters
+        async function loadBillingStatusData() {
+            showBillingChartLoading();
+            
+            try {
+                // Build query parameters
+                const params = new URLSearchParams();
+                
+                Object.keys(currentFilters).forEach(key => {
+                    if (currentFilters[key] && currentFilters[key] !== 'all') {
+                        params.append(key, currentFilters[key]);
+                    }
+                });
+                
+                const response = await fetch(`/api/dashboard/billing-status?${params.toString()}`);
+                const data = await response.json();
+                
+                if (data.data && data.data.length > 0) {
+                    createBillingStatusChart(data.data);
+                    showBillingChart();
+                } else {
+                    showBillingNoData();
+                }
+                
+            } catch (error) {
+                console.error('Error loading billing status data:', error);
+                showBillingChartError();
+            }
+        }
+
+        // Show billing chart loading state
+        function showBillingChartLoading() {
+            document.getElementById('billingChartLoading').style.display = 'block';
+            document.getElementById('billingChartContainer').style.display = 'none';
+            document.getElementById('billingNoDataState').style.display = 'none';
+        }
+
+        // Show billing chart
+        function showBillingChart() {
+            document.getElementById('billingChartLoading').style.display = 'none';
+            document.getElementById('billingChartContainer').style.display = 'block';
+            document.getElementById('billingNoDataState').style.display = 'none';
+        }
+
+        // Show billing no data state
+        function showBillingNoData() {
+            document.getElementById('billingChartLoading').style.display = 'none';
+            document.getElementById('billingChartContainer').style.display = 'none';
+            document.getElementById('billingNoDataState').style.display = 'block';
+        }
+
+        // Show billing chart error
+        function showBillingChartError() {
+            document.getElementById('billingChartLoading').style.display = 'none';
+            document.getElementById('billingChartContainer').style.display = 'none';
+            document.getElementById('billingNoDataState').style.display = 'block';
+        }
+
+        // Create billing status pie chart with external legend
+        function createBillingStatusChart(data) {
+            const ctx = document.getElementById('billingStatusChart').getContext('2d');
+            
+            // Destroy existing chart
+            if (billingStatusChart) {
+                billingStatusChart.destroy();
+            }
+            
+            const labels = data.map(item => item.label);
+            const values = data.map(item => item.count);
+            
+            // Custom colors untuk billing status
+            const billingColors = ['#6B7280', '#3B82F6', '#F59E0B', '#10B981']; // Gray, Blue, Amber, Green
+            const colors = billingColors.slice(0, data.length);
+            const totalCount = values.reduce((a, b) => a + b, 0);
+            
+            billingStatusChart = new Chart(ctx, {
+                type: 'pie',
+                data: {
+                    labels: labels,
+                    datasets: [{
+                        data: values,
+                        backgroundColor: colors,
+                        borderColor: '#ffffff',
+                        borderWidth: 3,
+                        hoverBorderWidth: 4,
+                        hoverOffset: 10
+                    }]
+                },
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    plugins: {
+                        legend: {
+                            display: false
+                        },
+                        tooltip: {
+                            backgroundColor: 'rgba(0, 0, 0, 0.8)',
+                            titleColor: '#ffffff',
+                            bodyColor: '#ffffff',
+                            borderColor: '#ffffff',
+                            borderWidth: 1,
+                            callbacks: {
+                                label: function(context) {
+                                    const item = data[context.dataIndex];
+                                    const percentage = ((item.count / totalCount) * 100).toFixed(1);
+                                    return [
+                                        `${item.label}: ${item.count} proyek (${percentage}%)`,
+                                        `Total Nilai: ${item.formatted_total_value}`
+                                    ];
+                                }
+                            }
+                        }
+                    },
+                    animation: {
+                        animateRotate: true,
+                        animateScale: true,
+                        duration: 1000,
+                        onComplete: function() {
+                            // Create external legend after animation completes
+                            createBillingChartLegend(data, colors, totalCount);
+                        }
+                    },
+                    onHover: (event, activeElements) => {
+                        event.native.target.style.cursor = activeElements.length > 0 ? 'pointer' : 'default';
+                    }
+                }
+            });
+        }
+
+        // Create external legend for billing chart
+        function createBillingChartLegend(data, colors, totalCount) {
+            const legendContainer = document.getElementById('billingChartLegend');
+            legendContainer.innerHTML = '';
+            
+            data.forEach((item, index) => {
+                const percentage = ((item.count / totalCount) * 100).toFixed(1);
+                
+                // Create legend item
+                const legendItem = document.createElement('div');
+                legendItem.className = 'flex items-start space-x-3 p-3 rounded-lg hover:bg-gray-100 transition-colors cursor-pointer';
+                legendItem.setAttribute('data-index', index);
+                
+                // Color indicator
+                const colorBox = document.createElement('div');
+                colorBox.className = 'w-4 h-4 rounded-sm flex-shrink-0 mt-0.5';
+                colorBox.style.backgroundColor = colors[index];
+                
+                // Legend content
+                const content = document.createElement('div');
+                content.className = 'flex-1 min-w-0';
+                
+                const title = document.createElement('div');
+                title.className = 'font-medium text-gray-900 text-sm';
+                title.textContent = item.label;
+                
+                const stats = document.createElement('div');
+                stats.className = 'text-xs text-gray-600 mt-1';
+                stats.innerHTML = `
+                    <div>${item.count} proyek (${percentage}%)</div>
+                    <div class="font-medium">${item.formatted_total_value}</div>
+                `;
+                
+                content.appendChild(title);
+                content.appendChild(stats);
+                
+                legendItem.appendChild(colorBox);
+                legendItem.appendChild(content);
+                
+                // Add click event to highlight chart segment
+                legendItem.addEventListener('click', function() {
+                    highlightBillingChartSegment(index);
+                });
+                
+                legendContainer.appendChild(legendItem);
+            });
+        }
+        
+        // Highlight specific billing chart segment
+        function highlightBillingChartSegment(index) {
+            if (billingStatusChart) {
+                // Reset all segments
+                billingStatusChart.setActiveElements([]);
+                
+                // Highlight specific segment
+                billingStatusChart.setActiveElements([{
+                    datasetIndex: 0,
+                    index: index
+                }]);
+                
+                billingStatusChart.update('none');
+                
+                // Show tooltip
+                billingStatusChart.tooltip.setActiveElements([{
+                    datasetIndex: 0,
+                    index: index
+                }], {
+                    x: billingStatusChart.canvas.width / 2,
+                    y: billingStatusChart.canvas.height / 2
+                });
+                
+                billingStatusChart.update('none');
+            }
+        }
+
+        // Reset billing filters
+        function resetBillingFilters() {
+            // Reset to same filters as project types chart
+            resetAllFilters();
+            loadBillingStatusData();
+        }
+
+        // Export billing chart functionality
+        function exportBillingChart() {
+            if (billingStatusChart) {
+                const url = billingStatusChart.toBase64Image();
+                const link = document.createElement('a');
+                link.download = 'analisis-status-tagihan.png';
+                link.href = url;
+                link.click();
+            }
+        }
+
+        // Update applyFilters function to also reload billing data
+        const originalApplyFilters = applyFilters;
+        applyFilters = function() {
+            originalApplyFilters();
+            loadBillingStatusData();
+        };
+
+        // Update resetAllFilters function to also reload billing data
+        const originalResetAllFilters = resetAllFilters;
+        resetAllFilters = function() {
+            originalResetAllFilters();
+            loadBillingStatusData();
+        };
     </script>
 </x-app-layout>
