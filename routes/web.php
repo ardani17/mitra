@@ -9,6 +9,7 @@ use App\Http\Controllers\TimelineController;
 use App\Http\Controllers\BillingBatchController;
 use App\Http\Controllers\DashboardController;
 use App\Http\Controllers\ReportController;
+use App\Http\Controllers\UserController;
 use Illuminate\Support\Facades\Route;
 
 Route::get('/', function () {
@@ -30,7 +31,13 @@ Route::middleware('auth')->group(function () {
     
     Route::get('/profile', [ProfileController::class, 'edit'])->name('profile.edit');
     Route::patch('/profile', [ProfileController::class, 'update'])->name('profile.update');
+    Route::patch('/profile/company', [ProfileController::class, 'updateCompany'])->name('profile.company.update');
     Route::delete('/profile', [ProfileController::class, 'destroy'])->name('profile.destroy');
+    
+    // User Management routes (Only for Direktur)
+    Route::middleware('role:direktur')->group(function () {
+        Route::resource('users', UserController::class);
+    });
     
     // Company routes
     Route::resource('companies', CompanyController::class);

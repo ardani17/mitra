@@ -12,12 +12,27 @@
                             </svg>
                         </div>
                         <div class="hidden xs:block sm:block">
-                            <span class="text-base sm:text-lg font-bold text-gray-800">Mitra</span>
-                            <div class="text-xs text-gray-600 hidden sm:block">Project Management</div>
+                            @php
+                                $activeCompany = \App\Models\Company::getActive();
+                            @endphp
+                            @if($activeCompany)
+                                <span class="text-base sm:text-lg font-bold text-gray-800">{{ $activeCompany->name }}</span>
+                                <div class="text-xs text-gray-600 hidden sm:block">Project Management System</div>
+                            @else
+                                <span class="text-base sm:text-lg font-bold text-gray-800">Mitra</span>
+                                <div class="text-xs text-gray-600 hidden sm:block">Project Management</div>
+                            @endif
                         </div>
                         <!-- Mobile-only short title -->
                         <div class="block xs:hidden">
-                            <span class="text-base font-bold text-gray-800">Mitra</span>
+                            @php
+                                $activeCompany = \App\Models\Company::getActive();
+                            @endphp
+                            @if($activeCompany)
+                                <span class="text-base font-bold text-gray-800">{{ Str::limit($activeCompany->name, 15) }}</span>
+                            @else
+                                <span class="text-base font-bold text-gray-800">Mitra</span>
+                            @endif
                         </div>
                     </a>
                 </div>
@@ -50,7 +65,16 @@
                     <x-nav-link :href="route('billing-batches.index')" :active="request()->routeIs('billing-batches.*')">
                         {{ __('Penagihan') }}
                     </x-nav-link>
+                    @endif
+
                     
+                    <!-- User Management Menu (Only for Direktur) -->
+                    @if(auth()->user()->hasRole('direktur'))
+                    <x-nav-link :href="route('users.index')" :active="request()->routeIs('users.*')">
+                        {{ __('Manajemen User') }}
+                    </x-nav-link>
+                    @endif
+
                     @if(auth()->user()->hasRole(['direktur', 'finance_manager', 'project_manager']))
                     <x-nav-link :href="route('reports.index')" :active="request()->routeIs('reports.*')">
                         {{ __('Laporan') }}
@@ -61,7 +85,6 @@
                     <x-nav-link :href="route('documentation')" :active="request()->routeIs('documentation')">
                         {{ __('Dokumentasi') }}
                     </x-nav-link>
-                    @endif
                     @endif
                 </div>
             </div>
@@ -159,18 +182,25 @@
                 <x-responsive-nav-link :href="route('billing-batches.index')" :active="request()->routeIs('billing-batches.*')">
                     {{ __('Penagihan') }}
                 </x-responsive-nav-link>
+            @endif
+
+            <!-- User Management Menu (Only for Direktur) -->
+            @if(auth()->user()->hasRole('direktur'))
+            <x-responsive-nav-link :href="route('users.index')" :active="request()->routeIs('users.*')">
+                {{ __('Manajemen User') }}
+            </x-responsive-nav-link>
+            @endif
                 
-                @if(auth()->user()->hasRole(['direktur', 'finance_manager', 'project_manager']))
-                <x-responsive-nav-link :href="route('reports.index')" :active="request()->routeIs('reports.*')">
-                    {{ __('Laporan') }}
-                </x-responsive-nav-link>
-                <x-responsive-nav-link :href="route('excel.index')" :active="request()->routeIs('excel.*')">
-                    {{ __('Excel') }}
-                </x-responsive-nav-link>
-                <x-responsive-nav-link :href="route('documentation')" :active="request()->routeIs('documentation')">
-                    {{ __('Dokumentasi') }}
-                </x-responsive-nav-link>
-                @endif
+            @if(auth()->user()->hasRole(['direktur', 'finance_manager', 'project_manager']))
+            <x-responsive-nav-link :href="route('reports.index')" :active="request()->routeIs('reports.*')">
+                {{ __('Laporan') }}
+            </x-responsive-nav-link>
+            <x-responsive-nav-link :href="route('excel.index')" :active="request()->routeIs('excel.*')">
+                {{ __('Excel') }}
+            </x-responsive-nav-link>
+            <x-responsive-nav-link :href="route('documentation')" :active="request()->routeIs('documentation')">
+                {{ __('Dokumentasi') }}
+            </x-responsive-nav-link>
             @endif
         </div>
 

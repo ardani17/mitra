@@ -365,14 +365,158 @@ class Project extends Model
     // ========== BILLING INTEGRATION METHODS ==========
 
     /**
+     * Get current billing status dari billing batch
+     */
+    public function getCurrentBillingStatusAttribute()
+    {
+        $latestBilling = $this->billings()->with('billingBatch')->latest()->first();
+        return $latestBilling?->billingBatch?->status ?? 'not_billed';
+    }
+
+    /**
+     * Get total tagihan amount dengan fallback logic
+     */
+    public function getTotalTagihanAmountAttribute()
+    {
+        // 1. Cek apakah ada billing batch dengan nilai diterima
+        $totalReceived = $this->billings()->whereHas('billingBatch')->with('billingBatch')
+            ->get()->sum(fn($billing) => $billing->billingBatch->total_received_amount ?? 0);
+        
+        if ($totalReceived > 0) {
+            return $totalReceived;
+        }
+        
+        // 2. Jika tidak ada billing, gunakan final_total_value
+        if ($this->final_total_value && $this->final_total_value > 0) {
+            return $this->final_total_value;
+        }
+        
+        // 3. Fallback ke planned_total_value
+        return $this->planned_total_value ?? 0;
+    }
+
+    /**
+     * Get label untuk total tagihan berdasarkan sumber data
+     */
+    public function getTotalTagihanLabelAttribute()
+    {
+        $totalReceived = $this->billings()->whereHas('billingBatch')->with('billingBatch')
+            ->get()->sum(fn($billing) => $billing->billingBatch->total_received_amount ?? 0);
+        
+        if ($totalReceived > 0) {
+            return 'Total Tagihan Diterima';
+        }
+        
+        if ($this->final_total_value && $this->final_total_value > 0) {
+            return 'Total Tagihan Akhir';
+        }
+        
+        return 'Total Tagihan Plan';
+    }
+
+    /**
+     * Get source type untuk total tagihan
+     */
+    public function getTotalTagihanSourceAttribute()
+    {
+        $totalReceived = $this->billings()->whereHas('billingBatch')->with('billingBatch')
+            ->get()->sum(fn($billing) => $billing->billingBatch->total_received_amount ?? 0);
+        
+        if ($totalReceived > 0) {
+            return 'received';
+        }
+        
+        if ($this->final_total_value && $this->final_total_value > 0) {
+            return 'final';
+        }
+        
+        return 'plan';
+    }
+
+    /**
+     * Get total amount yang sudah diterima dari billing batch (backward compatibility)
+     */
+    public function getTotalReceivedAmountAttribute()
+    {
+        return $this->billings()->whereHas('billingBatch')->with('billingBatch')
+            ->get()->sum(fn($billing) => $billing->billingBatch->total_received_amount ?? 0);
+    }
+
+    /**
+     * Get progress percentage berdasarkan status billing batch
+     */
+    public function getBillingProgressPercentageAttribute()
+    {
+        $currentStatus = $this->current_billing_status;
+        return $this->getProgressFromStatus($currentStatus);
+    }
+
+    /**
+     * Get latest billing info dari billing batch
+     */
+    public function getLatestBillingInfoAttribute()
+    {
+        $latestBilling = $this->billings()->with('billingBatch')->latest()->first();
+        
+        if (!$latestBilling || !$latestBilling->billingBatch) {
+            return [
+                'status' => 'not_billed',
+                'status_label' => 'Belum Ditagih',
+                'invoice_number' => null,
+                'sp_number' => null,
+                'billing_date' => null,
+                'total_received' => 0
+            ];
+        }
+
+        $batch = $latestBilling->billingBatch;
+        return [
+            'status' => $batch->status,
+            'status_label' => $batch->status_label,
+            'invoice_number' => $batch->invoice_number,
+            'sp_number' => $batch->sp_number,
+            'billing_date' => $batch->billing_date,
+            'total_received' => $batch->total_received_amount
+        ];
+    }
+
+    /**
+     * Get progress dari status billing batch
+     */
+    private function getProgressFromStatus($status): int
+    {
+        return match($status) {
+            'draft' => 0,
+            'sent' => 15,
+            'area_verification' => 30,
+            'area_revision' => 25,
+            'regional_verification' => 60,
+            'regional_revision' => 55,
+            'payment_entry_ho' => 80,
+            'paid' => 100,
+            'not_billed' => 0,
+            default => 0
+        };
+    }
+
+    /**
      * Get billing status label dalam bahasa Indonesia
      */
     public function getBillingStatusLabelAttribute()
     {
-        return match($this->billing_status) {
+        $currentStatus = $this->current_billing_status;
+        
+        return match($currentStatus) {
+            'draft' => 'Draft',
+            'sent' => 'Terkirim',
+            'area_verification' => 'Verifikasi Area',
+            'area_revision' => 'Revisi Area',
+            'regional_verification' => 'Verifikasi Regional',
+            'regional_revision' => 'Revisi Regional',
+            'payment_entry_ho' => 'Entry Pembayaran HO',
+            'paid' => 'Lunas',
+            'cancelled' => 'Dibatalkan',
             'not_billed' => 'Belum Ditagih',
-            'partially_billed' => 'Sebagian Ditagih',
-            'fully_billed' => 'Sudah Ditagih',
             default => 'Belum Ditagih'
         };
     }
@@ -382,11 +526,20 @@ class Project extends Model
      */
     public function getBillingStatusBadgeColorAttribute()
     {
-        return match($this->billing_status) {
-            'not_billed' => 'bg-red-100 text-red-800',
-            'partially_billed' => 'bg-yellow-100 text-yellow-800',
-            'fully_billed' => 'bg-green-100 text-green-800',
-            default => 'bg-red-100 text-red-800'
+        $currentStatus = $this->current_billing_status;
+        
+        return match($currentStatus) {
+            'draft' => 'bg-gray-100 text-gray-800',
+            'sent' => 'bg-blue-100 text-blue-800',
+            'area_verification' => 'bg-yellow-100 text-yellow-800',
+            'area_revision' => 'bg-orange-100 text-orange-800',
+            'regional_verification' => 'bg-purple-100 text-purple-800',
+            'regional_revision' => 'bg-red-100 text-red-800',
+            'payment_entry_ho' => 'bg-indigo-100 text-indigo-800',
+            'paid' => 'bg-green-100 text-green-800',
+            'cancelled' => 'bg-red-100 text-red-800',
+            'not_billed' => 'bg-gray-100 text-gray-800',
+            default => 'bg-gray-100 text-gray-800'
         };
     }
 

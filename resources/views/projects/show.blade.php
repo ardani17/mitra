@@ -137,7 +137,7 @@
     <!-- Informasi Tagihan -->
     <div class="bg-white rounded-lg shadow-md p-4 sm:p-6 mb-6 sm:mb-8">
         <h3 class="text-base sm:text-lg font-semibold text-gray-800 mb-3 sm:mb-4">Informasi Tagihan</h3>
-        <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 sm:gap-6">
+        <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4 sm:gap-6">
             <!-- Status Tagihan -->
             <div class="bg-gray-50 p-4 rounded-lg">
                 <div class="flex items-center justify-between mb-2">
@@ -148,16 +148,32 @@
                 </div>
                 <div class="mt-3">
                     <div class="flex justify-between items-center mb-1">
-                        <span class="text-xs text-gray-500">Progress Tagihan</span>
-                        <span class="text-xs font-medium text-gray-700">{{ number_format($project->billing_percentage, 1) }}%</span>
+                        <span class="text-xs text-gray-500">Progress Verifikasi</span>
+                        <span class="text-xs font-medium text-gray-700">{{ $project->billing_progress_percentage }}%</span>
                     </div>
                     <div class="w-full bg-gray-200 rounded-full h-2">
-                        <div class="bg-blue-600 h-2 rounded-full" style="width: {{ min($project->billing_percentage, 100) }}%"></div>
+                        <div class="bg-blue-600 h-2 rounded-full" style="width: {{ $project->billing_progress_percentage }}%"></div>
+                    </div>
+                    <p class="text-xs text-gray-500 mt-1">Tahapan verifikasi billing</p>
+                </div>
+            </div>
+
+            <!-- Total Diterima -->
+            <div class="bg-green-50 p-4 rounded-lg">
+                <div class="flex items-center">
+                    <div class="p-2 bg-green-500 rounded-full text-white mr-3">
+                        <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8c-1.657 0-3 .895-3 2s1.343 2 3 2 3 .895 3 2-1.343 2-3 2m0-8c1.11 0 2.08.402 2.599 1M12 8V7m0 1v8m0 0v1m0-1c-1.11 0-2.08-.402-2.599-1"></path>
+                        </svg>
+                    </div>
+                    <div>
+                        <p class="text-sm text-gray-600">Total Diterima</p>
+                        <p class="text-xl font-bold text-green-600">Rp {{ number_format($project->total_received_amount, 0, ',', '.') }}</p>
                     </div>
                 </div>
             </div>
 
-            <!-- Total Ditagih -->
+            <!-- Dokumen Tagihan -->
             <div class="bg-blue-50 p-4 rounded-lg">
                 <div class="flex items-center">
                     <div class="p-2 bg-blue-500 rounded-full text-white mr-3">
@@ -166,41 +182,11 @@
                         </svg>
                     </div>
                     <div>
-                        <p class="text-sm text-gray-600">Total Ditagih</p>
-                        <p class="text-xl font-bold text-blue-600">Rp {{ number_format($project->total_billed_amount, 0, ',', '.') }}</p>
-                    </div>
-                </div>
-            </div>
-
-            <!-- Sisa Tagihan -->
-            <div class="bg-orange-50 p-4 rounded-lg">
-                <div class="flex items-center">
-                    <div class="p-2 bg-orange-500 rounded-full text-white mr-3">
-                        <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8c-1.657 0-3 .895-3 2s1.343 2 3 2 3 .895 3 2-1.343 2-3 2m0-8c1.11 0 2.08.402 2.599 1M12 8V7m0 1v8m0 0v1m0-1c-1.11 0-2.08-.402-2.599-1"></path>
-                        </svg>
-                    </div>
-                    <div>
-                        <p class="text-sm text-gray-600">Sisa Tagihan</p>
-                        <p class="text-xl font-bold text-orange-600">Rp {{ number_format($project->remaining_billable_amount, 0, ',', '.') }}</p>
-                    </div>
-                </div>
-            </div>
-
-            <!-- Dokumen Tagihan -->
-            <div class="bg-green-50 p-4 rounded-lg">
-                <div class="flex items-center">
-                    <div class="p-2 bg-green-500 rounded-full text-white mr-3">
-                        <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"></path>
-                        </svg>
-                    </div>
-                    <div>
                         <p class="text-sm text-gray-600">Dokumen Terakhir</p>
-                        @if($project->latest_invoice_number)
-                            <p class="text-sm font-medium text-green-600">{{ $project->latest_invoice_number }}</p>
-                            @if($project->last_billing_date)
-                                <p class="text-xs text-gray-500">{{ $project->last_billing_date->format('d M Y') }}</p>
+                        @if($project->latest_billing_info['invoice_number'])
+                            <p class="text-sm font-medium text-blue-600">{{ $project->latest_billing_info['invoice_number'] }}</p>
+                            @if($project->latest_billing_info['billing_date'])
+                                <p class="text-xs text-gray-500">{{ $project->latest_billing_info['billing_date']->format('d M Y') }}</p>
                             @endif
                         @else
                             <p class="text-sm text-gray-500">Belum ada tagihan</p>
@@ -211,28 +197,28 @@
         </div>
 
         <!-- Detail Dokumen Tagihan -->
-        @if($project->latest_billing_documents['invoice_number'])
+        @if($project->latest_billing_info['invoice_number'])
         <div class="mt-6 pt-6 border-t border-gray-200">
             <h4 class="text-md font-semibold text-gray-700 mb-3">Detail Dokumen Tagihan Terakhir</h4>
             <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
-                @if($project->latest_po_number)
-                <div>
-                    <span class="text-sm text-gray-600">Nomor PO/SP:</span>
-                    <p class="font-medium">{{ $project->latest_po_number }}</p>
-                </div>
-                @endif
-                @if($project->latest_sp_number)
+                @if($project->latest_billing_info['sp_number'])
                 <div>
                     <span class="text-sm text-gray-600">Nomor SP:</span>
-                    <p class="font-medium">{{ $project->latest_sp_number }}</p>
+                    <p class="font-medium">{{ $project->latest_billing_info['sp_number'] }}</p>
                 </div>
                 @endif
-                @if($project->latest_invoice_number)
+                @if($project->latest_billing_info['invoice_number'])
                 <div>
                     <span class="text-sm text-gray-600">Nomor Faktur:</span>
-                    <p class="font-medium">{{ $project->latest_invoice_number }}</p>
+                    <p class="font-medium">{{ $project->latest_billing_info['invoice_number'] }}</p>
                 </div>
                 @endif
+                <div>
+                    <span class="text-sm text-gray-600">Status Saat Ini:</span>
+                    <span class="inline-flex px-2 py-1 text-xs font-semibold rounded-full {{ $project->billing_status_badge_color }}">
+                        {{ $project->latest_billing_info['status_label'] }}
+                    </span>
+                </div>
             </div>
         </div>
         @endif
@@ -264,8 +250,8 @@
                         </svg>
                     </div>
                     <div>
-                        <p class="text-sm text-gray-600">Total Pendapatan</p>
-                        <p class="text-xl font-bold text-green-600">Rp {{ number_format($project->revenues->sum('amount'), 0, ',', '.') }}</p>
+                        <p class="text-sm text-gray-600">{{ $project->total_tagihan_label }}</p>
+                        <p class="text-xl font-bold text-green-600">Rp {{ number_format($project->total_tagihan_amount, 0, ',', '.') }}</p>
                     </div>
                 </div>
             </div>
@@ -280,10 +266,10 @@
                     <div>
                         <p class="text-sm text-gray-600">Laba Bersih</p>
                         @php
-                            $netProfit = $project->revenues->sum('amount') - $project->total_expenses;
+                            $netProfit = $project->total_tagihan_amount - $project->total_expenses;
                         @endphp
                         <p class="text-xl font-bold {{ $netProfit >= 0 ? 'text-green-600' : 'text-red-600' }}">
-                            Rp {{ number_format($netProfit, 0, ',', '.') }} {{ $netProfit < 0 ? '-' : '' }}
+                            Rp {{ number_format($netProfit, 0, ',', '.') }}
                         </p>
                     </div>
                 </div>
@@ -299,8 +285,8 @@
                     <div>
                         <p class="text-sm text-gray-600">Margin Keuntungan</p>
                         @php
-                            $totalRevenue = $project->revenues->sum('amount');
-                            $marginPercentage = $totalRevenue > 0 ? ($netProfit / $totalRevenue) * 100 : 0;
+                            $totalTagihan = $project->total_tagihan_amount;
+                            $marginPercentage = $totalTagihan > 0 ? ($netProfit / $totalTagihan) * 100 : 0;
                         @endphp
                         <p class="text-xl font-bold text-purple-600">{{ number_format($marginPercentage, 2) }}%</p>
                     </div>
