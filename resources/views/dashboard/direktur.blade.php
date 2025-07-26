@@ -228,8 +228,21 @@
                     </div>
 
                     <!-- Chart -->
-                    <div id="chartContainer" class="relative h-96" style="display: none;">
-                        <canvas id="projectTypesChart"></canvas>
+                    <div id="chartContainer" class="relative" style="display: none;">
+                        <div class="flex flex-col lg:flex-row items-center lg:items-start gap-6">
+                            <!-- Chart Canvas -->
+                            <div class="w-full lg:w-2/3 h-80">
+                                <canvas id="projectTypesChart"></canvas>
+                            </div>
+                            
+                            <!-- Legend -->
+                            <div class="w-full lg:w-1/3">
+                                <h5 class="text-sm font-semibold text-gray-700 mb-3">Keterangan</h5>
+                                <div id="chartLegend" class="space-y-2">
+                                    <!-- Legend items will be populated by JavaScript -->
+                                </div>
+                            </div>
+                        </div>
                     </div>
 
                     <!-- No Data State -->
@@ -648,7 +661,7 @@
             document.getElementById('noDataState').style.display = 'block';
         }
 
-        // Create project types pie chart with labels inside
+        // Create project types pie chart with external legend
         function createProjectTypesChart(data) {
             const ctx = document.getElementById('projectTypesChart').getContext('2d');
             
@@ -706,8 +719,8 @@
                         animateScale: true,
                         duration: 1000,
                         onComplete: function() {
-                            // Draw labels inside pie slices after animation completes
-                            drawLabelsInsidePie(ctx, data, totalCount);
+                            // Create external legend after animation completes
+                            createChartLegend(data, colors, totalCount);
                         }
                     },
                     onHover: (event, activeElements) => {
@@ -717,58 +730,79 @@
             });
         }
 
-        // Function to draw labels inside pie chart (desktop only)
-        function drawLabelsInsidePie(ctx, data, totalCount) {
-            const chart = projectTypesChart;
-            const meta = chart.getDatasetMeta(0);
+        // Create external legend for chart
+        function createChartLegend(data, colors, totalCount) {
+            const legendContainer = document.getElementById('chartLegend');
+            legendContainer.innerHTML = '';
             
-            // Only draw labels on desktop (screen width >= 768px)
-            const isMobile = window.innerWidth < 768;
-            if (isMobile) {
-                return; // Skip drawing labels on mobile
-            }
-            
-            const fontSize = 12;
-            const lineHeight = 16;
-            const strokeWidth = 2;
-            
-            ctx.save();
-            ctx.font = `bold ${fontSize}px Arial`;
-            ctx.textAlign = 'center';
-            ctx.textBaseline = 'middle';
-            
-            meta.data.forEach((element, index) => {
-                const item = data[index];
+            data.forEach((item, index) => {
                 const percentage = ((item.count / totalCount) * 100).toFixed(1);
                 
-                // Calculate position for label (center of slice)
-                const angle = element.startAngle + (element.endAngle - element.startAngle) / 2;
-                const radius = element.outerRadius * 0.7; // 70% of radius
-                const x = element.x + Math.cos(angle) * radius;
-                const y = element.y + Math.sin(angle) * radius;
+                // Create legend item
+                const legendItem = document.createElement('div');
+                legendItem.className = 'flex items-start space-x-3 p-3 rounded-lg hover:bg-gray-100 transition-colors cursor-pointer';
+                legendItem.setAttribute('data-index', index);
                 
-                // Only draw label if slice is large enough (5% threshold for desktop)
-                if (percentage > 5) {
-                    ctx.fillStyle = '#ffffff';
-                    ctx.strokeStyle = '#000000';
-                    ctx.lineWidth = strokeWidth;
-                    
-                    // Full format for desktop
-                    const lines = [
-                        item.label,
-                        `${item.count} (${percentage}%)`,
-                        item.formatted_total_value
-                    ];
-                    
-                    lines.forEach((line, lineIndex) => {
-                        const lineY = y + (lineIndex - (lines.length - 1) / 2) * lineHeight;
-                        ctx.strokeText(line, x, lineY);
-                        ctx.fillText(line, x, lineY);
-                    });
-                }
+                // Color indicator
+                const colorBox = document.createElement('div');
+                colorBox.className = 'w-4 h-4 rounded-sm flex-shrink-0 mt-0.5';
+                colorBox.style.backgroundColor = colors[index];
+                
+                // Legend content
+                const content = document.createElement('div');
+                content.className = 'flex-1 min-w-0';
+                
+                const title = document.createElement('div');
+                title.className = 'font-medium text-gray-900 text-sm';
+                title.textContent = item.label;
+                
+                const stats = document.createElement('div');
+                stats.className = 'text-xs text-gray-600 mt-1';
+                stats.innerHTML = `
+                    <div>${item.count} proyek (${percentage}%)</div>
+                    <div class="font-medium">${item.formatted_total_value}</div>
+                `;
+                
+                content.appendChild(title);
+                content.appendChild(stats);
+                
+                legendItem.appendChild(colorBox);
+                legendItem.appendChild(content);
+                
+                // Add click event to highlight chart segment
+                legendItem.addEventListener('click', function() {
+                    highlightChartSegment(index);
+                });
+                
+                legendContainer.appendChild(legendItem);
             });
-            
-            ctx.restore();
+        }
+        
+        // Highlight specific chart segment
+        function highlightChartSegment(index) {
+            if (projectTypesChart) {
+                // Reset all segments
+                projectTypesChart.setActiveElements([]);
+                
+                // Highlight specific segment
+                projectTypesChart.setActiveElements([{
+                    datasetIndex: 0,
+                    index: index
+                }]);
+                
+                projectTypesChart.update('none');
+                
+                // Show tooltip
+                projectTypesChart.tooltip.setActiveElements([{
+                    datasetIndex: 0,
+                    index: index
+                }], {
+                    x: projectTypesChart.canvas.width / 2,
+                    y: projectTypesChart.canvas.height / 2
+                });
+                
+                projectTypesChart.update('none');
+            }
         }
 
         // Export chart functionality
