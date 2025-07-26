@@ -43,7 +43,6 @@ class DashboardController extends Controller
             ->where('status', 'approved')
             ->sum('amount') ?? 0;
         $netProfit = $totalRevenue - $totalExpenses;
-        $totalBudget = Project::sum('planned_total_value') ?? 0;
 
         $projectsByStatus = Project::select('status', DB::raw('count(*) as total'))
             ->groupBy('status')
@@ -69,7 +68,7 @@ class DashboardController extends Controller
 
         return view('dashboard.direktur', compact(
             'totalProjects', 'activeProjects', 'totalRevenue', 'totalExpenses', 
-            'netProfit', 'totalBudget', 'projectsByStatus', 'projectsByType',
+            'netProfit', 'projectsByStatus', 'projectsByType',
             'pendingExpenses', 'overdueInvoices', 'recentActivities'
         ));
     }
@@ -391,5 +390,211 @@ class DashboardController extends Controller
             'overdue' => 'Terlambat',
             default => ucfirst($status)
         };
+    }
+
+    /**
+     * Get project types data dengan filter advanced
+     */
+    public function getProjectTypes(Request $request)
+    {
+        $query = Project::query();
+
+        // Apply filters
+        $this->applyProjectFilters($query, $request);
+
+        // Get data dengan grouping by type
+        $projectTypes = $query->select([
+                'type',
+                DB::raw('COUNT(*) as count'),
+                DB::raw('SUM(COALESCE(planned_total_value, 0)) as total_value'),
+                DB::raw('AVG(COALESCE(planned_total_value, 0)) as avg_value')
+            ])
+            ->groupBy('type')
+            ->get()
+            ->map(function ($item) {
+                return [
+                    'label' => $this->getProjectTypeLabel($item->type),
+                    'count' => $item->count,
+                    'total_value' => $item->total_value ?? 0,
+                    'avg_value' => $item->avg_value ?? 0,
+                    'formatted_total_value' => 'Rp ' . number_format($item->total_value ?? 0, 0, ',', '.'),
+                    'formatted_avg_value' => 'Rp ' . number_format($item->avg_value ?? 0, 0, ',', '.')
+                ];
+            });
+
+        // Summary data - clone query untuk menghindari konflik
+        $summaryQuery = clone $query;
+        $totalProjects = $summaryQuery->count();
+        
+        $summaryQuery2 = clone $query;
+        $totalValue = $summaryQuery2->sum('planned_total_value') ?? 0;
+        
+        $avgValue = $totalProjects > 0 ? $totalValue / $totalProjects : 0;
+
+        return response()->json([
+            'data' => $projectTypes,
+            'summary' => [
+                'total_projects' => $totalProjects,
+                'total_value' => $totalValue,
+                'avg_value' => $avgValue,
+                'formatted_total_value' => 'Rp ' . number_format($totalValue, 0, ',', '.'),
+                'formatted_avg_value' => 'Rp ' . number_format($avgValue, 0, ',', '.')
+            ]
+        ]);
+    }
+
+    /**
+     * Get available locations untuk filter
+     */
+    public function getLocations()
+    {
+        $locations = Project::select('location')
+            ->whereNotNull('location')
+            ->where('location', '!=', '')
+            ->distinct()
+            ->orderBy('location')
+            ->pluck('location')
+            ->toArray();
+
+        return response()->json($locations);
+    }
+
+    /**
+     * Get available clients untuk filter
+     */
+    public function getClients()
+    {
+        $clients = Project::select('client')
+            ->whereNotNull('client')
+            ->where('client', '!=', '')
+            ->distinct()
+            ->orderBy('client')
+            ->pluck('client')
+            ->toArray();
+
+        return response()->json($clients);
+    }
+
+    /**
+     * Apply filters ke query berdasarkan request parameters
+     */
+    private function applyProjectFilters($query, Request $request)
+    {
+        // Period filter
+        $period = $request->get('period');
+        if ($period && $period !== 'all') {
+            $this->applyPeriodFilter($query, $period, $request);
+        }
+
+        // Status filter
+        $status = $request->get('status');
+        if ($status && $status !== 'all') {
+            $query->where('status', $status);
+        }
+
+        // Value range filter
+        $valueRange = $request->get('valueRange');
+        if ($valueRange && $valueRange !== 'all') {
+            $this->applyValueRangeFilter($query, $valueRange, $request);
+        }
+
+        // Location filter
+        $location = $request->get('location');
+        if ($location && $location !== 'all') {
+            $query->where('location', $location);
+        }
+
+        // Client filter
+        $client = $request->get('client');
+        if ($client && $client !== 'all') {
+            $query->where('client', $client);
+        }
+    }
+
+    /**
+     * Apply period filter ke query
+     */
+    private function applyPeriodFilter($query, $period, Request $request)
+    {
+        $today = Carbon::today();
+
+        switch ($period) {
+            case 'today':
+                $query->whereBetween('created_at', [
+                    $today->copy()->startOfDay(),
+                    $today->copy()->endOfDay()
+                ]);
+                break;
+            case 'week':
+                $query->whereBetween('created_at', [
+                    $today->copy()->subWeek()->startOfDay(),
+                    $today->copy()->endOfDay()
+                ]);
+                break;
+            case 'month':
+                $query->whereBetween('created_at', [
+                    $today->copy()->startOfMonth()->startOfDay(),
+                    $today->copy()->endOfDay()
+                ]);
+                break;
+            case 'quarter':
+                $query->whereBetween('created_at', [
+                    $today->copy()->subMonths(3)->startOfDay(),
+                    $today->copy()->endOfDay()
+                ]);
+                break;
+            case 'semester':
+                $query->whereBetween('created_at', [
+                    $today->copy()->subMonths(6)->startOfDay(),
+                    $today->copy()->endOfDay()
+                ]);
+                break;
+            case 'year':
+                $query->whereBetween('created_at', [
+                    $today->copy()->subYear()->startOfDay(),
+                    $today->copy()->endOfDay()
+                ]);
+                break;
+            case 'custom':
+                $startDate = $request->get('startDate');
+                $endDate = $request->get('endDate');
+                if ($startDate && $endDate) {
+                    $query->whereBetween('created_at', [
+                        Carbon::parse($startDate)->startOfDay(),
+                        Carbon::parse($endDate)->endOfDay()
+                    ]);
+                }
+                break;
+        }
+    }
+
+    /**
+     * Apply value range filter ke query
+     */
+    private function applyValueRangeFilter($query, $valueRange, Request $request)
+    {
+        switch ($valueRange) {
+            case 'small':
+                $query->where('planned_total_value', '<', 100000000); // < 100 juta
+                break;
+            case 'medium':
+                $query->whereBetween('planned_total_value', [100000000, 1000000000]); // 100 juta - 1 miliar
+                break;
+            case 'large':
+                $query->where('planned_total_value', '>', 1000000000); // > 1 miliar
+                break;
+            case 'custom':
+                $minValue = $request->get('minValue');
+                $maxValue = $request->get('maxValue');
+                
+                if ($minValue !== null && $minValue !== '') {
+                    $query->where('planned_total_value', '>=', $minValue);
+                }
+                
+                if ($maxValue !== null && $maxValue !== '') {
+                    $query->where('planned_total_value', '<=', $maxValue);
+                }
+                break;
+        }
     }
 }

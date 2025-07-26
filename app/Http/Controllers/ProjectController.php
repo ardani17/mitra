@@ -164,7 +164,10 @@ class ProjectController extends Controller
         $project = Project::with(['expenses', 'activities', 'timelines', 'billings', 'revenues', 'documents.uploader'])->findOrFail($id);
         $this->authorize('view', $project);
         
-        return view('projects.show', compact('project'));
+        // Get comprehensive activities for the project
+        $allActivities = $project->getAllActivities();
+        
+        return view('projects.show', compact('project', 'allActivities'));
     }
 
     /**

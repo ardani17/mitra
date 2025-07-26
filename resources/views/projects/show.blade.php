@@ -304,9 +304,7 @@
                     <option value="ringkasan">Ringkasan</option>
                     <option value="timeline">Timeline</option>
                     <option value="pengeluaran">Pengeluaran</option>
-                    <option value="penagihan">Penagihan</option>
                     <option value="aktivitas">Aktivitas</option>
-                    <option value="pendapatan">Pendapatan</option>
                     <option value="dokumen">Dokumen</option>
                 </select>
             </div>
@@ -322,14 +320,8 @@
                 <button onclick="showTab('pengeluaran')" id="tab-pengeluaran" class="tab-button border-transparent text-gray-500 hover:text-gray-700 hover:border-gray-300 whitespace-nowrap py-3 sm:py-4 px-1 border-b-2 font-medium text-xs sm:text-sm">
                     Pengeluaran
                 </button>
-                <button onclick="showTab('penagihan')" id="tab-penagihan" class="tab-button border-transparent text-gray-500 hover:text-gray-700 hover:border-gray-300 whitespace-nowrap py-3 sm:py-4 px-1 border-b-2 font-medium text-xs sm:text-sm">
-                    Penagihan
-                </button>
                 <button onclick="showTab('aktivitas')" id="tab-aktivitas" class="tab-button border-transparent text-gray-500 hover:text-gray-700 hover:border-gray-300 whitespace-nowrap py-3 sm:py-4 px-1 border-b-2 font-medium text-xs sm:text-sm">
                     Aktivitas
-                </button>
-                <button onclick="showTab('pendapatan')" id="tab-pendapatan" class="tab-button border-transparent text-gray-500 hover:text-gray-700 hover:border-gray-300 whitespace-nowrap py-3 sm:py-4 px-1 border-b-2 font-medium text-xs sm:text-sm">
-                    Pendapatan
                 </button>
                 <button onclick="showTab('dokumen')" id="tab-dokumen" class="tab-button border-transparent text-gray-500 hover:text-gray-700 hover:border-gray-300 whitespace-nowrap py-3 sm:py-4 px-1 border-b-2 font-medium text-xs sm:text-sm">
                     Dokumen
@@ -557,157 +549,51 @@
                 @endif
             </div>
 
-            <!-- Tab Penagihan -->
-            <div id="content-penagihan" class="tab-content hidden">
-                <div class="flex justify-between items-center mb-4">
-                    <h3 class="text-lg font-semibold text-gray-800">Penagihan Proyek</h3>
-                    @can('create', App\Models\ProjectBilling::class)
-                    <a href="{{ route('billing-batches.create') }}" class="bg-blue-600 hover:bg-blue-700 text-white font-bold py-2 px-4 rounded text-sm">
-                        Buat Batch Penagihan
-                    </a>
-                    @endcan
-                </div>
-                
-                @if($project->billings->count() > 0)
-                <div class="overflow-x-auto">
-                    <table class="min-w-full divide-y divide-gray-200">
-                        <thead class="bg-blue-600">
-                            <tr>
-                                <th class="px-6 py-3 text-left text-xs font-bold text-white uppercase tracking-wider">Nomor Faktur Pajak</th>
-                                <th class="px-6 py-3 text-left text-xs font-bold text-white uppercase tracking-wider">Tanggal</th>
-                                <th class="px-6 py-3 text-left text-xs font-bold text-white uppercase tracking-wider">Jumlah</th>
-                                <th class="px-6 py-3 text-left text-xs font-bold text-white uppercase tracking-wider">Status</th>
-                                <th class="px-6 py-3 text-left text-xs font-bold text-white uppercase tracking-wider">Jatuh Tempo</th>
-                            </tr>
-                        </thead>
-                        <tbody class="bg-white divide-y divide-gray-200">
-                            @foreach($project->billings->take(10) as $billing)
-                            <tr class="hover:bg-gray-50">
-                                <td class="px-6 py-4 whitespace-nowrap text-sm font-medium text-gray-900">
-                                    {{ $billing->invoice_number }}
-                                </td>
-                                <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-900">
-                                    {{ $billing->billing_date->format('d M Y') }}
-                                </td>
-                                <td class="px-6 py-4 whitespace-nowrap text-sm font-medium text-gray-900">
-                                    Rp {{ number_format($billing->amount, 0, ',', '.') }}
-                                </td>
-                                <td class="px-6 py-4 whitespace-nowrap">
-                                    <span class="inline-flex px-2 py-1 text-xs font-semibold rounded-full 
-                                          @if($billing->status == 'paid') bg-green-100 text-green-800
-                                          @elseif($billing->status == 'sent') bg-blue-100 text-blue-800
-                                          @else bg-gray-100 text-gray-800 @endif">
-                                        {{ ucfirst($billing->status) }}
-                                    </span>
-                                </td>
-                                <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-900">
-                                    {{ $billing->due_date ? $billing->due_date->format('d M Y') : '-' }}
-                                </td>
-                            </tr>
-                            @endforeach
-                        </tbody>
-                    </table>
-                </div>
-                
-                @if($project->billings->count() > 10)
-                <div class="mt-4 text-center">
-                    <a href="{{ route('billing-batches.index') }}" class="text-blue-600 hover:text-blue-800 text-sm font-medium">
-                        Lihat semua batch penagihan
-                    </a>
-                </div>
-                @endif
-                @else
-                <div class="text-center py-8">
-                    <svg class="mx-auto h-12 w-12 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"></path>
-                    </svg>
-                    <h3 class="mt-2 text-sm font-medium text-gray-900">Belum ada penagihan</h3>
-                    <p class="mt-1 text-sm text-gray-500">Mulai dengan menambahkan penagihan proyek.</p>
-                </div>
-                @endif
-            </div>
-
             <!-- Tab Aktivitas -->
             <div id="content-aktivitas" class="tab-content hidden">
                 <h3 class="text-lg font-semibold text-gray-800 mb-4">Aktivitas Proyek</h3>
                 
-                @if($project->activities->count() > 0)
-                <div class="space-y-4">
-                    @foreach($project->activities->take(20) as $activity)
-                    <div class="flex items-start space-x-3">
-                        <div class="flex-shrink-0">
-                            <div class="w-8 h-8 bg-blue-100 rounded-full flex items-center justify-center">
-                                <svg class="w-4 h-4 text-blue-600" fill="currentColor" viewBox="0 0 24 24">
-                                    <path d="M12,2A10,10 0 0,0 2,12A10,10 0 0,0 12,22A10,10 0 0,0 22,12A10,10 0 0,0 12,2M12,4A8,8 0 0,1 20,12A8,8 0 0,1 12,20A8,8 0 0,1 4,12A8,8 0 0,1 12,4M12,6A6,6 0 0,0 6,12A6,6 0 0,0 12,18A6,6 0 0,0 18,12A6,6 0 0,0 12,6Z"></path>
-                                </svg>
-                            </div>
+                @if($allActivities->count() > 0)
+                <!-- Activities Container with Pagination -->
+                <div id="activitiesContainer">
+                    <div id="activitiesList" class="space-y-4">
+                        <!-- Activities will be populated by JavaScript -->
+                    </div>
+                    
+                    <!-- Pagination Controls -->
+                    <div class="mt-6 flex items-center justify-between">
+                        <div class="text-sm text-gray-500">
+                            Menampilkan <span id="currentRange">1-5</span> dari <span id="totalActivities">{{ $allActivities->count() }}</span> aktivitas
                         </div>
-                        <div class="flex-1 min-w-0">
-                            <p class="text-sm text-gray-900">{{ $activity->description }}</p>
-                            <p class="text-xs text-gray-500 mt-1">
-                                {{ $activity->user->name }} • {{ $activity->created_at->diffForHumans() }}
-                            </p>
+                        <div class="flex items-center space-x-2">
+                            <button id="prevBtn" onclick="changePage(-1)" class="px-3 py-1 text-sm bg-gray-200 text-gray-600 rounded hover:bg-gray-300 disabled:opacity-50 disabled:cursor-not-allowed" disabled>
+                                <svg class="w-4 h-4 inline mr-1" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 19l-7-7 7-7"></path>
+                                </svg>
+                                Sebelumnya
+                            </button>
+                            <span id="pageInfo" class="text-sm text-gray-600">Halaman 1 dari 1</span>
+                            <button id="nextBtn" onclick="changePage(1)" class="px-3 py-1 text-sm bg-blue-600 text-white rounded hover:bg-blue-700 disabled:opacity-50 disabled:cursor-not-allowed">
+                                Selanjutnya
+                                <svg class="w-4 h-4 inline ml-1" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7"></path>
+                                </svg>
+                            </button>
                         </div>
                     </div>
-                    @endforeach
                 </div>
+
+                <!-- Hidden data for JavaScript -->
+                <script type="application/json" id="activitiesData">
+                    {!! json_encode($allActivities->values()) !!}
+                </script>
                 @else
                 <div class="text-center py-8">
                     <svg class="mx-auto h-12 w-12 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5H7a2 2 0 00-2 2v10a2 2 0 002 2h8a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2"></path>
                     </svg>
                     <h3 class="mt-2 text-sm font-medium text-gray-900">Belum ada aktivitas</h3>
-                    <p class="mt-1 text-sm text-gray-500">Aktivitas proyek akan muncul di sini.</p>
-                </div>
-                @endif
-            </div>
-
-            <!-- Tab Pendapatan -->
-            <div id="content-pendapatan" class="tab-content hidden">
-                <div class="flex justify-between items-center mb-4">
-                    <h3 class="text-lg font-semibold text-gray-800">Pendapatan Proyek</h3>
-                </div>
-                
-                @if($project->revenues->count() > 0)
-                <div class="overflow-x-auto">
-                    <table class="min-w-full divide-y divide-gray-200">
-                        <thead class="bg-blue-600">
-                            <tr>
-                                <th class="px-6 py-3 text-left text-xs font-bold text-white uppercase tracking-wider">Tanggal</th>
-                                <th class="px-6 py-3 text-left text-xs font-bold text-white uppercase tracking-wider">Deskripsi</th>
-                                <th class="px-6 py-3 text-left text-xs font-bold text-white uppercase tracking-wider">Jumlah</th>
-                                <th class="px-6 py-3 text-left text-xs font-bold text-white uppercase tracking-wider">Status</th>
-                            </tr>
-                        </thead>
-                        <tbody class="bg-white divide-y divide-gray-200">
-                            @foreach($project->revenues as $revenue)
-                            <tr class="hover:bg-gray-50">
-                                <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-900">
-                                    {{ $revenue->revenue_date->format('d M Y') }}
-                                </td>
-                                <td class="px-6 py-4 text-sm text-gray-900">
-                                    {{ $revenue->description }}
-                                </td>
-                                <td class="px-6 py-4 whitespace-nowrap text-sm font-medium text-gray-900">
-                                    Rp {{ number_format($revenue->amount, 0, ',', '.') }}
-                                </td>
-                                <td class="px-6 py-4 whitespace-nowrap">
-                                    <span class="inline-flex px-2 py-1 text-xs font-semibold rounded-full bg-green-100 text-green-800">
-                                        Diterima
-                                    </span>
-                                </td>
-                            </tr>
-                            @endforeach
-                        </tbody>
-                    </table>
-                </div>
-                @else
-                <div class="text-center py-8">
-                    <svg class="mx-auto h-12 w-12 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8c-1.657 0-3 .895-3 2s1.343 2 3 2 3 .895 3 2-1.343 2-3 2m0-8c1.11 0 2.08.402 2.599 1M12 8V7m0 1v8m0 0v1m0-1c-1.11 0-2.08-.402-2.599-1"></path>
-                    </svg>
-                    <h3 class="mt-2 text-sm font-medium text-gray-900">Belum ada pendapatan</h3>
-                    <p class="mt-1 text-sm text-gray-500">Pendapatan proyek akan muncul di sini.</p>
+                    <p class="mt-1 text-sm text-gray-500">Aktivitas proyek akan muncul di sini secara otomatis.</p>
                 </div>
                 @endif
             </div>
@@ -1010,5 +896,220 @@ document.addEventListener('click', function(e) {
         });
     }
 });
+
+// Activities Pagination
+let activitiesData = [];
+let currentPage = 1;
+const itemsPerPage = 5;
+
+// Initialize activities pagination when DOM is loaded
+document.addEventListener('DOMContentLoaded', function() {
+    const activitiesDataElement = document.getElementById('activitiesData');
+    if (activitiesDataElement) {
+        try {
+            activitiesData = JSON.parse(activitiesDataElement.textContent);
+            displayActivities();
+        } catch (e) {
+            console.error('Error parsing activities data:', e);
+        }
+    }
+});
+
+function displayActivities() {
+    const startIndex = (currentPage - 1) * itemsPerPage;
+    const endIndex = startIndex + itemsPerPage;
+    const currentActivities = activitiesData.slice(startIndex, endIndex);
+    
+    const activitiesList = document.getElementById('activitiesList');
+    if (!activitiesList) return;
+    
+    activitiesList.innerHTML = '';
+    
+    currentActivities.forEach(activity => {
+        const activityElement = createActivityElement(activity);
+        activitiesList.appendChild(activityElement);
+    });
+    
+    updatePaginationControls();
+}
+
+function createActivityElement(activity) {
+    const div = document.createElement('div');
+    div.className = 'flex items-start space-x-3 p-4 bg-gray-50 rounded-lg hover:bg-gray-100 transition-colors';
+    
+    const iconSvg = getActivityIcon(activity.icon, activity.color);
+    const createdAt = new Date(activity.created_at);
+    const timeAgo = getTimeAgo(createdAt);
+    const formattedDate = createdAt.toLocaleDateString('id-ID', {
+        day: '2-digit',
+        month: 'short',
+        year: 'numeric',
+        hour: '2-digit',
+        minute: '2-digit'
+    });
+    
+    let additionalInfo = '';
+    
+    // Add specific information based on activity type
+    if (activity.notes) {
+        additionalInfo += `<p class="text-xs text-gray-600 mt-2 italic">Catatan: ${activity.notes}</p>`;
+    }
+    
+    if (activity.type === 'billing_status' && activity.batch_code) {
+        additionalInfo += `<div class="mt-2 text-xs text-gray-600"><span class="font-medium">Batch:</span> ${activity.batch_code}</div>`;
+    }
+    
+    if (activity.type === 'expense_approval' && activity.amount) {
+        additionalInfo += `<div class="mt-2 text-xs text-gray-600"><span class="font-medium">Jumlah:</span> Rp ${formatNumber(activity.amount)}</div>`;
+    }
+    
+    if (activity.type === 'timeline_update' && activity.progress !== undefined) {
+        additionalInfo += `<div class="mt-2 text-xs text-gray-600"><span class="font-medium">Progress:</span> ${activity.progress}%</div>`;
+    }
+    
+    if (activity.type === 'expense_created' && activity.amount) {
+        additionalInfo += `<div class="mt-2 flex items-center justify-between text-xs text-gray-600">
+            <span><span class="font-medium">Jumlah:</span> Rp ${formatNumber(activity.amount)}</span>
+            <span><span class="font-medium">Kategori:</span> ${activity.category ? activity.category.charAt(0).toUpperCase() + activity.category.slice(1) : ''}</span>
+        </div>`;
+    }
+    
+    div.innerHTML = `
+        <div class="flex-shrink-0">
+            <div class="w-10 h-10 bg-${activity.color}-100 rounded-full flex items-center justify-center">
+                ${iconSvg}
+            </div>
+        </div>
+        <div class="flex-1 min-w-0">
+            <div class="flex items-center justify-between">
+                <h4 class="text-sm font-medium text-gray-900">${activity.title}</h4>
+                <span class="inline-flex px-2 py-1 text-xs font-semibold rounded-full bg-${activity.color}-100 text-${activity.color}-800">
+                    ${activity.type.replace(/_/g, ' ').replace(/\b\w/g, l => l.toUpperCase())}
+                </span>
+            </div>
+            <p class="text-sm text-gray-700 mt-1">${activity.description}</p>
+            ${additionalInfo}
+            <div class="flex items-center justify-between mt-2">
+                <p class="text-xs text-gray-500">
+                    <span class="font-medium">${activity.user}</span> • ${timeAgo}
+                </p>
+                <p class="text-xs text-gray-400">
+                    ${formattedDate}
+                </p>
+            </div>
+        </div>
+    `;
+    
+    return div;
+}
+
+function getActivityIcon(icon, color) {
+    const iconClass = `w-5 h-5 text-${color}-600`;
+    
+    switch (icon) {
+        case 'activity':
+            return `<svg class="${iconClass}" fill="currentColor" viewBox="0 0 24 24">
+                <path d="M12,2A10,10 0 0,0 2,12A10,10 0 0,0 12,22A10,10 0 0,0 22,12A10,10 0 0,0 12,2M12,4A8,8 0 0,1 20,12A8,8 0 0,1 12,20A8,8 0 0,1 4,12A8,8 0 0,1 12,4M12,6A6,6 0 0,0 6,12A6,6 0 0,0 12,18A6,6 0 0,0 18,12A6,6 0 0,0 12,6Z"></path>
+            </svg>`;
+        case 'billing':
+            return `<svg class="${iconClass}" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"></path>
+            </svg>`;
+        case 'money':
+            return `<svg class="${iconClass}" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8c-1.657 0-3 .895-3 2s1.343 2 3 2 3 .895 3 2-1.343 2-3 2m0-8c1.11 0 2.08.402 2.599 1M12 8V7m0 1v8m0 0v1m0-1c-1.11 0-2.08-.402-2.599-1"></path>
+            </svg>`;
+        case 'calendar':
+            return `<svg class="${iconClass}" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z"></path>
+            </svg>`;
+        case 'document':
+            return `<svg class="${iconClass}" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"></path>
+            </svg>`;
+        case 'expense':
+            return `<svg class="${iconClass}" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 9V7a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2m2 4h10a2 2 0 002-2v-6a2 2 0 00-2-2H9a2 2 0 00-2 2v6a2 2 0 002 2zm7-5a2 2 0 11-4 0 2 2 0 014 0z"></path>
+            </svg>`;
+        default:
+            return `<svg class="${iconClass}" fill="currentColor" viewBox="0 0 24 24">
+                <path d="M12,2A10,10 0 0,0 2,12A10,10 0 0,0 12,22A10,10 0 0,0 22,12A10,10 0 0,0 12,2M12,4A8,8 0 0,1 20,12A8,8 0 0,1 12,20A8,8 0 0,1 4,12A8,8 0 0,1 12,4M12,6A6,6 0 0,0 6,12A6,6 0 0,0 12,18A6,6 0 0,0 18,12A6,6 0 0,0 12,6Z"></path>
+            </svg>`;
+    }
+}
+
+function updatePaginationControls() {
+    const totalPages = Math.ceil(activitiesData.length / itemsPerPage);
+    const startIndex = (currentPage - 1) * itemsPerPage + 1;
+    const endIndex = Math.min(currentPage * itemsPerPage, activitiesData.length);
+    
+    // Update range display
+    document.getElementById('currentRange').textContent = `${startIndex}-${endIndex}`;
+    document.getElementById('totalActivities').textContent = activitiesData.length;
+    
+    // Update page info
+    document.getElementById('pageInfo').textContent = `Halaman ${currentPage} dari ${totalPages}`;
+    
+    // Update button states
+    const prevBtn = document.getElementById('prevBtn');
+    const nextBtn = document.getElementById('nextBtn');
+    
+    prevBtn.disabled = currentPage === 1;
+    nextBtn.disabled = currentPage === totalPages;
+    
+    if (prevBtn.disabled) {
+        prevBtn.classList.add('opacity-50', 'cursor-not-allowed');
+        prevBtn.classList.remove('hover:bg-gray-300');
+    } else {
+        prevBtn.classList.remove('opacity-50', 'cursor-not-allowed');
+        prevBtn.classList.add('hover:bg-gray-300');
+    }
+    
+    if (nextBtn.disabled) {
+        nextBtn.classList.add('opacity-50', 'cursor-not-allowed');
+        nextBtn.classList.remove('hover:bg-blue-700');
+    } else {
+        nextBtn.classList.remove('opacity-50', 'cursor-not-allowed');
+        nextBtn.classList.add('hover:bg-blue-700');
+    }
+}
+
+function changePage(direction) {
+    const totalPages = Math.ceil(activitiesData.length / itemsPerPage);
+    const newPage = currentPage + direction;
+    
+    if (newPage >= 1 && newPage <= totalPages) {
+        currentPage = newPage;
+        displayActivities();
+    }
+}
+
+function formatNumber(number) {
+    return new Intl.NumberFormat('id-ID').format(number);
+}
+
+function getTimeAgo(date) {
+    const now = new Date();
+    const diffInSeconds = Math.floor((now - date) / 1000);
+    
+    if (diffInSeconds < 60) {
+        return `${diffInSeconds} detik yang lalu`;
+    } else if (diffInSeconds < 3600) {
+        const minutes = Math.floor(diffInSeconds / 60);
+        return `${minutes} menit yang lalu`;
+    } else if (diffInSeconds < 86400) {
+        const hours = Math.floor(diffInSeconds / 3600);
+        return `${hours} jam yang lalu`;
+    } else if (diffInSeconds < 2592000) {
+        const days = Math.floor(diffInSeconds / 86400);
+        return `${days} hari yang lalu`;
+    } else if (diffInSeconds < 31536000) {
+        const months = Math.floor(diffInSeconds / 2592000);
+        return `${months} bulan yang lalu`;
+    } else {
+        const years = Math.floor(diffInSeconds / 31536000);
+        return `${years} tahun yang lalu`;
+    }
+}
 </script>
 @endsection

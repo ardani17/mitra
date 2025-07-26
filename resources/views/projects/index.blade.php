@@ -223,32 +223,31 @@
                             <div class="space-y-1">
                                 <!-- Status Badge -->
                                 <span class="inline-flex px-2 py-1 text-xs font-semibold rounded-full {{ $project->billing_status_badge_color }}">
-                                    @if($project->billing_status == 'not_billed') Belum
-                                    @elseif($project->billing_status == 'partially_billed') Sebagian
-                                    @elseif($project->billing_status == 'fully_billed') Lunas
-                                    @else Belum
-                                    @endif
+                                    {{ $project->billing_status_label }}
                                 </span>
                                 
                                 <!-- Progress Bar -->
                                 <div class="w-full">
                                     <div class="flex justify-between text-xs text-gray-600 mb-1">
-                                        <span>{{ number_format($project->billing_percentage, 0) }}%</span>
-                                        <span>{{ \App\Helpers\FormatHelper::formatRupiah($project->total_billed_amount) }}</span>
+                                        <span>{{ $project->billing_progress_percentage }}%</span>
+                                        <span>{{ \App\Helpers\FormatHelper::formatRupiah($project->total_received_amount) }}</span>
                                     </div>
                                     <div class="w-full bg-gray-200 rounded-full h-1.5">
                                         <div class="h-1.5 rounded-full transition-all duration-300 
-                                                  @if($project->billing_status == 'fully_billed') bg-green-500
-                                                  @elseif($project->billing_status == 'partially_billed') bg-yellow-500
-                                                  @else bg-red-500 @endif" 
-                                             style="width: {{ min($project->billing_percentage, 100) }}%"></div>
+                                                  @if($project->current_billing_status == 'paid') bg-green-500
+                                                  @elseif(in_array($project->current_billing_status, ['regional_verification', 'payment_entry_ho'])) bg-blue-500
+                                                  @elseif(in_array($project->current_billing_status, ['area_verification', 'sent'])) bg-yellow-500
+                                                  @elseif(in_array($project->current_billing_status, ['area_revision', 'regional_revision'])) bg-orange-500
+                                                  @elseif($project->current_billing_status == 'cancelled') bg-red-500
+                                                  @else bg-gray-500 @endif" 
+                                             style="width: {{ $project->billing_progress_percentage }}%"></div>
                                     </div>
                                 </div>
                                 
                                 <!-- Latest Invoice -->
-                                @if($project->latest_invoice_number)
-                                <div class="text-xs text-gray-500 truncate" title="{{ $project->latest_invoice_number }}">
-                                    {{ Str::limit($project->latest_invoice_number, 15) }}
+                                @if($project->latest_billing_info['invoice_number'])
+                                <div class="text-xs text-gray-500 truncate" title="{{ $project->latest_billing_info['invoice_number'] }}">
+                                    {{ Str::limit($project->latest_billing_info['invoice_number'], 15) }}
                                 </div>
                                 @endif
                             </div>
@@ -382,23 +381,22 @@
                         <label class="text-xs font-medium text-gray-500">Status Tagihan</label>
                         <div class="mt-1">
                             <span class="inline-flex px-2 py-1 text-xs font-semibold rounded-full {{ $project->billing_status_badge_color }}">
-                                @if($project->billing_status == 'not_billed') Belum Ditagih
-                                @elseif($project->billing_status == 'partially_billed') Sebagian
-                                @elseif($project->billing_status == 'fully_billed') Lunas
-                                @else Belum Ditagih
-                                @endif
+                                {{ $project->billing_status_label }}
                             </span>
                             <div class="mt-2">
                                 <div class="flex justify-between text-xs text-gray-600 mb-1">
-                                    <span>{{ number_format($project->billing_percentage, 0) }}%</span>
-                                    <span>{{ \App\Helpers\FormatHelper::formatRupiah($project->total_billed_amount) }}</span>
+                                    <span>{{ $project->billing_progress_percentage }}%</span>
+                                    <span>{{ \App\Helpers\FormatHelper::formatRupiah($project->total_received_amount) }}</span>
                                 </div>
                                 <div class="w-full bg-gray-200 rounded-full h-2">
                                     <div class="h-2 rounded-full transition-all duration-300 
-                                              @if($project->billing_status == 'fully_billed') bg-green-500
-                                              @elseif($project->billing_status == 'partially_billed') bg-yellow-500
-                                              @else bg-red-500 @endif" 
-                                         style="width: {{ min($project->billing_percentage, 100) }}%"></div>
+                                              @if($project->current_billing_status == 'paid') bg-green-500
+                                              @elseif(in_array($project->current_billing_status, ['regional_verification', 'payment_entry_ho'])) bg-blue-500
+                                              @elseif(in_array($project->current_billing_status, ['area_verification', 'sent'])) bg-yellow-500
+                                              @elseif(in_array($project->current_billing_status, ['area_revision', 'regional_revision'])) bg-orange-500
+                                              @elseif($project->current_billing_status == 'cancelled') bg-red-500
+                                              @else bg-gray-500 @endif" 
+                                         style="width: {{ $project->billing_progress_percentage }}%"></div>
                                 </div>
                             </div>
                         </div>

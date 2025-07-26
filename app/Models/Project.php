@@ -674,4 +674,139 @@ class Project extends Model
         return $query->where('status', 'completed')
                     ->whereIn('billing_status', ['not_billed', 'partially_billed']);
     }
+
+    /**
+     * Get all activities related to this project
+     */
+    public function getAllActivities()
+    {
+        $activities = collect();
+
+        // 1. Project Activities (aktivitas umum proyek)
+        $projectActivities = $this->activities()->with('user')->get()->map(function ($activity) {
+            return [
+                'id' => $activity->id,
+                'type' => 'project_activity',
+                'icon' => 'activity',
+                'color' => 'blue',
+                'title' => 'Aktivitas Proyek',
+                'description' => $activity->description,
+                'user' => $activity->user->name,
+                'user_id' => $activity->user_id,
+                'created_at' => $activity->created_at,
+                'changes' => $activity->changes,
+                'activity_type' => $activity->activity_type
+            ];
+        });
+
+        // 2. Billing Status Logs (log perubahan status billing batch)
+        $billingLogs = \App\Models\BillingStatusLog::whereHas('billingBatch.projectBillings', function ($query) {
+            $query->where('project_id', $this->id);
+        })->with(['user', 'billingBatch'])->get()->map(function ($log) {
+            return [
+                'id' => $log->id,
+                'type' => 'billing_status',
+                'icon' => 'billing',
+                'color' => 'green',
+                'title' => 'Perubahan Status Billing',
+                'description' => "Status billing batch {$log->billingBatch->batch_code} diubah menjadi: {$log->status_label}",
+                'user' => $log->user->name ?? 'System',
+                'user_id' => $log->user_id,
+                'created_at' => $log->created_at,
+                'notes' => $log->notes,
+                'status' => $log->status,
+                'batch_code' => $log->billingBatch->batch_code
+            ];
+        });
+
+        // 3. Expense Approvals (riwayat persetujuan pengeluaran)
+        $expenseApprovals = \App\Models\ExpenseApproval::whereHas('expense', function ($query) {
+            $query->where('project_id', $this->id);
+        })->with(['approver', 'expense'])->get()->map(function ($approval) {
+            $statusLabels = [
+                'pending' => 'Menunggu Persetujuan',
+                'approved' => 'Disetujui',
+                'rejected' => 'Ditolak'
+            ];
+            
+            return [
+                'id' => $approval->id,
+                'type' => 'expense_approval',
+                'icon' => 'money',
+                'color' => $approval->status === 'approved' ? 'green' : ($approval->status === 'rejected' ? 'red' : 'yellow'),
+                'title' => 'Persetujuan Pengeluaran',
+                'description' => "Pengeluaran '{$approval->expense->description}' {$statusLabels[$approval->status]} sebesar Rp " . number_format($approval->expense->amount, 0, ',', '.'),
+                'user' => $approval->approver->name ?? 'System',
+                'user_id' => $approval->approver_id,
+                'created_at' => $approval->created_at,
+                'notes' => $approval->notes,
+                'status' => $approval->status,
+                'amount' => $approval->expense->amount
+            ];
+        });
+
+        // 4. Timeline Updates (perubahan pada milestone timeline)
+        $timelineActivities = $this->timelines()->get()->map(function ($timeline) {
+            return [
+                'id' => $timeline->id,
+                'type' => 'timeline_update',
+                'icon' => 'calendar',
+                'color' => 'purple',
+                'title' => 'Update Timeline',
+                'description' => "Milestone '{$timeline->milestone}' dibuat dengan status: {$timeline->status}",
+                'user' => 'System',
+                'user_id' => null,
+                'created_at' => $timeline->created_at,
+                'milestone' => $timeline->milestone,
+                'status' => $timeline->status,
+                'progress' => $timeline->progress_percentage
+            ];
+        });
+
+        // 5. Document Activities (upload/hapus dokumen)
+        $documentActivities = $this->documents()->with('uploader')->get()->map(function ($document) {
+            return [
+                'id' => $document->id,
+                'type' => 'document_upload',
+                'icon' => 'document',
+                'color' => 'indigo',
+                'title' => 'Upload Dokumen',
+                'description' => "Dokumen '{$document->name}' diunggah ({$document->document_type_label})",
+                'user' => $document->uploader->name,
+                'user_id' => $document->uploaded_by,
+                'created_at' => $document->created_at,
+                'document_name' => $document->name,
+                'document_type' => $document->document_type
+            ];
+        });
+
+        // 6. Expense Activities (penambahan pengeluaran baru)
+        $expenseActivities = $this->expenses()->with('user')->get()->map(function ($expense) {
+            return [
+                'id' => $expense->id,
+                'type' => 'expense_created',
+                'icon' => 'expense',
+                'color' => 'orange',
+                'title' => 'Pengeluaran Baru',
+                'description' => "Pengeluaran '{$expense->description}' ditambahkan sebesar Rp " . number_format($expense->amount, 0, ',', '.'),
+                'user' => $expense->user->name,
+                'user_id' => $expense->user_id,
+                'created_at' => $expense->created_at,
+                'amount' => $expense->amount,
+                'category' => $expense->category,
+                'status' => $expense->status
+            ];
+        });
+
+        // Gabungkan semua aktivitas
+        $activities = $activities->concat($projectActivities)
+                               ->concat($billingLogs)
+                               ->concat($expenseApprovals)
+                               ->concat($timelineActivities)
+                               ->concat($documentActivities)
+                               ->concat($expenseActivities);
+
+        // Sort berdasarkan created_at descending
+        return $activities->sortByDesc('created_at')->take(50);
+    }
 }

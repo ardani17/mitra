@@ -78,110 +78,147 @@
                 </div>
             </div>
 
-            <!-- Ringkasan Anggaran -->
-            <div class="bg-white rounded-lg shadow-lg p-4 sm:p-6 mb-6 sm:mb-8 mx-4 sm:mx-0">
-                <h3 class="text-lg sm:text-xl font-bold text-gray-800 mb-4">Ringkasan Anggaran</h3>
-                <div class="grid grid-cols-1 sm:grid-cols-3 gap-4 sm:gap-6">
-                    <div class="text-center p-4 bg-blue-50 rounded-lg">
-                        <h4 class="text-sm sm:text-lg font-semibold text-gray-700 mb-2">Total Anggaran</h4>
-                        <p class="text-lg sm:text-2xl font-bold text-blue-600 break-words">{{ \App\Helpers\FormatHelper::formatRupiah($totalBudget) }}</p>
-                    </div>
-                    <div class="text-center p-4 bg-orange-50 rounded-lg">
-                        <h4 class="text-sm sm:text-lg font-semibold text-gray-700 mb-2">Utilisasi Anggaran</h4>
-                        @php
-                            $budgetUtilization = $totalBudget > 0 ? ($totalExpenses / $totalBudget) * 100 : 0;
-                        @endphp
-                        <p class="text-lg sm:text-2xl font-bold text-orange-600">{{ number_format($budgetUtilization, 1) }}%</p>
-                        <div class="w-full bg-gray-200 rounded-full h-2 sm:h-3 mt-2">
-                            <div class="bg-orange-500 h-2 sm:h-3 rounded-full transition-all duration-300" style="width: {{ min($budgetUtilization, 100) }}%"></div>
-                        </div>
-                    </div>
-                    <div class="text-center p-4 bg-green-50 rounded-lg">
-                        <h4 class="text-sm sm:text-lg font-semibold text-gray-700 mb-2">Sisa Anggaran</h4>
-                        <p class="text-lg sm:text-2xl font-bold text-green-600 break-words">{{ \App\Helpers\FormatHelper::formatRupiah($totalBudget - $totalExpenses) }}</p>
-                    </div>
-                </div>
-            </div>
-
-            <!-- Analytics Charts Section -->
-            <div class="bg-white rounded-lg shadow-lg p-4 sm:p-6 mb-6 sm:mb-8 mx-4 sm:mx-0">
-                <div class="flex flex-col sm:flex-row sm:justify-between sm:items-center mb-4 sm:mb-6 space-y-4 sm:space-y-0">
-                    <h3 class="text-lg sm:text-xl font-bold text-gray-800">Analisis Visual Proyek</h3>
-                    <div class="flex flex-col sm:flex-row items-stretch sm:items-center space-y-2 sm:space-y-0 sm:space-x-4">
-                        <select id="yearFilter" class="rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500 text-sm">
-                            <option value="">Pilih Tahun...</option>
-                        </select>
-                        <button id="refreshBtn" class="bg-blue-500 hover:bg-blue-700 text-white font-bold py-2 px-3 sm:px-4 rounded text-sm">
-                            Refresh
+            <!-- Analisis Tipe Proyek dengan Filter Advanced -->
+            <div class="bg-white rounded-lg shadow-lg p-6 mb-8 mx-4 sm:mx-0">
+                <div class="flex justify-between items-center mb-6">
+                    <h3 class="text-xl font-bold text-gray-800">Analisis Tipe Proyek</h3>
+                    <div class="flex space-x-2">
+                        <button id="resetFilters" class="text-sm text-gray-500 hover:text-gray-700 px-3 py-1 rounded border">
+                            Reset Filter
+                        </button>
+                        <button id="exportChart" class="bg-blue-500 hover:bg-blue-600 text-white px-3 py-1 rounded text-sm">
+                            Export
                         </button>
                     </div>
                 </div>
 
-                <!-- Loading State -->
-                <div id="loadingState" class="text-center py-8">
-                    <div class="animate-spin rounded-full h-12 w-12 border-b-2 border-blue-500 mx-auto"></div>
-                    <p class="mt-4 text-gray-600">Memuat data analitik...</p>
+                <!-- Advanced Filter Panel -->
+                <div class="bg-gray-50 rounded-lg p-4 mb-6">
+                    <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-6 gap-4">
+                        
+                        <!-- Periode Filter -->
+                        <div class="space-y-2">
+                            <label class="block text-sm font-medium text-gray-700">Periode</label>
+                            <select id="periodFilter" class="w-full rounded-md border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500 text-sm">
+                                <option value="all" selected>Semua Periode</option>
+                                <option value="today">Hari Ini</option>
+                                <option value="week">Minggu Ini</option>
+                                <option value="month">Bulan Ini</option>
+                                <option value="quarter">3 Bulan</option>
+                                <option value="semester">6 Bulan</option>
+                                <option value="year">1 Tahun</option>
+                                <option value="custom">Custom Range</option>
+                            </select>
+                        </div>
+
+                        <!-- Status Filter -->
+                        <div class="space-y-2">
+                            <label class="block text-sm font-medium text-gray-700">Status Proyek</label>
+                            <select id="statusFilter" class="w-full rounded-md border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500 text-sm">
+                                <option value="all">Semua Status</option>
+                                <option value="planning">Perencanaan</option>
+                                <option value="in_progress">Sedang Berjalan</option>
+                                <option value="completed">Selesai</option>
+                                <option value="cancelled">Dibatalkan</option>
+                            </select>
+                        </div>
+
+                        <!-- Nilai Proyek Filter -->
+                        <div class="space-y-2">
+                            <label class="block text-sm font-medium text-gray-700">Nilai Proyek</label>
+                            <select id="valueRangeFilter" class="w-full rounded-md border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500 text-sm">
+                                <option value="all">Semua Nilai</option>
+                                <option value="small">< 100 Juta</option>
+                                <option value="medium">100 Juta - 1 Miliar</option>
+                                <option value="large">> 1 Miliar</option>
+                                <option value="custom">Custom Range</option>
+                            </select>
+                        </div>
+
+                        <!-- Lokasi Filter -->
+                        <div class="space-y-2">
+                            <label class="block text-sm font-medium text-gray-700">Lokasi</label>
+                            <select id="locationFilter" class="w-full rounded-md border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500 text-sm">
+                                <option value="all">Semua Lokasi</option>
+                                <!-- Populated dynamically -->
+                            </select>
+                        </div>
+
+                        <!-- Client Filter -->
+                        <div class="space-y-2">
+                            <label class="block text-sm font-medium text-gray-700">Client</label>
+                            <select id="clientFilter" class="w-full rounded-md border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500 text-sm">
+                                <option value="all">Semua Client</option>
+                                <!-- Populated dynamically -->
+                            </select>
+                        </div>
+
+                        <!-- Apply Button -->
+                        <div class="space-y-2">
+                            <label class="block text-sm font-medium text-gray-700">Aksi</label>
+                            <button id="applyFilters" class="w-full bg-blue-500 hover:bg-blue-600 text-white px-3 py-2 rounded text-sm font-medium">
+                                Terapkan Filter
+                            </button>
+                        </div>
+                    </div>
+
+                    <!-- Custom Date Range (Hidden by default) -->
+                    <div id="customDateRange" class="mt-4 grid grid-cols-1 md:grid-cols-2 gap-4" style="display: none;">
+                        <div>
+                            <label class="block text-sm font-medium text-gray-700 mb-1">Tanggal Mulai</label>
+                            <input type="date" id="startDate" class="w-full rounded-md border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500 text-sm">
+                        </div>
+                        <div>
+                            <label class="block text-sm font-medium text-gray-700 mb-1">Tanggal Akhir</label>
+                            <input type="date" id="endDate" class="w-full rounded-md border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500 text-sm">
+                        </div>
+                    </div>
+
+                    <!-- Custom Value Range (Hidden by default) -->
+                    <div id="customValueRange" class="mt-4 grid grid-cols-1 md:grid-cols-2 gap-4" style="display: none;">
+                        <div>
+                            <label class="block text-sm font-medium text-gray-700 mb-1">Nilai Minimum (Rp)</label>
+                            <input type="number" id="minValue" class="w-full rounded-md border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500 text-sm" placeholder="0">
+                        </div>
+                        <div>
+                            <label class="block text-sm font-medium text-gray-700 mb-1">Nilai Maksimum (Rp)</label>
+                            <input type="number" id="maxValue" class="w-full rounded-md border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500 text-sm" placeholder="Tidak terbatas">
+                        </div>
+                    </div>
                 </div>
 
-                <!-- Charts Grid -->
-                <div id="chartsContainer" class="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-4 sm:gap-6" style="display: none;">
-                    <!-- Tipe Proyek Chart -->
-                    <div class="bg-gray-50 rounded-lg p-3 sm:p-4">
-                        <h4 class="text-sm sm:text-lg font-semibold text-gray-900 mb-3 sm:mb-4">Tipe Proyek</h4>
-                        <div class="relative h-48 sm:h-64">
-                            <canvas id="projectTypesChart"></canvas>
+                <!-- Chart Container -->
+                <div class="bg-gray-50 rounded-lg p-6">
+                    <div class="flex justify-between items-center mb-6">
+                        <h4 class="text-lg font-semibold text-gray-900">Distribusi Tipe Proyek</h4>
+                        <div class="text-sm text-gray-500" id="chartSubtitle">
+                            Semua periode
                         </div>
-                        <div id="projectTypesLegend" class="mt-3 sm:mt-4 text-xs sm:text-sm"></div>
+                    </div>
+                    
+                    <!-- Loading State -->
+                    <div id="chartLoading" class="text-center py-12">
+                        <div class="animate-spin rounded-full h-8 w-8 border-b-2 border-blue-500 mx-auto"></div>
+                        <p class="mt-2 text-gray-600 text-sm">Memuat data...</p>
                     </div>
 
-                    <!-- Lokasi Proyek Chart -->
-                    <div class="bg-gray-50 rounded-lg p-3 sm:p-4">
-                        <h4 class="text-sm sm:text-lg font-semibold text-gray-900 mb-3 sm:mb-4">Lokasi Proyek</h4>
-                        <div class="relative h-48 sm:h-64">
-                            <canvas id="projectLocationsChart"></canvas>
-                        </div>
-                        <div id="projectLocationsLegend" class="mt-3 sm:mt-4 text-xs sm:text-sm"></div>
+                    <!-- Chart -->
+                    <div id="chartContainer" class="relative h-96" style="display: none;">
+                        <canvas id="projectTypesChart"></canvas>
                     </div>
 
-                    <!-- Status Penagihan Chart -->
-                    <div class="bg-gray-50 rounded-lg p-3 sm:p-4">
-                        <h4 class="text-sm sm:text-lg font-semibold text-gray-900 mb-3 sm:mb-4">Status Penagihan</h4>
-                        <div class="relative h-48 sm:h-64">
-                            <canvas id="billingStatusChart"></canvas>
+                    <!-- No Data State -->
+                    <div id="noDataState" class="text-center py-12" style="display: none;">
+                        <div class="text-gray-400 mb-2">
+                            <svg class="w-12 h-12 mx-auto" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 19v-6a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2a2 2 0 002-2zm0 0V9a2 2 0 012-2h2a2 2 0 012 2v10m-6 0a2 2 0 002 2h2a2 2 0 002-2m0 0V5a2 2 0 012-2h2a2 2 0 012 2v14a2 2 0 01-2 2h-2a2 2 0 01-2-2z"></path>
+                            </svg>
                         </div>
-                        <div id="billingStatusLegend" class="mt-3 sm:mt-4 text-xs sm:text-sm"></div>
+                        <p class="text-gray-600">Tidak ada data untuk filter yang dipilih</p>
+                        <button onclick="resetAllFilters()" class="mt-2 text-blue-500 hover:text-blue-600 text-sm">
+                            Reset filter untuk melihat semua data
+                        </button>
                     </div>
-
-                    <!-- Status Proyek Chart -->
-                    <div class="bg-gray-50 rounded-lg p-3 sm:p-4">
-                        <h4 class="text-sm sm:text-lg font-semibold text-gray-900 mb-3 sm:mb-4">Status Proyek</h4>
-                        <div class="relative h-48 sm:h-64">
-                            <canvas id="projectStatusChart"></canvas>
-                        </div>
-                        <div id="projectStatusLegend" class="mt-3 sm:mt-4 text-xs sm:text-sm"></div>
-                    </div>
-
-                    <!-- Status Pembayaran Chart -->
-                    <div class="bg-gray-50 rounded-lg p-3 sm:p-4">
-                        <h4 class="text-sm sm:text-lg font-semibold text-gray-900 mb-3 sm:mb-4">Status Pembayaran</h4>
-                        <div class="relative h-48 sm:h-64">
-                            <canvas id="paymentStatusChart"></canvas>
-                        </div>
-                        <div id="paymentStatusLegend" class="mt-3 sm:mt-4 text-xs sm:text-sm"></div>
-                    </div>
-                </div>
-
-                <!-- Error State -->
-                <div id="errorState" class="text-center py-8" style="display: none;">
-                    <div class="text-red-500 mb-4">
-                        <svg class="w-12 h-12 mx-auto" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-2.5L13.732 4c-.77-.833-1.964-.833-2.732 0L3.732 16.5c-.77.833.192 2.5 1.732 2.5z"></path>
-                        </svg>
-                    </div>
-                    <p class="text-gray-600">Terjadi kesalahan saat memuat data. Silakan coba lagi.</p>
-                    <button id="retryBtn" class="mt-4 bg-blue-500 hover:bg-blue-700 text-white font-bold py-2 px-4 rounded">
-                        Coba Lagi
-                    </button>
                 </div>
             </div>
 
@@ -283,8 +320,18 @@
     
     <script>
         // Global variables
-        let charts = {};
-        let currentYear = new Date().getFullYear();
+        let projectTypesChart = null;
+        let currentFilters = {
+            period: 'all',
+            status: 'all',
+            valueRange: 'all',
+            location: 'all',
+            client: 'all',
+            startDate: null,
+            endDate: null,
+            minValue: null,
+            maxValue: null
+        };
 
         // Color palettes untuk charts
         const colorPalettes = {
@@ -294,128 +341,294 @@
 
         // Initialize dashboard
         document.addEventListener('DOMContentLoaded', function() {
-            loadAvailableYears();
-            loadDashboardData(currentYear);
+            initializeFilters();
+            loadLocationOptions();
+            loadClientOptions();
+            loadProjectTypesData();
             
-            // Event listeners
-            document.getElementById('yearFilter').addEventListener('change', function() {
-                const selectedYear = this.value;
-                if (selectedYear) {
-                    currentYear = selectedYear;
-                    loadDashboardData(selectedYear);
-                }
-            });
-
-            document.getElementById('refreshBtn').addEventListener('click', function() {
-                loadDashboardData(currentYear);
-            });
-
-            document.getElementById('retryBtn').addEventListener('click', function() {
-                loadDashboardData(currentYear);
-            });
+            // Event listeners untuk filter
+            document.getElementById('periodFilter').addEventListener('change', handlePeriodChange);
+            document.getElementById('valueRangeFilter').addEventListener('change', handleValueRangeChange);
+            document.getElementById('applyFilters').addEventListener('click', applyFilters);
+            document.getElementById('resetFilters').addEventListener('click', resetAllFilters);
+            document.getElementById('exportChart').addEventListener('click', exportChart);
         });
 
-        // Load available years
-        async function loadAvailableYears() {
+        // Initialize filter values
+        function initializeFilters() {
+            // Set default dates
+            const today = new Date();
+            const oneYearAgo = new Date(today.getFullYear() - 1, today.getMonth(), today.getDate());
+            
+            document.getElementById('endDate').value = today.toISOString().split('T')[0];
+            document.getElementById('startDate').value = oneYearAgo.toISOString().split('T')[0];
+        }
+
+        // Handle period filter change
+        function handlePeriodChange() {
+            const period = document.getElementById('periodFilter').value;
+            const customDateRange = document.getElementById('customDateRange');
+            
+            if (period === 'custom') {
+                customDateRange.style.display = 'grid';
+            } else {
+                customDateRange.style.display = 'none';
+                updateDateRangeFromPeriod(period);
+            }
+        }
+
+        // Handle value range filter change
+        function handleValueRangeChange() {
+            const valueRange = document.getElementById('valueRangeFilter').value;
+            const customValueRange = document.getElementById('customValueRange');
+            
+            if (valueRange === 'custom') {
+                customValueRange.style.display = 'grid';
+            } else {
+                customValueRange.style.display = 'none';
+            }
+        }
+
+        // Update date range based on period selection
+        function updateDateRangeFromPeriod(period) {
+            const today = new Date();
+            let startDate = new Date();
+            
+            switch(period) {
+                case 'today':
+                    startDate = new Date(today);
+                    break;
+                case 'week':
+                    startDate = new Date(today.getTime() - 7 * 24 * 60 * 60 * 1000);
+                    break;
+                case 'month':
+                    startDate = new Date(today.getFullYear(), today.getMonth(), 1);
+                    break;
+                case 'quarter':
+                    startDate = new Date(today.getTime() - 90 * 24 * 60 * 60 * 1000);
+                    break;
+                case 'semester':
+                    startDate = new Date(today.getTime() - 180 * 24 * 60 * 60 * 1000);
+                    break;
+                case 'year':
+                    startDate = new Date(today.getFullYear() - 1, today.getMonth(), today.getDate());
+                    break;
+                case 'all':
+                    startDate = null;
+                    break;
+            }
+            
+            if (startDate) {
+                document.getElementById('startDate').value = startDate.toISOString().split('T')[0];
+                document.getElementById('endDate').value = today.toISOString().split('T')[0];
+            }
+        }
+
+        // Load location options
+        async function loadLocationOptions() {
             try {
-                const response = await fetch('/api/dashboard/years');
-                const years = await response.json();
+                const response = await fetch('/api/dashboard/locations');
+                const locations = await response.json();
                 
-                const yearSelect = document.getElementById('yearFilter');
-                yearSelect.innerHTML = '<option value="">Pilih Tahun...</option>';
+                const locationSelect = document.getElementById('locationFilter');
+                locationSelect.innerHTML = '<option value="all">Semua Lokasi</option>';
                 
-                years.forEach(year => {
+                locations.forEach(location => {
                     const option = document.createElement('option');
-                    option.value = year;
-                    option.textContent = year;
-                    if (year == currentYear) {
-                        option.selected = true;
-                    }
-                    yearSelect.appendChild(option);
+                    option.value = location;
+                    option.textContent = location;
+                    locationSelect.appendChild(option);
                 });
             } catch (error) {
-                console.error('Error loading years:', error);
+                console.error('Error loading locations:', error);
             }
         }
 
-        // Load dashboard data
-        async function loadDashboardData(year) {
-            showLoading();
+        // Load client options
+        async function loadClientOptions() {
+            try {
+                const response = await fetch('/api/dashboard/clients');
+                const clients = await response.json();
+                
+                const clientSelect = document.getElementById('clientFilter');
+                clientSelect.innerHTML = '<option value="all">Semua Client</option>';
+                
+                clients.forEach(client => {
+                    const option = document.createElement('option');
+                    option.value = client;
+                    option.textContent = client;
+                    clientSelect.appendChild(option);
+                });
+            } catch (error) {
+                console.error('Error loading clients:', error);
+            }
+        }
+
+        // Apply filters and reload data
+        function applyFilters() {
+            // Collect filter values
+            currentFilters.period = document.getElementById('periodFilter').value;
+            currentFilters.status = document.getElementById('statusFilter').value;
+            currentFilters.valueRange = document.getElementById('valueRangeFilter').value;
+            currentFilters.location = document.getElementById('locationFilter').value;
+            currentFilters.client = document.getElementById('clientFilter').value;
+            
+            // Custom date range
+            if (currentFilters.period === 'custom') {
+                currentFilters.startDate = document.getElementById('startDate').value;
+                currentFilters.endDate = document.getElementById('endDate').value;
+            }
+            
+            // Custom value range
+            if (currentFilters.valueRange === 'custom') {
+                currentFilters.minValue = document.getElementById('minValue').value;
+                currentFilters.maxValue = document.getElementById('maxValue').value;
+            }
+            
+            // Update chart subtitle
+            updateChartSubtitle();
+            
+            // Load data with filters
+            loadProjectTypesData();
+        }
+
+        // Reset all filters
+        function resetAllFilters() {
+            document.getElementById('periodFilter').value = 'all';
+            document.getElementById('statusFilter').value = 'all';
+            document.getElementById('valueRangeFilter').value = 'all';
+            document.getElementById('locationFilter').value = 'all';
+            document.getElementById('clientFilter').value = 'all';
+            
+            document.getElementById('customDateRange').style.display = 'none';
+            document.getElementById('customValueRange').style.display = 'none';
+            
+            // Reset to default values
+            currentFilters = {
+                period: 'all',
+                status: 'all',
+                valueRange: 'all',
+                location: 'all',
+                client: 'all',
+                startDate: null,
+                endDate: null,
+                minValue: null,
+                maxValue: null
+            };
+            
+            updateChartSubtitle();
+            loadProjectTypesData();
+        }
+
+        // Update chart subtitle based on filters
+        function updateChartSubtitle() {
+            const period = document.getElementById('periodFilter').value;
+            const status = document.getElementById('statusFilter').value;
+            const location = document.getElementById('locationFilter').value;
+            
+            let subtitle = '';
+            
+            // Period
+            switch(period) {
+                case 'today': subtitle += 'Hari ini'; break;
+                case 'week': subtitle += 'Minggu ini'; break;
+                case 'month': subtitle += 'Bulan ini'; break;
+                case 'quarter': subtitle += '3 bulan terakhir'; break;
+                case 'semester': subtitle += '6 bulan terakhir'; break;
+                case 'year': subtitle += '1 tahun terakhir'; break;
+                case 'custom': subtitle += 'Periode custom'; break;
+                default: subtitle += 'Semua periode'; break;
+            }
+            
+            // Status
+            if (status !== 'all') {
+                subtitle += ` • Status: ${status.replace('_', ' ')}`;
+            }
+            
+            // Location
+            if (location !== 'all') {
+                subtitle += ` • Lokasi: ${location}`;
+            }
+            
+            document.getElementById('chartSubtitle').textContent = subtitle;
+        }
+
+        // Load project types data with filters
+        async function loadProjectTypesData() {
+            showChartLoading();
             
             try {
-                const response = await fetch(`/api/dashboard/analytics?year=${year}`);
+                // Build query parameters
+                const params = new URLSearchParams();
+                
+                Object.keys(currentFilters).forEach(key => {
+                    if (currentFilters[key] && currentFilters[key] !== 'all') {
+                        params.append(key, currentFilters[key]);
+                    }
+                });
+                
+                const response = await fetch(`/api/dashboard/project-types?${params.toString()}`);
                 const data = await response.json();
                 
-                createCharts(data.charts);
-                showCharts();
+                if (data.data && data.data.length > 0) {
+                    createProjectTypesChart(data.data);
+                    showChart();
+                } else {
+                    showNoData();
+                }
                 
             } catch (error) {
-                console.error('Error loading dashboard data:', error);
-                showError();
+                console.error('Error loading project types data:', error);
+                showChartError();
             }
         }
 
-        // Show loading state
-        function showLoading() {
-            document.getElementById('loadingState').style.display = 'block';
-            document.getElementById('chartsContainer').style.display = 'none';
-            document.getElementById('errorState').style.display = 'none';
+        // Show chart loading state
+        function showChartLoading() {
+            document.getElementById('chartLoading').style.display = 'block';
+            document.getElementById('chartContainer').style.display = 'none';
+            document.getElementById('noDataState').style.display = 'none';
         }
 
-        // Show charts
-        function showCharts() {
-            document.getElementById('loadingState').style.display = 'none';
-            document.getElementById('chartsContainer').style.display = 'grid';
-            document.getElementById('errorState').style.display = 'none';
+        // Show chart
+        function showChart() {
+            document.getElementById('chartLoading').style.display = 'none';
+            document.getElementById('chartContainer').style.display = 'block';
+            document.getElementById('noDataState').style.display = 'none';
         }
 
-        // Show error state
-        function showError() {
-            document.getElementById('loadingState').style.display = 'none';
-            document.getElementById('chartsContainer').style.display = 'none';
-            document.getElementById('errorState').style.display = 'block';
+        // Show no data state
+        function showNoData() {
+            document.getElementById('chartLoading').style.display = 'none';
+            document.getElementById('chartContainer').style.display = 'none';
+            document.getElementById('noDataState').style.display = 'block';
         }
 
-        // Create all charts
-        function createCharts(chartsData) {
-            // Destroy existing charts
-            Object.values(charts).forEach(chart => {
-                if (chart) chart.destroy();
-            });
-            charts = {};
-
-            // Create pie charts
-            charts.projectTypes = createPieChart('projectTypesChart', chartsData.project_types, 'Tipe Proyek');
-            charts.projectLocations = createPieChart('projectLocationsChart', chartsData.project_locations, 'Lokasi Proyek');
-            charts.billingStatus = createPieChart('billingStatusChart', chartsData.billing_status, 'Status Penagihan');
-            charts.projectStatus = createPieChart('projectStatusChart', chartsData.project_status, 'Status Proyek');
-            charts.paymentStatus = createPieChart('paymentStatusChart', chartsData.payment_status, 'Status Pembayaran');
-
-            // Create legends
-            createLegend('projectTypesLegend', chartsData.project_types);
-            createLegend('projectLocationsLegend', chartsData.project_locations);
-            createLegend('billingStatusLegend', chartsData.billing_status);
-            createLegend('projectStatusLegend', chartsData.project_status);
-            createLegend('paymentStatusLegend', chartsData.payment_status);
-        }
-
-        // Create pie chart
-        function createPieChart(canvasId, data, title) {
-            const ctx = document.getElementById(canvasId).getContext('2d');
+        // Create project types pie chart with labels inside
+        function createProjectTypesChart(data) {
+            const ctx = document.getElementById('projectTypesChart').getContext('2d');
+            
+            // Destroy existing chart
+            if (projectTypesChart) {
+                projectTypesChart.destroy();
+            }
             
             const labels = data.map(item => item.label);
-            const values = data.map(item => item.value);
+            const values = data.map(item => item.count);
             const colors = colorPalettes.primary.slice(0, data.length);
+            const totalCount = values.reduce((a, b) => a + b, 0);
             
-            return new Chart(ctx, {
+            projectTypesChart = new Chart(ctx, {
                 type: 'pie',
                 data: {
                     labels: labels,
                     datasets: [{
                         data: values,
                         backgroundColor: colors,
-                        borderColor: colors.map(color => color + '80'),
-                        borderWidth: 2
+                        borderColor: '#ffffff',
+                        borderWidth: 3,
+                        hoverBorderWidth: 4,
+                        hoverOffset: 10
                     }]
                 },
                 options: {
@@ -426,41 +639,93 @@
                             display: false
                         },
                         tooltip: {
+                            backgroundColor: 'rgba(0, 0, 0, 0.8)',
+                            titleColor: '#ffffff',
+                            bodyColor: '#ffffff',
+                            borderColor: '#ffffff',
+                            borderWidth: 1,
                             callbacks: {
                                 label: function(context) {
                                     const item = data[context.dataIndex];
-                                    const percentage = ((item.value / values.reduce((a, b) => a + b, 0)) * 100).toFixed(1);
-                                    return `${item.label}: ${item.value} (${percentage}%) - ${item.formatted_value}`;
+                                    const percentage = ((item.count / totalCount) * 100).toFixed(1);
+                                    return [
+                                        `${item.label}: ${item.count} proyek (${percentage}%)`,
+                                        `Total Nilai: ${item.formatted_total_value}`,
+                                        `Rata-rata: ${item.formatted_avg_value}`
+                                    ];
                                 }
                             }
                         }
+                    },
+                    animation: {
+                        animateRotate: true,
+                        animateScale: true,
+                        duration: 1000,
+                        onComplete: function() {
+                            // Draw labels inside pie slices after animation completes
+                            drawLabelsInsidePie(ctx, data, totalCount);
+                        }
+                    },
+                    onHover: (event, activeElements) => {
+                        event.native.target.style.cursor = activeElements.length > 0 ? 'pointer' : 'default';
                     }
                 }
             });
         }
 
-        // Create legend
-        function createLegend(legendId, data) {
-            const legendContainer = document.getElementById(legendId);
-            const totalValue = data.reduce((sum, item) => sum + item.value, 0);
+        // Function to draw labels inside pie chart
+        function drawLabelsInsidePie(ctx, data, totalCount) {
+            const chart = projectTypesChart;
+            const meta = chart.getDatasetMeta(0);
             
-            legendContainer.innerHTML = data.map((item, index) => {
-                const percentage = totalValue > 0 ? ((item.value / totalValue) * 100).toFixed(1) : 0;
-                const color = colorPalettes.primary[index % colorPalettes.primary.length];
+            ctx.save();
+            ctx.font = 'bold 12px Arial';
+            ctx.textAlign = 'center';
+            ctx.textBaseline = 'middle';
+            
+            meta.data.forEach((element, index) => {
+                const item = data[index];
+                const percentage = ((item.count / totalCount) * 100).toFixed(1);
                 
-                return `
-                    <div class="flex items-center justify-between mb-2">
-                        <div class="flex items-center">
-                            <div class="w-3 h-3 rounded-full mr-2" style="background-color: ${color}"></div>
-                            <span class="text-gray-700">${item.label}</span>
-                        </div>
-                        <div class="text-right">
-                            <div class="font-semibold">${item.value} (${percentage}%)</div>
-                            <div class="text-xs text-gray-500">${item.formatted_value}</div>
-                        </div>
-                    </div>
-                `;
-            }).join('');
+                // Calculate position for label (center of slice)
+                const angle = element.startAngle + (element.endAngle - element.startAngle) / 2;
+                const radius = element.outerRadius * 0.7; // Position at 70% of radius
+                const x = element.x + Math.cos(angle) * radius;
+                const y = element.y + Math.sin(angle) * radius;
+                
+                // Only draw label if slice is large enough
+                if (percentage > 5) {
+                    ctx.fillStyle = '#ffffff';
+                    ctx.strokeStyle = '#000000';
+                    ctx.lineWidth = 2;
+                    
+                    // Draw text with stroke for better visibility
+                    const lines = [
+                        item.label,
+                        `${item.count} (${percentage}%)`,
+                        item.formatted_total_value
+                    ];
+                    
+                    lines.forEach((line, lineIndex) => {
+                        const lineY = y + (lineIndex - 1) * 16; // 16px line height
+                        ctx.strokeText(line, x, lineY);
+                        ctx.fillText(line, x, lineY);
+                    });
+                }
+            });
+            
+            ctx.restore();
+        }
+
+        // Export chart functionality
+        function exportChart() {
+            if (projectTypesChart) {
+                const url = projectTypesChart.toBase64Image();
+                const link = document.createElement('a');
+                link.download = 'analisis-tipe-proyek.png';
+                link.href = url;
+                link.click();
+            }
         }
     </script>
 </x-app-layout>
