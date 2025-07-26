@@ -80,21 +80,46 @@
 
             <!-- Analisis Tipe Proyek dengan Filter Advanced -->
             <div class="bg-white rounded-lg shadow-lg p-6 mb-8 mx-4 sm:mx-0">
-                <div class="flex justify-between items-center mb-6">
-                    <h3 class="text-xl font-bold text-gray-800">Analisis Tipe Proyek</h3>
-                    <div class="flex space-x-2">
-                        <button id="resetFilters" class="text-sm text-gray-500 hover:text-gray-700 px-3 py-1 rounded border">
-                            Reset Filter
+                <div class="flex flex-col sm:flex-row justify-between items-start sm:items-center mb-6 gap-4">
+                    <div>
+                        <h3 class="text-xl font-bold text-gray-800">Analisis Tipe Proyek</h3>
+                        <p class="text-sm text-gray-600 mt-1">Distribusi dan performa proyek berdasarkan tipe</p>
+                    </div>
+                    <div class="flex flex-wrap gap-2">
+                        <button id="resetFilters" class="text-sm text-gray-500 hover:text-gray-700 px-3 py-1 rounded border border-gray-300 hover:border-gray-400 transition-colors">
+                            <svg class="w-4 h-4 inline mr-1" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15"></path>
+                            </svg>
+                            Reset
                         </button>
-                        <button id="exportChart" class="bg-blue-500 hover:bg-blue-600 text-white px-3 py-1 rounded text-sm">
+                        <button id="exportChart" class="bg-blue-500 hover:bg-blue-600 text-white px-3 py-1 rounded text-sm transition-colors">
+                            <svg class="w-4 h-4 inline mr-1" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 10v6m0 0l-3-3m3 3l3-3m2 8H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"></path>
+                            </svg>
                             Export
+                        </button>
+                        <button id="fullscreenChart" class="hidden lg:block bg-gray-500 hover:bg-gray-600 text-white px-3 py-1 rounded text-sm transition-colors">
+                            <svg class="w-4 h-4 inline mr-1" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 8V4m0 0h4M4 4l5 5m11-1V4m0 0h-4m4 0l-5 5M4 16v4m0 0h4m-4 0l5-5m11 5l-5-5m5 5v-4m0 4h-4"></path>
+                            </svg>
+                            Fullscreen
                         </button>
                     </div>
                 </div>
 
                 <!-- Advanced Filter Panel -->
                 <div class="bg-gray-50 rounded-lg p-4 mb-6">
-                    <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-6 gap-4">
+                    <!-- Mobile: Collapsible Filter -->
+                    <div class="md:hidden mb-4">
+                        <button id="toggleMobileFilters" class="w-full bg-blue-500 text-white px-4 py-2 rounded-lg flex items-center justify-between">
+                            <span>Filter Proyek</span>
+                            <svg id="filterToggleIcon" class="w-5 h-5 transform transition-transform" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"></path>
+                            </svg>
+                        </button>
+                    </div>
+                    
+                    <div id="filterContent" class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-6 gap-4 md:block hidden md:grid">
                         
                         <!-- Periode Filter -->
                         <div class="space-y-2">
@@ -352,6 +377,25 @@
             document.getElementById('applyFilters').addEventListener('click', applyFilters);
             document.getElementById('resetFilters').addEventListener('click', resetAllFilters);
             document.getElementById('exportChart').addEventListener('click', exportChart);
+            
+            // Mobile filter toggle
+            const toggleButton = document.getElementById('toggleMobileFilters');
+            const filterContent = document.getElementById('filterContent');
+            const filterIcon = document.getElementById('filterToggleIcon');
+            
+            if (toggleButton) {
+                toggleButton.addEventListener('click', function() {
+                    const isHidden = filterContent.classList.contains('hidden');
+                    
+                    if (isHidden) {
+                        filterContent.classList.remove('hidden');
+                        filterIcon.style.transform = 'rotate(180deg)';
+                    } else {
+                        filterContent.classList.add('hidden');
+                        filterIcon.style.transform = 'rotate(0deg)';
+                    }
+                });
+            }
         });
 
         // Initialize filter values
@@ -678,8 +722,14 @@
             const chart = projectTypesChart;
             const meta = chart.getDatasetMeta(0);
             
+            // Detect mobile screen
+            const isMobile = window.innerWidth < 768;
+            const fontSize = isMobile ? 10 : 12;
+            const lineHeight = isMobile ? 12 : 16;
+            const strokeWidth = isMobile ? 1 : 2;
+            
             ctx.save();
-            ctx.font = 'bold 12px Arial';
+            ctx.font = `bold ${fontSize}px Arial`;
             ctx.textAlign = 'center';
             ctx.textBaseline = 'middle';
             
@@ -689,25 +739,34 @@
                 
                 // Calculate position for label (center of slice)
                 const angle = element.startAngle + (element.endAngle - element.startAngle) / 2;
-                const radius = element.outerRadius * 0.7; // Position at 70% of radius
+                const radius = element.outerRadius * (isMobile ? 0.6 : 0.7); // Closer to center on mobile
                 const x = element.x + Math.cos(angle) * radius;
                 const y = element.y + Math.sin(angle) * radius;
                 
                 // Only draw label if slice is large enough
-                if (percentage > 5) {
+                const minPercentage = isMobile ? 10 : 5; // Higher threshold on mobile
+                if (percentage > minPercentage) {
                     ctx.fillStyle = '#ffffff';
                     ctx.strokeStyle = '#000000';
-                    ctx.lineWidth = 2;
+                    ctx.lineWidth = strokeWidth;
                     
-                    // Draw text with stroke for better visibility
-                    const lines = [
-                        item.label,
-                        `${item.count} (${percentage}%)`,
-                        item.formatted_total_value
-                    ];
+                    // Prepare lines - shorter format for mobile
+                    let lines;
+                    if (isMobile) {
+                        lines = [
+                            item.label,
+                            `${item.count} (${percentage}%)`
+                        ];
+                    } else {
+                        lines = [
+                            item.label,
+                            `${item.count} (${percentage}%)`,
+                            item.formatted_total_value
+                        ];
+                    }
                     
                     lines.forEach((line, lineIndex) => {
-                        const lineY = y + (lineIndex - 1) * 16; // 16px line height
+                        const lineY = y + (lineIndex - (lines.length - 1) / 2) * lineHeight;
                         ctx.strokeText(line, x, lineY);
                         ctx.fillText(line, x, lineY);
                     });
