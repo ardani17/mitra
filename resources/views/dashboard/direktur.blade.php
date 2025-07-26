@@ -717,16 +717,20 @@
             });
         }
 
-        // Function to draw labels inside pie chart
+        // Function to draw labels inside pie chart (desktop only)
         function drawLabelsInsidePie(ctx, data, totalCount) {
             const chart = projectTypesChart;
             const meta = chart.getDatasetMeta(0);
             
-            // Detect mobile screen
+            // Only draw labels on desktop (screen width >= 768px)
             const isMobile = window.innerWidth < 768;
-            const fontSize = isMobile ? 10 : 12;
-            const lineHeight = isMobile ? 12 : 16;
-            const strokeWidth = isMobile ? 1 : 2;
+            if (isMobile) {
+                return; // Skip drawing labels on mobile
+            }
+            
+            const fontSize = 12;
+            const lineHeight = 16;
+            const strokeWidth = 2;
             
             ctx.save();
             ctx.font = `bold ${fontSize}px Arial`;
@@ -739,31 +743,22 @@
                 
                 // Calculate position for label (center of slice)
                 const angle = element.startAngle + (element.endAngle - element.startAngle) / 2;
-                const radius = element.outerRadius * (isMobile ? 0.6 : 0.7); // Closer to center on mobile
+                const radius = element.outerRadius * 0.7; // 70% of radius
                 const x = element.x + Math.cos(angle) * radius;
                 const y = element.y + Math.sin(angle) * radius;
                 
-                // Only draw label if slice is large enough
-                const minPercentage = isMobile ? 10 : 5; // Higher threshold on mobile
-                if (percentage > minPercentage) {
+                // Only draw label if slice is large enough (5% threshold for desktop)
+                if (percentage > 5) {
                     ctx.fillStyle = '#ffffff';
                     ctx.strokeStyle = '#000000';
                     ctx.lineWidth = strokeWidth;
                     
-                    // Prepare lines - shorter format for mobile
-                    let lines;
-                    if (isMobile) {
-                        lines = [
-                            item.label,
-                            `${item.count} (${percentage}%)`
-                        ];
-                    } else {
-                        lines = [
-                            item.label,
-                            `${item.count} (${percentage}%)`,
-                            item.formatted_total_value
-                        ];
-                    }
+                    // Full format for desktop
+                    const lines = [
+                        item.label,
+                        `${item.count} (${percentage}%)`,
+                        item.formatted_total_value
+                    ];
                     
                     lines.forEach((line, lineIndex) => {
                         const lineY = y + (lineIndex - (lines.length - 1) / 2) * lineHeight;
