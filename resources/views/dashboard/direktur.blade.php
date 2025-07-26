@@ -210,14 +210,6 @@
                             <h3 class="text-xl font-bold text-gray-800">Analisis Tipe Proyek</h3>
                             <p class="text-sm text-gray-600 mt-1">Distribusi dan performa proyek berdasarkan tipe</p>
                         </div>
-                        <div class="flex flex-wrap gap-2">
-                            <button id="exportChart" class="bg-blue-500 hover:bg-blue-600 text-white px-3 py-1 rounded text-sm transition-colors">
-                                <svg class="w-4 h-4 inline mr-1" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 10v6m0 0l-3-3m3 3l3-3m2 8H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"></path>
-                                </svg>
-                                Export
-                            </button>
-                        </div>
                     </div>
 
                     <!-- Chart Container -->
@@ -274,14 +266,6 @@
                             <h3 class="text-xl font-bold text-gray-800">Analisis Status Tagihan</h3>
                             <p class="text-sm text-gray-600 mt-1">Distribusi proyek berdasarkan status tagihan dan pembayaran</p>
                         </div>
-                        <div class="flex flex-wrap gap-2">
-                            <button id="exportBillingChart" class="bg-green-500 hover:bg-green-600 text-white px-3 py-1 rounded text-sm transition-colors">
-                                <svg class="w-4 h-4 inline mr-1" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 10v6m0 0l-3-3m3 3l3-3m2 8H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"></path>
-                                </svg>
-                                Export
-                            </button>
-                        </div>
                     </div>
 
                     <!-- Chart Container -->
@@ -323,8 +307,8 @@
                                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 19v-6a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2a2 2 0 002-2zm0 0V9a2 2 0 012-2h2a2 2 0 012 2v10m-6 0a2 2 0 002 2h2a2 2 0 002-2m0 0V5a2 2 0 012-2h2a2 2 0 012 2v14a2 2 0 01-2 2h-2a2 2 0 01-2-2z"></path>
                                 </svg>
                             </div>
-                            <p class="text-gray-600 text-sm">Tidak ada data tagihan untuk filter yang dipilih</p>
-                            <button onclick="resetAllFilters()" class="mt-2 text-green-500 hover:text-green-600 text-xs">
+                            <p class="text-gray-600 text-sm">Tidak ada data untuk filter yang dipilih</p>
+                            <button onclick="resetAllFilters()" class="mt-2 text-blue-500 hover:text-blue-600 text-xs">
                                 Reset filter untuk melihat semua data
                             </button>
                         </div>
@@ -372,11 +356,6 @@
             document.getElementById('valueRangeFilter').addEventListener('change', handleValueRangeChange);
             document.getElementById('applyFilters').addEventListener('click', applyFilters);
             document.getElementById('resetFilters').addEventListener('click', resetAllFilters);
-            document.getElementById('exportChart').addEventListener('click', exportChart);
-            
-            // Event listeners untuk billing chart
-            document.getElementById('resetBillingFilters').addEventListener('click', resetBillingFilters);
-            document.getElementById('exportBillingChart').addEventListener('click', exportBillingChart);
             
             // Mobile filter toggle
             const toggleButton = document.getElementById('toggleMobileFilters');
@@ -614,8 +593,14 @@
                 const response = await fetch(`/api/dashboard/project-types?${params.toString()}`);
                 const data = await response.json();
                 
-                if (data.data && data.data.length > 0) {
-                    createProjectTypesChart(data.data);
+                // Check if there's actual data (not just empty records with 0 values)
+                const hasActualData = data.data && data.data.length > 0 && 
+                    data.data.some(item => item.count > 0);
+                
+                if (hasActualData) {
+                    // Filter out items with 0 count for chart display
+                    const filteredData = data.data.filter(item => item.count > 0);
+                    createProjectTypesChart(filteredData);
                     showChart();
                 } else {
                     showNoData();
@@ -822,8 +807,14 @@
                 const response = await fetch(`/api/dashboard/billing-status?${params.toString()}`);
                 const data = await response.json();
                 
-                if (data.data && data.data.length > 0) {
-                    createBillingStatusChart(data.data);
+                // Check if there's actual data (not just empty records with 0 values)
+                const hasActualData = data.data && data.data.length > 0 && 
+                    data.data.some(item => item.count > 0);
+                
+                if (hasActualData) {
+                    // Filter out items with 0 count for chart display
+                    const filteredData = data.data.filter(item => item.count > 0);
+                    createBillingStatusChart(filteredData);
                     showBillingChart();
                 } else {
                     showBillingNoData();

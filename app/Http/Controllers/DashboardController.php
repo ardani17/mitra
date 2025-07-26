@@ -611,44 +611,66 @@ class DashboardController extends Controller
             $year = date('Y');
         }
 
-        // 1. Belum Ditagih - Proyek tanpa billing batch atau billing_status = 'not_billed'
+        // 1. Belum Ditagih - HANYA proyek yang belum punya billing batch sama sekali
         $belumDigaih = Project::whereYear('created_at', $year)
-            ->where(function($query) {
-                $query->where('billing_status', 'not_billed')
-                      ->orWhereDoesntHave('billings.billingBatch');
-            })
+            ->whereDoesntHave('billings.billingBatch')
             ->select(DB::raw('COUNT(*) as count'), DB::raw('SUM(COALESCE(planned_total_value, 0)) as total_value'))
             ->first();
 
-        // 2. Tertagih - Billing batch aktif tapi belum input faktur pajak
+        // 2. Tertagih - Status billing batch dari draft sampai regional verification/revision
         $tertagih = Project::whereYear('created_at', $year)
-            ->whereHas('billings.billingBatch', function($query) {
-                $query->whereIn('status', ['sent', 'area_verification', 'area_revision', 
-                                         'regional_verification', 'regional_revision', 'payment_entry_ho'])
-                      ->where(function($q) {
-                          $q->whereNull('tax_invoice_number')
-                            ->orWhere('tax_invoice_number', '');
-                      });
+            ->whereHas('billings.billingBatch', function($q) {
+                $q->whereIn('status', [
+                    'draft', 
+                    'sent', 
+                    'area_verification', 
+                    'area_revision', 
+                    'regional_verification', 
+                    'regional_revision'
+                ]);
             })
-            ->select(DB::raw('COUNT(*) as count'), DB::raw('SUM(COALESCE(planned_total_value, 0)) as total_value'))
+            ->join('project_billings', 'projects.id', '=', 'project_billings.project_id')
+            ->join('billing_batches', 'project_billings.billing_batch_id', '=', 'billing_batches.id')
+            ->whereIn('billing_batches.status', [
+                'draft', 
+                'sent', 
+                'area_verification', 
+                'area_revision', 
+                'regional_verification', 
+                'regional_revision'
+            ])
+            ->select(
+                DB::raw('COUNT(DISTINCT projects.id) as count'), 
+                DB::raw('SUM(COALESCE(billing_batches.total_received_amount, 0)) as total_value')
+            )
             ->first();
 
-        // 3. Sudah Input Faktur Pajak - Ada faktur pajak tapi belum lunas
+        // 3. Sudah Input Faktur Pajak - Status billing batch = payment_entry_ho
         $sudahInputFaktur = Project::whereYear('created_at', $year)
-            ->whereHas('billings.billingBatch', function($query) {
-                $query->whereNotNull('tax_invoice_number')
-                      ->where('tax_invoice_number', '!=', '')
-                      ->where('status', '!=', 'paid');
+            ->whereHas('billings.billingBatch', function($q) {
+                $q->where('status', 'payment_entry_ho');
             })
-            ->select(DB::raw('COUNT(*) as count'), DB::raw('SUM(COALESCE(planned_total_value, 0)) as total_value'))
+            ->join('project_billings', 'projects.id', '=', 'project_billings.project_id')
+            ->join('billing_batches', 'project_billings.billing_batch_id', '=', 'billing_batches.id')
+            ->where('billing_batches.status', 'payment_entry_ho')
+            ->select(
+                DB::raw('COUNT(DISTINCT projects.id) as count'), 
+                DB::raw('SUM(COALESCE(billing_batches.total_received_amount, 0)) as total_value')
+            )
             ->first();
 
         // 4. Lunas - Status paid
         $lunas = Project::whereYear('created_at', $year)
-            ->whereHas('billings.billingBatch', function($query) {
-                $query->where('status', 'paid');
+            ->whereHas('billings.billingBatch', function($q) {
+                $q->where('status', 'paid');
             })
-            ->select(DB::raw('COUNT(*) as count'), DB::raw('SUM(COALESCE(planned_total_value, 0)) as total_value'))
+            ->join('project_billings', 'projects.id', '=', 'project_billings.project_id')
+            ->join('billing_batches', 'project_billings.billing_batch_id', '=', 'billing_batches.id')
+            ->where('billing_batches.status', 'paid')
+            ->select(
+                DB::raw('COUNT(DISTINCT projects.id) as count'), 
+                DB::raw('SUM(COALESCE(billing_batches.total_received_amount, 0)) as total_value')
+            )
             ->first();
 
         return [
@@ -689,44 +711,66 @@ class DashboardController extends Controller
         // Apply filters
         $this->applyProjectFilters($query, $request);
 
-        // 1. Belum Ditagih
+        // 1. Belum Ditagih - HANYA proyek yang belum punya billing batch sama sekali
         $belumDigaihQuery = clone $query;
-        $belumDigaih = $belumDigaihQuery->where(function($q) {
-                $q->where('billing_status', 'not_billed')
-                  ->orWhereDoesntHave('billings.billingBatch');
-            })
+        $belumDigaih = $belumDigaihQuery->whereDoesntHave('billings.billingBatch')
             ->select(DB::raw('COUNT(*) as count'), DB::raw('SUM(COALESCE(planned_total_value, 0)) as total_value'))
             ->first();
 
-        // 2. Tertagih
+        // 2. Tertagih - Status billing batch dari draft sampai regional verification/revision
         $tertagihQuery = clone $query;
         $tertagih = $tertagihQuery->whereHas('billings.billingBatch', function($q) {
-                $q->whereIn('status', ['sent', 'area_verification', 'area_revision', 
-                                     'regional_verification', 'regional_revision', 'payment_entry_ho'])
-                  ->where(function($subQ) {
-                      $subQ->whereNull('tax_invoice_number')
-                           ->orWhere('tax_invoice_number', '');
-                  });
+                $q->whereIn('status', [
+                    'draft', 
+                    'sent', 
+                    'area_verification', 
+                    'area_revision', 
+                    'regional_verification', 
+                    'regional_revision'
+                ]);
             })
-            ->select(DB::raw('COUNT(*) as count'), DB::raw('SUM(COALESCE(planned_total_value, 0)) as total_value'))
+            ->join('project_billings', 'projects.id', '=', 'project_billings.project_id')
+            ->join('billing_batches', 'project_billings.billing_batch_id', '=', 'billing_batches.id')
+            ->whereIn('billing_batches.status', [
+                'draft', 
+                'sent', 
+                'area_verification', 
+                'area_revision', 
+                'regional_verification', 
+                'regional_revision'
+            ])
+            ->select(
+                DB::raw('COUNT(DISTINCT projects.id) as count'), 
+                DB::raw('SUM(COALESCE(billing_batches.total_received_amount, 0)) as total_value')
+            )
             ->first();
 
-        // 3. Sudah Input Faktur Pajak
+        // 3. Sudah Input Faktur Pajak - Status billing batch = payment_entry_ho
         $sudahInputFakturQuery = clone $query;
         $sudahInputFaktur = $sudahInputFakturQuery->whereHas('billings.billingBatch', function($q) {
-                $q->whereNotNull('tax_invoice_number')
-                  ->where('tax_invoice_number', '!=', '')
-                  ->where('status', '!=', 'paid');
+                $q->where('status', 'payment_entry_ho');
             })
-            ->select(DB::raw('COUNT(*) as count'), DB::raw('SUM(COALESCE(planned_total_value, 0)) as total_value'))
+            ->join('project_billings', 'projects.id', '=', 'project_billings.project_id')
+            ->join('billing_batches', 'project_billings.billing_batch_id', '=', 'billing_batches.id')
+            ->where('billing_batches.status', 'payment_entry_ho')
+            ->select(
+                DB::raw('COUNT(DISTINCT projects.id) as count'), 
+                DB::raw('SUM(COALESCE(billing_batches.total_received_amount, 0)) as total_value')
+            )
             ->first();
 
-        // 4. Lunas
+        // 4. Lunas - Status paid
         $lunasQuery = clone $query;
         $lunas = $lunasQuery->whereHas('billings.billingBatch', function($q) {
                 $q->where('status', 'paid');
             })
-            ->select(DB::raw('COUNT(*) as count'), DB::raw('SUM(COALESCE(planned_total_value, 0)) as total_value'))
+            ->join('project_billings', 'projects.id', '=', 'project_billings.project_id')
+            ->join('billing_batches', 'project_billings.billing_batch_id', '=', 'billing_batches.id')
+            ->where('billing_batches.status', 'paid')
+            ->select(
+                DB::raw('COUNT(DISTINCT projects.id) as count'), 
+                DB::raw('SUM(COALESCE(billing_batches.total_received_amount, 0)) as total_value')
+            )
             ->first();
 
         $data = [
