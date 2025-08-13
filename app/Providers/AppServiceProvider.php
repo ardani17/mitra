@@ -4,13 +4,23 @@ namespace App\Providers;
 
 use Illuminate\Support\ServiceProvider;
 use Illuminate\Support\Facades\Gate;
+use Illuminate\Support\Facades\Auth;
+use Illuminate\Support\Facades\View;
 use App\Models\Project;
 use App\Models\ProjectExpense;
 use App\Models\ProjectBilling;
+use App\Models\Employee;
+use App\Models\DailySalary;
+use App\Models\SalaryRelease;
 use App\Policies\ProjectPolicy;
 use App\Policies\ExpensePolicy;
 use App\Policies\BillingPolicy;
+use App\Policies\EmployeePolicy;
+use App\Policies\DailySalaryPolicy;
+use App\Policies\SalaryReleasePolicy;
 use App\Observers\ProjectBillingObserver;
+use App\Observers\ProjectExpenseObserver;
+use App\Observers\SalaryReleaseObserver;
 
 class AppServiceProvider extends ServiceProvider
 {
@@ -31,8 +41,23 @@ class AppServiceProvider extends ServiceProvider
         Gate::policy(Project::class, ProjectPolicy::class);
         Gate::policy(ProjectExpense::class, ExpensePolicy::class);
         Gate::policy(ProjectBilling::class, BillingPolicy::class);
+        Gate::policy(Employee::class, EmployeePolicy::class);
+        Gate::policy(DailySalary::class, DailySalaryPolicy::class);
+        Gate::policy(SalaryRelease::class, SalaryReleasePolicy::class);
         
         // Register observers
         ProjectBilling::observe(ProjectBillingObserver::class);
+        ProjectExpense::observe(ProjectExpenseObserver::class);
+        SalaryRelease::observe(SalaryReleaseObserver::class);
+        
+        // Ensure roles are loaded for authenticated users in views
+        View::composer('*', function ($view) {
+            if (Auth::check()) {
+                $user = Auth::user();
+                if (!$user->relationLoaded('roles')) {
+                    $user->load('roles');
+                }
+            }
+        });
     }
 }

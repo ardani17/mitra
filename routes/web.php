@@ -7,9 +7,16 @@ use App\Http\Controllers\ExpenseController;
 use App\Http\Controllers\ExpenseApprovalController;
 use App\Http\Controllers\TimelineController;
 use App\Http\Controllers\BillingBatchController;
+use App\Http\Controllers\ProjectBillingController;
+use App\Http\Controllers\BillingDashboardController;
 use App\Http\Controllers\DashboardController;
 use App\Http\Controllers\ReportController;
 use App\Http\Controllers\UserController;
+use App\Http\Controllers\CashflowController;
+use App\Http\Controllers\FinanceDashboardController;
+use App\Http\Controllers\EmployeeController;
+use App\Http\Controllers\DailySalaryController;
+use App\Http\Controllers\SalaryReleaseController;
 use Illuminate\Support\Facades\Route;
 
 Route::get('/', function () {
@@ -86,6 +93,32 @@ Route::middleware('auth')->group(function () {
     Route::delete('/billing-batches/{billingBatch}/documents/{document}', [BillingBatchController::class, 'deleteDocument'])->name('billing-batches.delete-document');
     Route::get('/billing-batches/{billingBatch}/confirm-delete', [BillingBatchController::class, 'confirmDelete'])->name('billing-batches.confirm-delete');
     
+    // Project Billing routes (Per-Project Billing with Termin Support)
+    Route::resource('project-billings', ProjectBillingController::class);
+    Route::get('/projects/{project}/manage-schedule', [ProjectBillingController::class, 'manageSchedule'])->name('project-billings.manage-schedule');
+    Route::post('/projects/{project}/store-schedule', [ProjectBillingController::class, 'storeSchedule'])->name('project-billings.store-schedule');
+    Route::get('/api/projects/{project}/schedules', [ProjectBillingController::class, 'getProjectSchedules'])->name('api.project-billings.schedules');
+    
+    // Termin Payment routes
+    Route::post('/schedules/{schedule}/create-billing', [ProjectBillingController::class, 'createTerminPayment'])->name('project-billings.create-termin');
+    Route::post('/projects/{project}/generate-schedule', [ProjectBillingController::class, 'generatePaymentSchedule'])->name('project-billings.generate-schedule');
+    Route::patch('/project-billings/{projectBilling}/update-termin-status', [ProjectBillingController::class, 'updateTerminStatus'])->name('project-billings.update-termin-status');
+    Route::post('/project-billings/bulk-update-termin', [ProjectBillingController::class, 'bulkUpdateTermin'])->name('project-billings.bulk-update-termin');
+    
+    // Project Payment Schedule routes - Commented out until controller is created
+    // Route::resource('project-payment-schedules', ProjectPaymentScheduleController::class);
+    // Route::post('project-payment-schedules/bulk-create', [ProjectPaymentScheduleController::class, 'bulkCreateSchedule'])->name('project-payment-schedules.bulk-create');
+    // Route::patch('project-payment-schedules/adjust/{project}', [ProjectPaymentScheduleController::class, 'adjustSchedule'])->name('project-payment-schedules.adjust');
+    // Route::get('project-payment-schedules/export', [ProjectPaymentScheduleController::class, 'export'])->name('project-payment-schedules.export');
+    
+    // Billing Dashboard
+    Route::get('/billing-dashboard', [BillingDashboardController::class, 'index'])->name('billing-dashboard.index');
+    Route::get('/billing-dashboard/export', [BillingDashboardController::class, 'export'])->name('billing-dashboard.export');
+    Route::get('/api/billing-dashboard/data', [BillingDashboardController::class, 'getData'])->name('api.billing-dashboard.data');
+    Route::post('/api/billing-dashboard/clear-cache', [BillingDashboardController::class, 'clearCache'])->name('api.billing-dashboard.clear-cache');
+    Route::post('/api/billing-dashboard/preferences', [BillingDashboardController::class, 'savePreferences'])->name('api.billing-dashboard.save-preferences');
+    Route::get('/api/billing-dashboard/preferences', [BillingDashboardController::class, 'getPreferences'])->name('api.billing-dashboard.get-preferences');
+    
     // Redirect old billing routes to new batch system
     Route::get('/penagihan', function() {
         return redirect()->route('billing-batches.index');
@@ -134,6 +167,91 @@ Route::middleware('auth')->group(function () {
         Route::get('/template/{type}', [App\Http\Controllers\ExcelController::class, 'downloadTemplate'])->name('template');
         Route::get('/import-logs', [App\Http\Controllers\ExcelController::class, 'importLogs'])->name('import-logs');
         Route::get('/import-logs/{id}', [App\Http\Controllers\ExcelController::class, 'importLogDetail'])->name('import-log-detail');
+    });
+
+    // Financial Management Routes (Only for Finance Manager and Direktur)
+    Route::middleware('role:direktur,finance_manager')->prefix('finance')->name('finance.')->group(function () {
+        // Finance Dashboard
+        Route::get('/dashboard', [FinanceDashboardController::class, 'index'])->name('dashboard');
+        Route::get('/dashboard/export', [FinanceDashboardController::class, 'export'])->name('dashboard.export');
+        
+        // Cashflow Journal
+        Route::resource('cashflow', CashflowController::class);
+        Route::get('/cashflow-income', [CashflowController::class, 'income'])->name('cashflow.income');
+        Route::get('/cashflow-expense', [CashflowController::class, 'expense'])->name('cashflow.expense');
+        Route::post('/cashflow/bulk-action', [CashflowController::class, 'bulkAction'])->name('cashflow.bulk-action');
+        Route::get('/cashflow-export', [CashflowController::class, 'export'])->name('cashflow.export');
+        Route::post('/cashflow-import', [CashflowController::class, 'import'])->name('cashflow.import');
+        Route::get('/cashflow-template', [CashflowController::class, 'downloadTemplate'])->name('cashflow.template');
+        
+        // API endpoints for finance dashboard
+        Route::get('/api/dashboard-data', [FinanceDashboardController::class, 'getDashboardData'])->name('api.dashboard-data');
+        Route::get('/api/cashflow-chart', [FinanceDashboardController::class, 'getCashflowChart'])->name('api.cashflow-chart');
+        Route::get('/dashboard/summary', [FinanceDashboardController::class, 'getSummary'])->name('dashboard.summary');
+        Route::get('/dashboard/categories', [FinanceDashboardController::class, 'getCategories'])->name('dashboard.categories');
+        
+        // Financial Reports
+        Route::get('/reports/cashflow', [FinanceDashboardController::class, 'cashflowReport'])->name('reports.cashflow');
+        Route::get('/reports/balance-summary', [FinanceDashboardController::class, 'balanceSummary'])->name('reports.balance-summary');
+        
+        // Employee Management
+        Route::get('/employees-dashboard', [EmployeeController::class, 'dashboard'])->name('employees.dashboard');
+        Route::resource('employees', EmployeeController::class);
+        Route::get('/employees/{employee}/salary-summary', [EmployeeController::class, 'salarySummary'])->name('employees.salary-summary');
+        Route::get('/employees-export', [EmployeeController::class, 'export'])->name('employees.export');
+        Route::get('/employees-analytics', [EmployeeController::class, 'analytics'])->name('employees.analytics');
+        Route::get('/employees-reports', [EmployeeController::class, 'reports'])->name('employees.reports');
+        
+        // Employee Documents
+        Route::get('/employees/{employee}/documents', [EmployeeController::class, 'documents'])->name('employees.documents');
+        Route::post('/employees/{employee}/documents', [EmployeeController::class, 'uploadDocument'])->name('employees.documents.upload');
+        Route::delete('/employees/{employee}/documents/{document}', [EmployeeController::class, 'deleteDocument'])->name('employees.documents.delete');
+        
+        // Employee Daily Salary Management (moved from separate menu)
+        Route::post('/employees/{employee}/daily-salaries', [DailySalaryController::class, 'store'])->name('employees.daily-salaries.store');
+        Route::put('/employees/{employee}/daily-salaries/{dailySalary}', [DailySalaryController::class, 'update'])->name('employees.daily-salaries.update');
+        Route::delete('/employees/{employee}/daily-salaries/{dailySalary}', [DailySalaryController::class, 'destroy'])->name('employees.daily-salaries.destroy');
+        Route::get('/employees/{employee}/daily-salaries/{dailySalary}', [DailySalaryController::class, 'show'])->name('employees.daily-salaries.show');
+        
+        // Employee Salary Release Management (moved from separate menu)
+        Route::post('/employees/{employee}/salary-releases', [SalaryReleaseController::class, 'store'])->name('employees.salary-releases.store');
+        Route::post('/employees/{employee}/salary-releases/{salaryRelease}/release', [SalaryReleaseController::class, 'release'])->name('employees.salary-releases.release');
+        Route::post('/employees/{employee}/salary-releases/{salaryRelease}/mark-as-paid', [SalaryReleaseController::class, 'markAsPaid'])->name('employees.salary-releases.mark-as-paid');
+        Route::delete('/employees/{employee}/salary-releases/{salaryRelease}', [SalaryReleaseController::class, 'destroy'])->name('employees.salary-releases.destroy');
+        
+        // API endpoints
+        Route::get('/api/employees/{employee}/rate', [DailySalaryController::class, 'getEmployeeRate'])->name('api.employees.rate');
+        Route::get('/api/employees/{employee}/unreleased-salaries', [SalaryReleaseController::class, 'getUnreleasedSalaries'])->name('api.employees.unreleased-salaries');
+        Route::get('/api/employees/{employee}/salary-releases', [SalaryReleaseController::class, 'getEmployeeSalaryReleases'])->name('api.employees.salary-releases');
+        
+        // Redirect old routes to employee management
+        Route::get('/daily-salaries', function() {
+            return redirect()->route('finance.employees.index')->with('info', 'Pengelolaan gaji harian telah dipindahkan ke halaman detail karyawan.');
+        })->name('daily-salaries.index');
+        
+        Route::get('/daily-salaries/create', function() {
+            return redirect()->route('finance.employees.index')->with('info', 'Silakan pilih karyawan terlebih dahulu untuk menambah gaji harian.');
+        })->name('daily-salaries.create');
+        
+        Route::get('/salary-releases', function() {
+            return redirect()->route('finance.employees.index')->with('info', 'Pengelolaan rilis gaji telah dipindahkan ke halaman detail karyawan.');
+        })->name('salary-releases.index');
+        
+        Route::get('/salary-releases/create', function() {
+            return redirect()->route('finance.employees.index')->with('info', 'Silakan pilih karyawan terlebih dahulu untuk membuat rilis gaji.');
+        })->name('salary-releases.create');
+        
+        // Keep some existing routes for backward compatibility
+        Route::resource('daily-salaries', DailySalaryController::class)->except(['index', 'create']);
+        Route::get('/daily-salaries-calendar', [DailySalaryController::class, 'calendar'])->name('daily-salaries.calendar');
+        Route::post('/daily-salaries/bulk-confirm', [DailySalaryController::class, 'bulkConfirm'])->name('daily-salaries.bulk-confirm');
+        
+        Route::resource('salary-releases', SalaryReleaseController::class)->except(['index', 'create']);
+        Route::post('/salary-releases/{salaryRelease}/release', [SalaryReleaseController::class, 'release'])->name('salary-releases.release');
+        Route::post('/salary-releases/{salaryRelease}/mark-as-paid', [SalaryReleaseController::class, 'markAsPaid'])->name('salary-releases.mark-as-paid');
+        Route::post('/salary-releases/{salaryRelease}/revert-to-draft', [SalaryReleaseController::class, 'revertToDraft'])->name('salary-releases.revert-to-draft');
+        Route::get('/api/salary-releases/unreleased-salaries', [SalaryReleaseController::class, 'getUnreleasedSalaries'])->name('salary-releases.get-unreleased-salaries');
+        
     });
 });
 

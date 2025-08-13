@@ -28,6 +28,11 @@ class ProjectBilling extends Model
         'billing_date',
         'paid_date',
         'status',
+        'payment_type',
+        'termin_number',
+        'total_termin',
+        'is_final_termin',
+        'parent_schedule_id',
         'notes'
     ];
 
@@ -42,7 +47,8 @@ class ProjectBilling extends Model
         'ppn_amount' => 'decimal:2',
         'total_amount' => 'decimal:2',
         'billing_date' => 'date',
-        'paid_date' => 'date'
+        'paid_date' => 'date',
+        'is_final_termin' => 'boolean'
     ];
 
     public function project(): BelongsTo
@@ -53,6 +59,11 @@ class ProjectBilling extends Model
     public function billingBatch(): BelongsTo
     {
         return $this->belongsTo(BillingBatch::class);
+    }
+
+    public function paymentSchedule(): BelongsTo
+    {
+        return $this->belongsTo(ProjectPaymentSchedule::class, 'parent_schedule_id');
     }
 
     public function isPaid(): bool
@@ -68,6 +79,68 @@ class ProjectBilling extends Model
     public function isSent(): bool
     {
         return $this->status === 'sent';
+    }
+
+    /**
+     * Check if this is a termin payment (always true for project billing)
+     */
+    public function isTerminPayment(): bool
+    {
+        return true; // Project billing is always termin-based
+    }
+
+    /**
+     * Check if this is a full payment (deprecated - always false)
+     */
+    public function isFullPayment(): bool
+    {
+        return false; // Project billing doesn't use full payment concept
+    }
+
+    /**
+     * Get termin label for display
+     */
+    public function getTerminLabel(): string
+    {
+        return "Termin {$this->termin_number} dari {$this->total_termin}";
+    }
+
+    /**
+     * Check if this is the final termin for the project
+     */
+    public function isFinalTermin(): bool
+    {
+        return $this->is_final_termin || ($this->termin_number === $this->total_termin);
+    }
+
+    /**
+     * Get project completion percentage based on this termin
+     */
+    public function getProjectCompletionPercentage(): float
+    {
+        if (!$this->total_termin || $this->total_termin <= 0) {
+            return 0;
+        }
+        
+        return ($this->termin_number / $this->total_termin) * 100;
+    }
+
+    /**
+     * Check if project is fully paid (all termins completed)
+     */
+    public function isProjectFullyPaid(): bool
+    {
+        if (!$this->project) {
+            return false;
+        }
+
+        // Count paid termins for this project
+        $paidTermins = static::where('project_id', $this->project_id)
+            ->where('status', 'paid')
+            ->count();
+
+        // Check if all termins are paid
+        return $paidTermins >= $this->total_termin;
     }
 
     /**

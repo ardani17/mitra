@@ -137,6 +137,11 @@
     <!-- Informasi Tagihan -->
     <div class="bg-white rounded-lg shadow-md p-4 sm:p-6 mb-6 sm:mb-8">
         <h3 class="text-base sm:text-lg font-semibold text-gray-800 mb-3 sm:mb-4">Informasi Tagihan</h3>
+        
+        @php
+            $billingInfo = $project->billing_info;
+        @endphp
+        
         <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4 sm:gap-6">
             <!-- Status Tagihan -->
             <div class="bg-gray-50 p-4 rounded-lg">
@@ -148,13 +153,28 @@
                 </div>
                 <div class="mt-3">
                     <div class="flex justify-between items-center mb-1">
-                        <span class="text-xs text-gray-500">Progress Verifikasi</span>
+                        <span class="text-xs text-gray-500">
+                            {{ $billingInfo['type'] === 'batch' ? 'Progress Verifikasi' : 'Progress Pembayaran' }}
+                        </span>
                         <span class="text-xs font-medium text-gray-700">{{ $project->billing_progress_percentage }}%</span>
                     </div>
                     <div class="w-full bg-gray-200 rounded-full h-2">
                         <div class="bg-blue-600 h-2 rounded-full" style="width: {{ $project->billing_progress_percentage }}%"></div>
                     </div>
-                    <p class="text-xs text-gray-500 mt-1">Tahapan verifikasi billing</p>
+                    <p class="text-xs text-gray-500 mt-1">
+                        {{ $billingInfo['type'] === 'batch' ? 'Tahapan verifikasi billing' : 'Persentase pembayaran termin' }}
+                    </p>
+                    @if($billingInfo['type'] === 'direct' && $billingInfo['billing_count'] > 0)
+                    <p class="text-xs text-gray-400 mt-1">
+                        @php
+                            $totalToBePaid = $project->final_total_value && $project->final_total_value > 0
+                                ? $project->final_total_value
+                                : ($project->planned_total_value ?? 0);
+                            $totalPaid = $project->total_received_amount; // Total termin yang sudah lunas
+                        @endphp
+                        Dibayar: Rp {{ number_format($totalPaid, 0, ',', '.') }} dari Rp {{ number_format($totalToBePaid, 0, ',', '.') }}
+                    </p>
+                    @endif
                 </div>
             </div>
 
@@ -167,8 +187,11 @@
                         </svg>
                     </div>
                     <div>
-                        <p class="text-sm text-gray-600">Total Diterima</p>
+                        <p class="text-sm text-gray-600">{{ $project->total_tagihan_label }}</p>
                         <p class="text-xl font-bold text-green-600">Rp {{ number_format($project->total_received_amount, 0, ',', '.') }}</p>
+                        <p class="text-xs text-gray-500 mt-1">
+                            {{ $billingInfo['type'] === 'batch' ? 'Dari Billing Batch' : 'Dari Tagihan Termin' }}
+                        </p>
                     </div>
                 </div>
             </div>
@@ -188,6 +211,9 @@
                             @if($project->latest_billing_info['billing_date'])
                                 <p class="text-xs text-gray-500">{{ $project->latest_billing_info['billing_date']->format('d M Y') }}</p>
                             @endif
+                            <p class="text-xs text-gray-400 mt-1">
+                                {{ $project->latest_billing_info['source'] === 'batch' ? 'Billing Batch' : 'Tagihan Termin' }}
+                            </p>
                         @else
                             <p class="text-sm text-gray-500">Belum ada tagihan</p>
                         @endif
@@ -196,11 +222,13 @@
             </div>
         </div>
 
-        <!-- Detail Dokumen Tagihan -->
+
+
+        <!-- Detail Dokumen Tagihan Terakhir -->
         @if($project->latest_billing_info['invoice_number'])
         <div class="mt-6 pt-6 border-t border-gray-200">
             <h4 class="text-md font-semibold text-gray-700 mb-3">Detail Dokumen Tagihan Terakhir</h4>
-            <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
+            <div class="grid grid-cols-1 md:grid-cols-4 gap-4">
                 @if($project->latest_billing_info['sp_number'])
                 <div>
                     <span class="text-sm text-gray-600">Nomor SP:</span>
@@ -218,6 +246,10 @@
                     <span class="inline-flex px-2 py-1 text-xs font-semibold rounded-full {{ $project->billing_status_badge_color }}">
                         {{ $project->latest_billing_info['status_label'] }}
                     </span>
+                </div>
+                <div>
+                    <span class="text-sm text-gray-600">Sumber:</span>
+                    <p class="font-medium">{{ $project->latest_billing_info['source'] === 'batch' ? 'Billing Batch' : 'Tagihan Termin' }}</p>
                 </div>
             </div>
         </div>
@@ -304,6 +336,7 @@
                     <option value="ringkasan">Ringkasan</option>
                     <option value="timeline">Timeline</option>
                     <option value="pengeluaran">Pengeluaran</option>
+                    <option value="pembayaran">Jadwal Pembayaran</option>
                     <option value="aktivitas">Aktivitas</option>
                     <option value="dokumen">Dokumen</option>
                 </select>
@@ -319,6 +352,9 @@
                 </button>
                 <button onclick="showTab('pengeluaran')" id="tab-pengeluaran" class="tab-button border-transparent text-gray-500 hover:text-gray-700 hover:border-gray-300 whitespace-nowrap py-3 sm:py-4 px-1 border-b-2 font-medium text-xs sm:text-sm">
                     Pengeluaran
+                </button>
+                <button onclick="showTab('pembayaran')" id="tab-pembayaran" class="tab-button border-transparent text-gray-500 hover:text-gray-700 hover:border-gray-300 whitespace-nowrap py-3 sm:py-4 px-1 border-b-2 font-medium text-xs sm:text-sm">
+                    Jadwal Pembayaran
                 </button>
                 <button onclick="showTab('aktivitas')" id="tab-aktivitas" class="tab-button border-transparent text-gray-500 hover:text-gray-700 hover:border-gray-300 whitespace-nowrap py-3 sm:py-4 px-1 border-b-2 font-medium text-xs sm:text-sm">
                     Aktivitas
@@ -596,6 +632,91 @@
                     <p class="mt-1 text-sm text-gray-500">Aktivitas proyek akan muncul di sini secara otomatis.</p>
                 </div>
                 @endif
+            </div>
+
+            <!-- Tab Pembayaran -->
+            <div id="content-pembayaran" class="tab-content hidden">
+                <div class="flex justify-between items-center mb-4">
+                    <h3 class="text-lg font-semibold text-gray-800">Jadwal Pembayaran Termin</h3>
+                    @can('create', App\Models\ProjectBilling::class)
+                    <a href="{{ route('project-billings.manage-schedule', $project) }}" class="bg-blue-600 hover:bg-blue-700 text-white font-bold py-2 px-4 rounded text-sm">
+                        Kelola Jadwal Pembayaran
+                    </a>
+                    @endcan
+                </div>
+
+                <!-- Filter Jadwal Pembayaran -->
+                <div class="mb-4 flex flex-wrap gap-2">
+                    <select id="scheduleStatusFilter" class="border border-gray-300 rounded-md px-3 py-2 text-sm">
+                        <option value="">Semua Status</option>
+                        <option value="pending">Pending</option>
+                        <option value="billed">Ditagih</option>
+                        <option value="paid">Dibayar</option>
+                        <option value="overdue">Terlambat</option>
+                    </select>
+                    <input type="text" id="scheduleSearch" placeholder="Cari jadwal..." class="border border-gray-300 rounded-md px-3 py-2 text-sm flex-1">
+                </div>
+                
+                <div id="schedulesContainer" class="bg-white rounded-lg shadow overflow-hidden">
+                    <div class="overflow-x-auto">
+                        <table class="min-w-full divide-y divide-gray-200">
+                            <thead class="bg-gray-800">
+                                <tr>
+                                    <th class="px-6 py-3 text-left text-xs font-bold text-white uppercase tracking-wider">Termin</th>
+                                    <th class="px-6 py-3 text-left text-xs font-bold text-white uppercase tracking-wider">Tanggal Jatuh Tempo</th>
+                                    <th class="px-6 py-3 text-left text-xs font-bold text-white uppercase tracking-wider">Persentase</th>
+                                    <th class="px-6 py-3 text-left text-xs font-bold text-white uppercase tracking-wider">Jumlah</th>
+                                    <th class="px-6 py-3 text-left text-xs font-bold text-white uppercase tracking-wider">Status</th>
+                                    <th class="px-6 py-3 text-left text-xs font-bold text-white uppercase tracking-wider">Aksi</th>
+                                </tr>
+                            </thead>
+                            <tbody id="schedulesList" class="bg-white divide-y divide-gray-200">
+                                <!-- Jadwal pembayaran akan dimuat melalui AJAX -->
+                                <tr>
+                                    <td colspan="6" class="px-6 py-4 text-center text-sm text-gray-500">
+                                        <svg class="animate-spin h-5 w-5 text-blue-600 mx-auto" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
+                                            <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle>
+                                            <path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
+                                        </svg>
+                                        <p class="mt-2">Memuat jadwal pembayaran...</p>
+                                    </td>
+                                </tr>
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+
+                <!-- Statistik Jadwal Pembayaran -->
+                <div class="mt-6 grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
+                    <div class="bg-white rounded-lg shadow p-4 border-l-4 border-blue-500">
+                        <h4 class="text-sm font-medium text-gray-500">Total Termin</h4>
+                        <div class="mt-2 flex justify-between items-end">
+                            <p class="text-2xl font-bold text-gray-800" id="totalTermin">0</p>
+                            <p class="text-sm text-gray-500" id="totalAmount">Rp 0</p>
+                        </div>
+                    </div>
+                    <div class="bg-white rounded-lg shadow p-4 border-l-4 border-yellow-500">
+                        <h4 class="text-sm font-medium text-gray-500">Pending</h4>
+                        <div class="mt-2 flex justify-between items-end">
+                            <p class="text-2xl font-bold text-gray-800" id="pendingTermin">0</p>
+                            <p class="text-sm text-gray-500" id="pendingAmount">Rp 0</p>
+                        </div>
+                    </div>
+                    <div class="bg-white rounded-lg shadow p-4 border-l-4 border-green-500">
+                        <h4 class="text-sm font-medium text-gray-500">Dibayar</h4>
+                        <div class="mt-2 flex justify-between items-end">
+                            <p class="text-2xl font-bold text-gray-800" id="paidTermin">0</p>
+                            <p class="text-sm text-gray-500" id="paidAmount">Rp 0</p>
+                        </div>
+                    </div>
+                    <div class="bg-white rounded-lg shadow p-4 border-l-4 border-red-500">
+                        <h4 class="text-sm font-medium text-gray-500">Terlambat</h4>
+                        <div class="mt-2 flex justify-between items-end">
+                            <p class="text-2xl font-bold text-gray-800" id="overdueTermin">0</p>
+                            <p class="text-sm text-gray-500" id="overdueAmount">Rp 0</p>
+                        </div>
+                    </div>
+                </div>
             </div>
 
             <!-- Tab Dokumen -->
@@ -1109,6 +1230,221 @@ function getTimeAgo(date) {
     } else {
         const years = Math.floor(diffInSeconds / 31536000);
         return `${years} tahun yang lalu`;
+    }
+}
+
+// Jadwal Pembayaran Tab Functionality
+document.addEventListener('DOMContentLoaded', function() {
+    // Load payment schedules when tab is clicked
+    const pembayaranTab = document.getElementById('tab-pembayaran');
+    if (pembayaranTab) {
+        pembayaranTab.addEventListener('click', function() {
+            loadPaymentSchedules();
+        });
+    }
+    
+    // Load payment schedules if tab is active on page load
+    if (window.location.hash === '#pembayaran') {
+        showTab('pembayaran');
+        loadPaymentSchedules();
+    }
+    
+    // Add event listeners for filters
+    const scheduleStatusFilter = document.getElementById('scheduleStatusFilter');
+    const scheduleSearch = document.getElementById('scheduleSearch');
+    
+    if (scheduleStatusFilter) {
+        scheduleStatusFilter.addEventListener('change', loadPaymentSchedules);
+    }
+    
+    if (scheduleSearch) {
+        scheduleSearch.addEventListener('input', debounce(loadPaymentSchedules, 500));
+    }
+});
+
+// Debounce function to limit API calls during search
+function debounce(func, wait) {
+    let timeout;
+    return function() {
+        const context = this;
+        const args = arguments;
+        clearTimeout(timeout);
+        timeout = setTimeout(() => {
+            func.apply(context, args);
+        }, wait);
+    };
+}
+
+// Load payment schedules from API
+function loadPaymentSchedules() {
+    const projectId = {{ $project->id }};
+    const status = document.getElementById('scheduleStatusFilter').value;
+    const search = document.getElementById('scheduleSearch').value;
+    
+    // Show loading state
+    document.getElementById('schedulesList').innerHTML = `
+        <tr>
+            <td colspan="6" class="px-6 py-4 text-center text-sm text-gray-500">
+                <svg class="animate-spin h-5 w-5 text-blue-600 mx-auto" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
+                    <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle>
+                    <path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
+                </svg>
+                <p class="mt-2">Memuat jadwal pembayaran...</p>
+            </td>
+        </tr>
+    `;
+    
+    // Fetch payment schedules
+    fetch(`/api/projects/${projectId}/schedules?status=${status}&search=${search}`)
+        .then(response => {
+            if (!response.ok) {
+                throw new Error('Network response was not ok');
+            }
+            return response.json();
+        })
+        .then(data => {
+            displayPaymentSchedules(data);
+            loadPaymentScheduleStats(projectId);
+        })
+        .catch(error => {
+            console.error('Error fetching payment schedules:', error);
+            document.getElementById('schedulesList').innerHTML = `
+                <tr>
+                    <td colspan="6" class="px-6 py-4 text-center text-sm text-red-500">
+                        <svg class="h-6 w-6 text-red-500 mx-auto" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4m0 4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"></path>
+                        </svg>
+                        <p class="mt-2">Gagal memuat jadwal pembayaran. Silakan coba lagi.</p>
+                    </td>
+                </tr>
+            `;
+        });
+}
+
+// Display payment schedules in the table
+function displayPaymentSchedules(schedules) {
+    const schedulesList = document.getElementById('schedulesList');
+    
+    if (schedules.length === 0) {
+        schedulesList.innerHTML = `
+            <tr>
+                <td colspan="6" class="px-6 py-4 text-center text-sm text-gray-500">
+                    <svg class="h-12 w-12 text-gray-400 mx-auto" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"></path>
+                    </svg>
+                    <h3 class="mt-2 text-sm font-medium text-gray-900">Belum ada jadwal pembayaran</h3>
+                    <p class="mt-1 text-sm text-gray-500">Mulai dengan menambahkan jadwal pembayaran termin.</p>
+                </td>
+            </tr>
+        `;
+        return;
+    }
+    
+    let html = '';
+    
+    schedules.forEach(schedule => {
+        const dueDate = new Date(schedule.due_date);
+        const formattedDueDate = dueDate.toLocaleDateString('id-ID', {
+            day: '2-digit',
+            month: 'short',
+            year: 'numeric'
+        });
+        
+        // Determine status class and label
+        let statusClass = '';
+        let statusLabel = '';
+        
+        switch (schedule.status) {
+            case 'pending':
+                // Check if overdue
+                if (new Date(schedule.due_date) < new Date()) {
+                    statusClass = 'bg-red-100 text-red-800';
+                    statusLabel = 'Terlambat';
+                } else {
+                    statusClass = 'bg-yellow-100 text-yellow-800';
+                    statusLabel = 'Pending';
+                }
+                break;
+            case 'billed':
+                statusClass = 'bg-blue-100 text-blue-800';
+                statusLabel = 'Ditagih';
+                break;
+            case 'paid':
+                statusClass = 'bg-green-100 text-green-800';
+                statusLabel = 'Dibayar';
+                break;
+            default:
+                statusClass = 'bg-gray-100 text-gray-800';
+                statusLabel = schedule.status;
+        }
+        
+        html += `
+            <tr class="hover:bg-gray-50">
+                <td class="px-6 py-4 whitespace-nowrap text-sm font-medium text-gray-900">
+                    ${schedule.termin_name}
+                </td>
+                <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
+                    ${formattedDueDate}
+                </td>
+                <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
+                    ${schedule.percentage}%
+                </td>
+                <td class="px-6 py-4 whitespace-nowrap text-sm font-medium text-gray-900">
+                    Rp ${formatNumber(schedule.amount)}
+                </td>
+                <td class="px-6 py-4 whitespace-nowrap">
+                    <span class="inline-flex px-2 py-1 text-xs font-semibold rounded-full ${statusClass}">
+                        ${statusLabel}
+                    </span>
+                </td>
+                <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
+                    <div class="flex space-x-2">
+                        <button onclick="viewScheduleDetails(${schedule.id})" class="text-blue-600 hover:text-blue-900" title="Lihat Detail">
+                            <svg class="h-5 w-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z"></path>
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z"></path>
+                            </svg>
+                        </button>
+                        ${schedule.status === 'pending' ? `
+                            <button onclick="createBillingFromSchedule(${schedule.id})" class="text-green-600 hover:text-green-900" title="Buat Tagihan">
+                                <svg class="h-5 w-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2"></path>
+                                </svg>
+                            </button>
+                        ` : ''}
+                    </div>
+                </td>
+            </tr>
+        `;
+    });
+    
+    schedulesList.innerHTML = html;
+}
+
+// Load payment schedule statistics
+function loadPaymentScheduleStats(projectId) {
+    // For now, show placeholder data since the API endpoint doesn't exist yet
+    document.getElementById('totalTermin').textContent = '0';
+    document.getElementById('pendingTermin').textContent = '0';
+    document.getElementById('paidTermin').textContent = '0';
+    document.getElementById('overdueTermin').textContent = '0';
+    
+    document.getElementById('totalAmount').textContent = 'Rp 0';
+    document.getElementById('pendingAmount').textContent = 'Rp 0';
+    document.getElementById('paidAmount').textContent = 'Rp 0';
+    document.getElementById('overdueAmount').textContent = 'Rp 0';
+}
+
+// View schedule details
+function viewScheduleDetails(scheduleId) {
+    alert('Fitur detail jadwal pembayaran akan segera tersedia.');
+}
+
+// Create billing from schedule
+function createBillingFromSchedule(scheduleId) {
+    if (confirm('Apakah Anda yakin ingin membuat tagihan dari jadwal pembayaran ini?')) {
+        // Redirect to project billing create page
+        window.location.href = `{{ route('project-billings.create') }}?project_id={{ $project->id }}&schedule_id=${scheduleId}`;
     }
 }
 </script>

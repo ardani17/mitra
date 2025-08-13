@@ -26,6 +26,7 @@ class BillingBatch extends Model
         'status',
         'client_type',
         'billing_date',
+        'due_date',
         'sent_date',
         'area_verification_date',
         'area_revision_date',
@@ -38,6 +39,7 @@ class BillingBatch extends Model
 
     protected $casts = [
         'billing_date' => 'date',
+        'due_date' => 'date',
         'sent_date' => 'datetime',
         'area_verification_date' => 'datetime',
         'area_revision_date' => 'datetime',

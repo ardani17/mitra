@@ -54,19 +54,98 @@
                     </x-nav-link>
 
                     <!-- Expense Approvals Menu (Only for Finance Manager, Project Manager, and Direktur) -->
-                    @if(auth()->user()->roles->whereIn('name', ['direktur', 'finance_manager', 'project_manager'])->count() > 0)
+                    @if(auth()->user()->hasAnyRole(['direktur', 'finance_manager', 'project_manager']))
                     <x-nav-link :href="route('expense-approvals.index')" :active="request()->routeIs('expense-approvals.*')">
                         {{ __('Approval Pengeluaran') }}
                     </x-nav-link>
                     @endif
 
                     <!-- Billings Menu (Only for Finance Manager and Direktur) -->
-                    @if(auth()->user()->roles->whereIn('name', ['direktur', 'finance_manager'])->count() > 0)
-                    <x-nav-link :href="route('billing-batches.index')" :active="request()->routeIs('billing-batches.*')">
-                        {{ __('Penagihan') }}
-                    </x-nav-link>
+                    @if(auth()->user()->hasAnyRole(['direktur', 'finance_manager']))
+                    <div class="relative inline-flex items-center" x-data="{ open: false }">
+                        <button @click="open = ! open" class="inline-flex items-center px-1 pt-1 border-b-2 text-sm font-medium leading-5 transition duration-150 ease-in-out focus:outline-none
+                               {{ request()->routeIs('billing-batches.*', 'project-billings.*', 'billing-dashboard.*') ? 'border-white text-white focus:border-sky-200' : 'border-transparent text-sky-100 hover:text-white hover:border-sky-200 focus:text-white focus:border-sky-200' }}">
+                            {{ __('Penagihan') }}
+                            <svg class="ml-1 h-4 w-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"></path>
+                            </svg>
+                        </button>
+                        
+                        <div x-show="open" @click.away="open = false" x-transition:enter="transition ease-out duration-200" x-transition:enter-start="opacity-0 scale-95" x-transition:enter-end="opacity-100 scale-100" x-transition:leave="transition ease-in duration-75" x-transition:leave-start="opacity-100 scale-100" x-transition:leave-end="opacity-0 scale-95" class="absolute left-0 mt-2 w-56 rounded-md shadow-lg bg-white ring-1 ring-black ring-opacity-5 z-50" style="top: 100%;">
+                            <div class="py-1">
+                                <a href="{{ route('billing-batches.index') }}" class="flex items-center px-4 py-2 text-sm text-gray-700 hover:bg-indigo-50 hover:text-indigo-700 transition duration-150 ease-in-out {{ request()->routeIs('billing-batches.*') ? 'bg-indigo-50 text-indigo-700 font-medium' : '' }}">
+                                    <svg class="mr-3 h-4 w-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 11H5m14 0a2 2 0 012 2v6a2 2 0 01-2 2H5a2 2 0 01-2-2v-6a2 2 0 012-2m14 0V9a2 2 0 00-2-2M5 9a2 2 0 012-2m0 0V5a2 2 0 012-2h6a2 2 0 012 2v2M7 7h10"></path>
+                                    </svg>
+                                    Penagihan Batch
+                                </a>
+                                <a href="{{ route('project-billings.index') }}" class="flex items-center px-4 py-2 text-sm text-gray-700 hover:bg-indigo-50 hover:text-indigo-700 transition duration-150 ease-in-out {{ request()->routeIs('project-billings.*') ? 'bg-indigo-50 text-indigo-700 font-medium' : '' }}">
+                                    <svg class="mr-3 h-4 w-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"></path>
+                                    </svg>
+                                    Penagihan Per-Proyek
+                                </a>
+                                <div class="border-t border-gray-100 my-1"></div>
+                                <a href="{{ route('billing-dashboard.index') }}" class="flex items-center px-4 py-2 text-sm text-gray-700 hover:bg-indigo-50 hover:text-indigo-700 transition duration-150 ease-in-out {{ request()->routeIs('billing-dashboard.*') ? 'bg-indigo-50 text-indigo-700 font-medium' : '' }}">
+                                    <svg class="mr-3 h-4 w-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 19v-6a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2a2 2 0 002-2zm0 0V9a2 2 0 012-2h2a2 2 0 012 2v10m-6 0a2 2 0 002 2h2a2 2 0 002-2m0 0V5a2 2 0 012-2h2a2 2 0 012 2v14a2 2 0 01-2 2h-2a2 2 0 01-2-2z"></path>
+                                    </svg>
+                                    Dashboard Penagihan
+                                </a>
+                            </div>
+                        </div>
+                    </div>
                     @endif
 
+                    <!-- Financial Menu (Only for Finance Manager and Direktur) -->
+                    @if(auth()->user()->hasAnyRole(['direktur', 'finance_manager']))
+                    <div class="relative inline-flex items-center" x-data="{ open: false }">
+                        <button @click="open = ! open" class="inline-flex items-center px-1 pt-1 border-b-2 text-sm font-medium leading-5 transition duration-150 ease-in-out focus:outline-none
+                               {{ request()->routeIs('finance.*') ? 'border-white text-white focus:border-sky-200' : 'border-transparent text-sky-100 hover:text-white hover:border-sky-200 focus:text-white focus:border-sky-200' }}">
+                            {{ __('Keuangan') }}
+                            <svg class="ml-1 h-4 w-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"></path>
+                            </svg>
+                        </button>
+                        
+                        <div x-show="open" @click.away="open = false" x-transition:enter="transition ease-out duration-200" x-transition:enter-start="opacity-0 scale-95" x-transition:enter-end="opacity-100 scale-100" x-transition:leave="transition ease-in duration-75" x-transition:leave-start="opacity-100 scale-100" x-transition:leave-end="opacity-0 scale-95" class="nav-dropdown-mobile sm:absolute sm:left-0 sm:mt-2 sm:w-64 sm:rounded-md sm:shadow-lg sm:bg-white sm:ring-1 sm:ring-black sm:ring-opacity-5 z-50" style="top: 100%;">
+                            <div class="py-1">
+                                <a href="{{ route('finance.dashboard') }}" class="dropdown-item {{ request()->routeIs('finance.dashboard') ? 'bg-indigo-50 text-indigo-700 font-medium' : '' }}">
+                                    <svg class="mr-3 h-4 w-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 19v-6a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2a2 2 0 002-2zm0 0V9a2 2 0 012-2h2a2 2 0 012 2v10m-6 0a2 2 0 002 2h2a2 2 0 002-2m0 0V5a2 2 0 012-2h2a2 2 0 012 2v14a2 2 0 01-2 2h-2a2 2 0 01-2-2z"/>
+                                    </svg>
+                                    Dashboard Keuangan
+                                </a>
+                                <div class="border-t border-gray-100 my-1"></div>
+                                <a href="{{ route('finance.cashflow.index') }}" class="dropdown-item {{ request()->routeIs('finance.cashflow.*') ? 'bg-indigo-50 text-indigo-700 font-medium' : '' }}">
+                                    <svg class="mr-3 h-4 w-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8c-1.657 0-3 .895-3 2s1.343 2 3 2 3 .895 3 2-1.343 2-3 2m0-8c1.11 0 2.08.402 2.599 1M12 8V7m0 1v8m0 0v1m0-1c-1.11 0-2.08-.402-2.599-1"/>
+                                    </svg>
+                                    Jurnal Cashflow
+                                </a>
+                                <a href="{{ route('finance.cashflow.income') }}" class="dropdown-item">
+                                    <svg class="mr-3 h-4 w-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M7 11l5-5m0 0l5 5m-5-5v12"/>
+                                    </svg>
+                                    Pemasukan
+                                </a>
+                                <a href="{{ route('finance.cashflow.expense') }}" class="dropdown-item">
+                                    <svg class="mr-3 h-4 w-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 13l-5 5m0 0l-5-5m5 5V6"/>
+                                    </svg>
+                                    Pengeluaran
+                                </a>
+                                <div class="border-t border-gray-100 my-1"></div>
+                                <a href="{{ route('finance.employees.index') }}" class="dropdown-item {{ request()->routeIs('finance.employees.*') ? 'bg-indigo-50 text-indigo-700 font-medium' : '' }}">
+                                    <svg class="mr-3 h-4 w-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4.354a4 4 0 110 5.292M15 21H3v-1a6 6 0 0112 0v1zm0 0h6v-1a6 6 0 00-9-2.239"/>
+                                    </svg>
+                                    Manajemen Karyawan
+                                </a>
+                           </div>
+                        </div>
+                    </div>
+                    @endif
                     
                     <!-- User Management Menu (Only for Direktur) -->
                     @if(auth()->user()->hasRole('direktur'))
@@ -75,17 +154,6 @@
                     </x-nav-link>
                     @endif
 
-                    @if(auth()->user()->hasRole(['direktur', 'finance_manager', 'project_manager']))
-                    <x-nav-link :href="route('reports.index')" :active="request()->routeIs('reports.*')">
-                        {{ __('Laporan') }}
-                    </x-nav-link>
-                    <x-nav-link :href="route('excel.index')" :active="request()->routeIs('excel.*')">
-                        {{ __('Excel') }}
-                    </x-nav-link>
-                    <x-nav-link :href="route('documentation')" :active="request()->routeIs('documentation')">
-                        {{ __('Dokumentasi') }}
-                    </x-nav-link>
-                    @endif
                 </div>
             </div>
 
@@ -114,11 +182,13 @@
                         <div class="px-4 py-2 border-b border-gray-100">
                             <div class="text-sm text-gray-600">Role:</div>
                             <div class="flex flex-wrap gap-1 mt-1">
-                                @foreach(Auth::user()->roles as $role)
+                                @if(Auth::user()->roles)
+                                    @foreach(Auth::user()->roles as $role)
                                     <span class="inline-flex items-center px-2 py-1 rounded-full text-xs font-medium bg-blue-100 text-blue-800">
                                         {{ ucfirst(str_replace('_', ' ', $role->name)) }}
                                     </span>
-                                @endforeach
+                                    @endforeach
+                                @endif
                             </div>
                         </div>
 
@@ -171,17 +241,82 @@
             </x-responsive-nav-link>
 
             <!-- Expense Approvals Menu (Only for Finance Manager, Project Manager, and Direktur) -->
-            @if(auth()->user()->roles->whereIn('name', ['direktur', 'finance_manager', 'project_manager'])->count() > 0)
+            @if(auth()->user()->hasAnyRole(['direktur', 'finance_manager', 'project_manager']))
             <x-responsive-nav-link :href="route('expense-approvals.index')" :active="request()->routeIs('expense-approvals.*')">
                 {{ __('Approval Pengeluaran') }}
             </x-responsive-nav-link>
             @endif
 
             <!-- Billings Menu (Only for Finance Manager and Direktur) -->
-            @if(auth()->user()->roles->whereIn('name', ['direktur', 'finance_manager'])->count() > 0)
-                <x-responsive-nav-link :href="route('billing-batches.index')" :active="request()->routeIs('billing-batches.*')">
-                    {{ __('Penagihan') }}
-                </x-responsive-nav-link>
+            @if(auth()->user()->hasAnyRole(['direktur', 'finance_manager']))
+                <div class="border-t border-gray-200 pt-2">
+                    <div class="px-4 py-2">
+                        <div class="text-xs font-semibold text-gray-500 uppercase tracking-wider">Penagihan</div>
+                    </div>
+                    <x-responsive-nav-link :href="route('billing-batches.index')" :active="request()->routeIs('billing-batches.*')">
+                        <div class="flex items-center">
+                            <svg class="mr-3 h-4 w-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 11H5m14 0a2 2 0 012 2v6a2 2 0 01-2 2H5a2 2 0 01-2-2v-6a2 2 0 012-2m14 0V9a2 2 0 00-2-2M5 9a2 2 0 012-2m0 0V5a2 2 0 012-2h6a2 2 0 012 2v2M7 7h10"></path>
+                            </svg>
+                            {{ __('Penagihan Batch') }}
+                        </div>
+                    </x-responsive-nav-link>
+                    <x-responsive-nav-link :href="route('project-billings.index')" :active="request()->routeIs('project-billings.*')">
+                        <div class="flex items-center">
+                            <svg class="mr-3 h-4 w-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"></path>
+                            </svg>
+                            {{ __('Penagihan Per-Proyek') }}
+                        </div>
+                    </x-responsive-nav-link>
+                    <x-responsive-nav-link :href="route('billing-dashboard.index')">
+                        <div class="flex items-center">
+                            <svg class="mr-3 h-4 w-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 19v-6a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2a2 2 0 002-2zm0 0V9a2 2 0 012-2h2a2 2 0 012 2v10m-6 0a2 2 0 002 2h2a2 2 0 002-2m0 0V5a2 2 0 012-2h2a2 2 0 012 2v14a2 2 0 01-2 2h-2a2 2 0 01-2-2z"></path>
+                            </svg>
+                            {{ __('Dashboard Penagihan') }}
+                        </div>
+                    </x-responsive-nav-link>
+                </div>
+            @endif
+
+            <!-- Financial Menu (Only for Finance Manager and Direktur) -->
+            @if(auth()->user()->hasAnyRole(['direktur', 'finance_manager']))
+                <div class="responsive-nav-section">
+                    <div class="responsive-nav-section-title">
+                        Keuangan
+                    </div>
+                    <x-responsive-nav-link :href="route('finance.dashboard')" :active="request()->routeIs('finance.dashboard')" class="responsive-nav-item {{ request()->routeIs('finance.dashboard') ? 'active' : '' }}">
+                        <svg class="mr-3 h-5 w-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 19v-6a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2a2 2 0 002-2zm0 0V9a2 2 0 012-2h2a2 2 0 012 2v10m-6 0a2 2 0 002 2h2a2 2 0 002-2m0 0V5a2 2 0 012-2h2a2 2 0 012 2v14a2 2 0 01-2 2h-2a2 2 0 01-2-2z"/>
+                        </svg>
+                        {{ __('Dashboard Keuangan') }}
+                    </x-responsive-nav-link>
+                    <x-responsive-nav-link :href="route('finance.cashflow.index')" :active="request()->routeIs('finance.cashflow.*')" class="responsive-nav-item {{ request()->routeIs('finance.cashflow.*') ? 'active' : '' }}">
+                        <svg class="mr-3 h-5 w-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8c-1.657 0-3 .895-3 2s1.343 2 3 2 3 .895 3 2-1.343 2-3 2m0-8c1.11 0 2.08.402 2.599 1M12 8V7m0 1v8m0 0v1m0-1c-1.11 0-2.08-.402-2.599-1"/>
+                        </svg>
+                        {{ __('Jurnal Cashflow') }}
+                    </x-responsive-nav-link>
+                    <x-responsive-nav-link :href="route('finance.cashflow.income')" class="responsive-nav-item">
+                        <svg class="mr-3 h-5 w-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M7 11l5-5m0 0l5 5m-5-5v12"/>
+                        </svg>
+                        {{ __('Pemasukan') }}
+                    </x-responsive-nav-link>
+                    <x-responsive-nav-link :href="route('finance.cashflow.expense')" class="responsive-nav-item">
+                        <svg class="mr-3 h-5 w-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 13l-5 5m0 0l-5-5m5 5V6"/>
+                        </svg>
+                        {{ __('Pengeluaran') }}
+                    </x-responsive-nav-link>
+                    <x-responsive-nav-link :href="route('finance.employees.index')" :active="request()->routeIs('finance.employees.*')" class="responsive-nav-item {{ request()->routeIs('finance.employees.*') ? 'active' : '' }}">
+                        <svg class="mr-3 h-5 w-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4.354a4 4 0 110 5.292M15 21H3v-1a6 6 0 0112 0v1zm0 0h6v-1a6 6 0 00-9-2.239"/>
+                        </svg>
+                        {{ __('Manajemen Karyawan') }}
+                    </x-responsive-nav-link>
+                </div>
             @endif
 
             <!-- User Management Menu (Only for Direktur) -->
@@ -191,7 +326,7 @@
             </x-responsive-nav-link>
             @endif
                 
-            @if(auth()->user()->hasRole(['direktur', 'finance_manager', 'project_manager']))
+            @if(auth()->user()->roles && auth()->user()->hasRole(['direktur', 'finance_manager', 'project_manager']))
             <x-responsive-nav-link :href="route('reports.index')" :active="request()->routeIs('reports.*')">
                 {{ __('Laporan') }}
             </x-responsive-nav-link>

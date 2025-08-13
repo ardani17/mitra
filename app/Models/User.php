@@ -59,7 +59,15 @@ class User extends Authenticatable
     public function hasRole($role): bool
     {
         if (is_string($role)) {
-            return $this->roles->contains('name', $role);
+            // Load roles if not already loaded
+            if (!$this->relationLoaded('roles')) {
+                $this->load('roles');
+            }
+            return $this->roles && $this->roles->contains('name', $role);
+        }
+        
+        if (is_array($role)) {
+            return $this->hasAnyRole($role);
         }
         
         return false;
@@ -67,8 +75,17 @@ class User extends Authenticatable
 
     public function hasAnyRole(array $roles): bool
     {
-        foreach ($roles as $role) {
-            if ($this->hasRole($role)) {
+        // Load roles if not already loaded
+        if (!$this->relationLoaded('roles')) {
+            $this->load('roles');
+        }
+        
+        if (!$this->roles) {
+            return false;
+        }
+        
+        foreach ($roles as $roleName) {
+            if ($this->roles->contains('name', $roleName)) {
                 return true;
             }
         }

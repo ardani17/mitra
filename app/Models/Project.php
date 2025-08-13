@@ -78,6 +78,11 @@ class Project extends Model
         return $this->hasMany(ProjectBilling::class);
     }
 
+    public function paymentSchedules(): HasMany
+    {
+        return $this->hasMany(ProjectPaymentSchedule::class);
+    }
+
     public function revenues(): HasMany
     {
         return $this->hasMany(ProjectRevenue::class);
@@ -91,6 +96,11 @@ class Project extends Model
     public function documents(): HasMany
     {
         return $this->hasMany(ProjectDocument::class);
+    }
+
+    public function cashflowEntries(): HasMany
+    {
+        return $this->hasMany(CashflowEntry::class);
     }
 
     /**
@@ -365,46 +375,74 @@ class Project extends Model
     // ========== BILLING INTEGRATION METHODS ==========
 
     /**
-     * Get current billing status dari billing batch
+     * Get current billing status dari billing batch dan project billing
      */
     public function getCurrentBillingStatusAttribute()
     {
         $latestBilling = $this->billings()->with('billingBatch')->latest()->first();
-        return $latestBilling?->billingBatch?->status ?? 'not_billed';
+        
+        if (!$latestBilling) {
+            return 'not_billed';
+        }
+        
+        // Jika ada billing batch, gunakan status dari batch
+        if ($latestBilling->billingBatch) {
+            return $latestBilling->billingBatch->status;
+        }
+        
+        // Jika direct project billing, gunakan status dari project billing
+        return $latestBilling->status ?? 'not_billed';
     }
 
     /**
-     * Get total tagihan amount dengan fallback logic
+     * Get total tagihan amount berdasarkan jenis billing yang digunakan
      */
     public function getTotalTagihanAmountAttribute()
     {
-        // 1. Cek apakah ada billing batch dengan nilai diterima
-        $totalReceived = $this->billings()->whereHas('billingBatch')->with('billingBatch')
-            ->get()->sum(fn($billing) => $billing->billingBatch->total_received_amount ?? 0);
+        // Prioritas: Jika ada billing batch, gunakan itu. Jika tidak, gunakan direct billing
+        $hasBatchBilling = $this->billings()->whereHas('billingBatch')->exists();
         
-        if ($totalReceived > 0) {
-            return $totalReceived;
+        if ($hasBatchBilling) {
+            // Gunakan data dari billing batch
+            $batchBillings = $this->billings()->whereHas('billingBatch')->with('billingBatch')->get();
+            $totalFromBatch = $batchBillings->sum(fn($billing) => $billing->billingBatch->total_received_amount ?? 0);
+            
+            if ($totalFromBatch > 0) {
+                return $totalFromBatch;
+            }
+        } else {
+            // Gunakan data dari direct project billing
+            $directBillings = $this->billings()->whereNull('billing_batch_id')->get();
+            $totalFromDirect = $directBillings->sum(fn($billing) =>
+                $billing->status === 'paid'
+                    ? ($billing->received_amount ?? $billing->total_amount ?? 0)
+                    : ($billing->total_amount ?? 0)
+            );
+            
+            if ($totalFromDirect > 0) {
+                return $totalFromDirect;
+            }
         }
         
-        // 2. Jika tidak ada billing, gunakan final_total_value
+        // Fallback jika tidak ada billing
         if ($this->final_total_value && $this->final_total_value > 0) {
             return $this->final_total_value;
         }
         
-        // 3. Fallback ke planned_total_value
         return $this->planned_total_value ?? 0;
     }
 
     /**
-     * Get label untuk total tagihan berdasarkan sumber data
+     * Get label untuk total tagihan berdasarkan jenis billing yang digunakan
      */
     public function getTotalTagihanLabelAttribute()
     {
-        $totalReceived = $this->billings()->whereHas('billingBatch')->with('billingBatch')
-            ->get()->sum(fn($billing) => $billing->billingBatch->total_received_amount ?? 0);
+        $hasBatchBilling = $this->billings()->whereHas('billingBatch')->exists();
         
-        if ($totalReceived > 0) {
-            return 'Total Tagihan Diterima';
+        if ($hasBatchBilling) {
+            return 'Total Tagihan Batch';
+        } elseif ($this->billings()->whereNull('billing_batch_id')->exists()) {
+            return 'Total Tagihan Termin';
         }
         
         if ($this->final_total_value && $this->final_total_value > 0) {
@@ -419,11 +457,12 @@ class Project extends Model
      */
     public function getTotalTagihanSourceAttribute()
     {
-        $totalReceived = $this->billings()->whereHas('billingBatch')->with('billingBatch')
-            ->get()->sum(fn($billing) => $billing->billingBatch->total_received_amount ?? 0);
+        $hasBatchBilling = $this->billings()->whereHas('billingBatch')->exists();
         
-        if ($totalReceived > 0) {
-            return 'received';
+        if ($hasBatchBilling) {
+            return 'batch';
+        } elseif ($this->billings()->whereNull('billing_batch_id')->exists()) {
+            return 'direct';
         }
         
         if ($this->final_total_value && $this->final_total_value > 0) {
@@ -434,50 +473,197 @@ class Project extends Model
     }
 
     /**
-     * Get total amount yang sudah diterima dari billing batch (backward compatibility)
+     * Get total amount yang sudah diterima berdasarkan jenis billing yang digunakan
      */
     public function getTotalReceivedAmountAttribute()
     {
-        return $this->billings()->whereHas('billingBatch')->with('billingBatch')
-            ->get()->sum(fn($billing) => $billing->billingBatch->total_received_amount ?? 0);
+        // Prioritas: Jika ada billing batch, gunakan itu. Jika tidak, gunakan direct billing
+        $hasBatchBilling = $this->billings()->whereHas('billingBatch')->exists();
+        
+        if ($hasBatchBilling) {
+            // Gunakan data dari billing batch
+            $batchBillings = $this->billings()->whereHas('billingBatch')->with('billingBatch')->get();
+            return $batchBillings->sum(fn($billing) => $billing->billingBatch->total_received_amount ?? 0);
+        } else {
+            // Untuk project billing, hitung semua tagihan yang sudah dibuat
+            $directBillings = $this->billings()->whereNull('billing_batch_id')->get();
+            return $directBillings->sum(fn($billing) => $billing->total_amount ?? 0);
+        }
     }
 
     /**
-     * Get progress percentage berdasarkan status billing batch
+     * Get progress percentage berdasarkan jenis billing yang digunakan
      */
     public function getBillingProgressPercentageAttribute()
     {
-        $currentStatus = $this->current_billing_status;
-        return $this->getProgressFromStatus($currentStatus);
+        $hasBatchBilling = $this->billings()->whereHas('billingBatch')->exists();
+        
+        if ($hasBatchBilling) {
+            // Untuk billing batch, gunakan progress berdasarkan status
+            $currentStatus = $this->current_billing_status;
+            return $this->getProgressFromStatus($currentStatus);
+        } else {
+            // Untuk project billing, hitung progress berdasarkan pembayaran termin
+            return $this->calculateTerminPaymentProgress();
+        }
     }
 
     /**
-     * Get latest billing info dari billing batch
+     * Calculate progress pembayaran termin untuk project billing
+     */
+    private function calculateTerminPaymentProgress(): int
+    {
+        // Tentukan total yang harus dibayar (prioritas: final_total_value > planned_total_value)
+        $totalToBePaid = $this->final_total_value && $this->final_total_value > 0
+            ? $this->final_total_value
+            : ($this->planned_total_value ?? 0);
+        
+        if ($totalToBePaid <= 0) {
+            return 0;
+        }
+        
+        // Hitung total tagihan yang sudah dibuat
+        $totalBilled = $this->billings()
+            ->whereNull('billing_batch_id')
+            ->sum('total_amount');
+        
+        // Hitung persentase berdasarkan total tagihan yang dibuat vs total yang harus dibayar
+        $percentage = ($totalBilled / $totalToBePaid) * 100;
+        
+        return min(100, max(0, round($percentage)));
+    }
+
+    /**
+     * Get latest billing info dari billing batch dan project billing
      */
     public function getLatestBillingInfoAttribute()
     {
+        // Cari billing terakhir (baik dari batch maupun direct)
         $latestBilling = $this->billings()->with('billingBatch')->latest()->first();
         
-        if (!$latestBilling || !$latestBilling->billingBatch) {
+        if (!$latestBilling) {
             return [
                 'status' => 'not_billed',
                 'status_label' => 'Belum Ditagih',
                 'invoice_number' => null,
                 'sp_number' => null,
                 'billing_date' => null,
-                'total_received' => 0
+                'total_received' => 0,
+                'source' => null
             ];
         }
 
-        $batch = $latestBilling->billingBatch;
-        return [
-            'status' => $batch->status,
-            'status_label' => $batch->status_label,
-            'invoice_number' => $batch->invoice_number,
-            'sp_number' => $batch->sp_number,
-            'billing_date' => $batch->billing_date,
-            'total_received' => $batch->total_received_amount
+        // Jika billing terkait dengan batch
+        if ($latestBilling->billingBatch) {
+            $batch = $latestBilling->billingBatch;
+            return [
+                'status' => $batch->status,
+                'status_label' => $batch->status_label,
+                'invoice_number' => $batch->invoice_number,
+                'sp_number' => $batch->sp_number,
+                'billing_date' => $batch->billing_date,
+                'total_received' => $batch->total_received_amount,
+                'source' => 'batch'
+            ];
+        }
+        
+        // Jika billing langsung (direct project billing)
+        $statusLabels = [
+            'draft' => 'Draft',
+            'sent' => 'Terkirim',
+            'paid' => 'Lunas',
+            'overdue' => 'Terlambat',
+            'cancelled' => 'Dibatalkan'
         ];
+        
+        return [
+            'status' => $latestBilling->status,
+            'status_label' => $statusLabels[$latestBilling->status] ?? 'Tidak Diketahui',
+            'invoice_number' => $latestBilling->invoice_number,
+            'sp_number' => $latestBilling->sp_number,
+            'billing_date' => $latestBilling->billing_date,
+            'total_received' => $latestBilling->received_amount ?? $latestBilling->total_amount ?? 0,
+            'source' => 'direct'
+        ];
+    }
+
+    /**
+     * Get billing information berdasarkan jenis billing yang digunakan
+     */
+    public function getBillingInfoAttribute()
+    {
+        $hasBatchBilling = $this->billings()->whereHas('billingBatch')->exists();
+        
+        if ($hasBatchBilling) {
+            // Gunakan billing batch
+            $batchBillings = $this->billings()->whereHas('billingBatch')->with('billingBatch')->get();
+            $batchInfo = [];
+            $totalAmount = 0;
+            
+            foreach ($batchBillings as $billing) {
+                $batch = $billing->billingBatch;
+                $batchInfo[] = [
+                    'id' => $billing->id,
+                    'batch_code' => $batch->batch_code,
+                    'invoice_number' => $batch->invoice_number,
+                    'sp_number' => $batch->sp_number,
+                    'billing_date' => $batch->billing_date,
+                    'status' => $batch->status,
+                    'status_label' => $batch->status_label,
+                    'total_amount' => $batch->total_received_amount ?? 0,
+                    'source' => 'batch'
+                ];
+                $totalAmount += $batch->total_received_amount ?? 0;
+            }
+            
+            return [
+                'type' => 'batch',
+                'billings' => $batchInfo,
+                'total_amount' => $totalAmount,
+                'billing_count' => count($batchInfo)
+            ];
+        } else {
+            // Gunakan direct billing
+            $directBillings = $this->billings()->whereNull('billing_batch_id')->get();
+            $directInfo = [];
+            $totalAmount = 0;
+            
+            $statusLabels = [
+                'draft' => 'Draft',
+                'sent' => 'Terkirim',
+                'paid' => 'Lunas',
+                'overdue' => 'Terlambat',
+                'cancelled' => 'Dibatalkan'
+            ];
+            
+            foreach ($directBillings as $billing) {
+                $directInfo[] = [
+                    'id' => $billing->id,
+                    'termin_label' => $billing->getTerminLabel(),
+                    'invoice_number' => $billing->invoice_number,
+                    'sp_number' => $billing->sp_number,
+                    'billing_date' => $billing->billing_date,
+                    'status' => $billing->status,
+                    'status_label' => $statusLabels[$billing->status] ?? 'Tidak Diketahui',
+                    'total_amount' => $billing->total_amount ?? 0,
+                    'received_amount' => $billing->received_amount ?? 0,
+                    'source' => 'direct'
+                ];
+                
+                if ($billing->status === 'paid') {
+                    $totalAmount += $billing->received_amount ?? $billing->total_amount ?? 0;
+                } else {
+                    $totalAmount += $billing->total_amount ?? 0;
+                }
+            }
+            
+            return [
+                'type' => 'direct',
+                'billings' => $directInfo,
+                'total_amount' => $totalAmount,
+                'billing_count' => count($directInfo)
+            ];
+        }
     }
 
     /**
@@ -500,47 +686,89 @@ class Project extends Model
     }
 
     /**
-     * Get billing status label dalam bahasa Indonesia
+     * Get billing status label berdasarkan jenis billing yang digunakan
      */
     public function getBillingStatusLabelAttribute()
     {
-        $currentStatus = $this->current_billing_status;
+        $hasBatchBilling = $this->billings()->whereHas('billingBatch')->exists();
         
-        return match($currentStatus) {
-            'draft' => 'Draft',
-            'sent' => 'Terkirim',
-            'area_verification' => 'Verifikasi Area',
-            'area_revision' => 'Revisi Area',
-            'regional_verification' => 'Verifikasi Regional',
-            'regional_revision' => 'Revisi Regional',
-            'payment_entry_ho' => 'Entry Pembayaran HO',
-            'paid' => 'Lunas',
-            'cancelled' => 'Dibatalkan',
-            'not_billed' => 'Belum Ditagih',
-            default => 'Belum Ditagih'
-        };
+        if ($hasBatchBilling) {
+            // Untuk billing batch, gunakan status batch
+            $currentStatus = $this->current_billing_status;
+            
+            return match($currentStatus) {
+                'draft' => 'Draft',
+                'sent' => 'Terkirim',
+                'area_verification' => 'Verifikasi Area',
+                'area_revision' => 'Revisi Area',
+                'regional_verification' => 'Verifikasi Regional',
+                'regional_revision' => 'Revisi Regional',
+                'payment_entry_ho' => 'Entry Pembayaran HO',
+                'paid' => 'Lunas',
+                'cancelled' => 'Dibatalkan',
+                'not_billed' => 'Belum Ditagih',
+                default => 'Belum Ditagih'
+            };
+        } else {
+            // Untuk project billing, gunakan status berdasarkan progress pembayaran
+            $progress = $this->calculateTerminPaymentProgress();
+            $hasDirectBilling = $this->billings()->whereNull('billing_batch_id')->exists();
+            
+            if (!$hasDirectBilling) {
+                return 'Belum Ditagih';
+            }
+            
+            if ($progress >= 100) {
+                return 'Lunas';
+            } elseif ($progress > 0) {
+                return 'Sebagian Dibayar';
+            } else {
+                return 'Belum Dibayar';
+            }
+        }
     }
 
     /**
-     * Get billing status badge color
+     * Get billing status badge color berdasarkan jenis billing yang digunakan
      */
     public function getBillingStatusBadgeColorAttribute()
     {
-        $currentStatus = $this->current_billing_status;
+        $hasBatchBilling = $this->billings()->whereHas('billingBatch')->exists();
         
-        return match($currentStatus) {
-            'draft' => 'bg-gray-100 text-gray-800',
-            'sent' => 'bg-blue-100 text-blue-800',
-            'area_verification' => 'bg-yellow-100 text-yellow-800',
-            'area_revision' => 'bg-orange-100 text-orange-800',
-            'regional_verification' => 'bg-purple-100 text-purple-800',
-            'regional_revision' => 'bg-red-100 text-red-800',
-            'payment_entry_ho' => 'bg-indigo-100 text-indigo-800',
-            'paid' => 'bg-green-100 text-green-800',
-            'cancelled' => 'bg-red-100 text-red-800',
-            'not_billed' => 'bg-gray-100 text-gray-800',
-            default => 'bg-gray-100 text-gray-800'
-        };
+        if ($hasBatchBilling) {
+            // Untuk billing batch, gunakan warna berdasarkan status batch
+            $currentStatus = $this->current_billing_status;
+            
+            return match($currentStatus) {
+                'draft' => 'bg-gray-100 text-gray-800',
+                'sent' => 'bg-blue-100 text-blue-800',
+                'area_verification' => 'bg-yellow-100 text-yellow-800',
+                'area_revision' => 'bg-orange-100 text-orange-800',
+                'regional_verification' => 'bg-purple-100 text-purple-800',
+                'regional_revision' => 'bg-red-100 text-red-800',
+                'payment_entry_ho' => 'bg-indigo-100 text-indigo-800',
+                'paid' => 'bg-green-100 text-green-800',
+                'cancelled' => 'bg-red-100 text-red-800',
+                'not_billed' => 'bg-gray-100 text-gray-800',
+                default => 'bg-gray-100 text-gray-800'
+            };
+        } else {
+            // Untuk project billing, gunakan warna berdasarkan progress pembayaran
+            $progress = $this->calculateTerminPaymentProgress();
+            $hasDirectBilling = $this->billings()->whereNull('billing_batch_id')->exists();
+            
+            if (!$hasDirectBilling) {
+                return 'bg-gray-100 text-gray-800';
+            }
+            
+            if ($progress >= 100) {
+                return 'bg-green-100 text-green-800';
+            } elseif ($progress > 0) {
+                return 'bg-yellow-100 text-yellow-800';
+            } else {
+                return 'bg-red-100 text-red-800';
+            }
+        }
     }
 
     /**
@@ -632,6 +860,78 @@ class Project extends Model
     {
         $plannedValue = $this->planned_total_value ?? 0;
         return $plannedValue - $this->total_billed_amount;
+    }
+
+    /**
+     * Check if project has termin payment schedule
+     */
+    public function hasTerminSchedule(): bool
+    {
+        return $this->paymentSchedules()->count() > 0;
+    }
+
+    /**
+     * Get termin payment summary
+     */
+    public function getTerminSummaryAttribute()
+    {
+        $schedules = $this->paymentSchedules;
+        
+        return [
+            'total_schedules' => $schedules->count(),
+            'pending_schedules' => $schedules->where('status', 'pending')->count(),
+            'billed_schedules' => $schedules->where('status', 'billed')->count(),
+            'paid_schedules' => $schedules->where('status', 'paid')->count(),
+            'overdue_schedules' => $schedules->where('status', 'overdue')->count(),
+            'total_scheduled_amount' => $schedules->sum('amount'),
+            'paid_amount' => $schedules->where('status', 'paid')->sum('amount'),
+            'pending_amount' => $schedules->whereIn('status', ['pending', 'billed'])->sum('amount'),
+        ];
+    }
+
+    /**
+     * Create termin payment schedule for project
+     */
+    public function createTerminSchedule(array $schedules): bool
+    {
+        try {
+            \DB::beginTransaction();
+
+            // Delete existing schedules if any
+            $this->paymentSchedules()->delete();
+
+            $totalPercentage = 0;
+            $totalTermin = count($schedules);
+
+            foreach ($schedules as $index => $schedule) {
+                $terminNumber = $index + 1;
+                $percentage = $schedule['percentage'];
+                $totalPercentage += $percentage;
+
+                $this->paymentSchedules()->create([
+                    'termin_number' => $terminNumber,
+                    'total_termin' => $totalTermin,
+                    'termin_name' => $schedule['name'] ?? "Termin {$terminNumber}",
+                    'percentage' => $percentage,
+                    'amount' => $this->calculateTotalValue() * ($percentage / 100),
+                    'due_date' => $schedule['due_date'],
+                    'description' => $schedule['description'] ?? null,
+                    'status' => 'pending'
+                ]);
+            }
+
+            // Validate total percentage should be 100%
+            if (abs($totalPercentage - 100) > 0.01) {
+                throw new \Exception("Total persentase harus 100%, saat ini: {$totalPercentage}%");
+            }
+
+            \DB::commit();
+            return true;
+
+        } catch (\Exception $e) {
+            \DB::rollback();
+            throw $e;
+        }
     }
 
     /**
