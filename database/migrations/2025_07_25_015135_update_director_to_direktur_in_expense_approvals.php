@@ -12,16 +12,26 @@ return new class extends Migration
      */
     public function up(): void
     {
-        // Untuk PostgreSQL, kita perlu drop constraint lama dan buat yang baru
-        DB::statement("ALTER TABLE expense_approvals DROP CONSTRAINT IF EXISTS expense_approvals_level_check");
-        
         // Update existing records yang menggunakan 'director' menjadi 'direktur'
         DB::table('expense_approvals')
             ->where('level', 'director')
             ->update(['level' => 'direktur']);
         
-        // Tambah constraint baru dengan nilai yang benar
-        DB::statement("ALTER TABLE expense_approvals ADD CONSTRAINT expense_approvals_level_check CHECK (level IN ('finance_manager', 'project_manager', 'direktur'))");
+        // Handle constraint berdasarkan database driver
+        $driver = DB::getDriverName();
+        
+        if ($driver === 'mysql' || $driver === 'pgsql') {
+            // Untuk MySQL dan PostgreSQL
+            try {
+                DB::statement("ALTER TABLE expense_approvals DROP CONSTRAINT IF EXISTS expense_approvals_level_check");
+            } catch (\Exception $e) {
+                // Ignore jika constraint tidak ada
+            }
+            
+            // Tambah constraint baru dengan nilai yang benar
+            DB::statement("ALTER TABLE expense_approvals ADD CONSTRAINT expense_approvals_level_check CHECK (level IN ('finance_manager', 'project_manager', 'direktur'))");
+        }
+        // SQLite tidak perlu constraint check karena Laravel akan handle di model level
     }
 
     /**

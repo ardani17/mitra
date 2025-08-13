@@ -104,6 +104,9 @@ class CashflowCategory extends Model
      */
     public static function getSystemCategory(string $code): ?self
     {
-        return static::where('code', $code)->where('is_system', true)->first();
+        return static::where('code', $code)
+            ->where('is_system', true)
+            ->where('is_active', true)
+            ->first();
     }
 }

@@ -129,10 +129,18 @@ class ExpenseApprovalController extends Controller
         ]);
         
         $expense = $approval->expense;
-        
+
         // Update expense status based on approval workflow
         if ($request->status === 'rejected') {
             $expense->update(['status' => 'rejected']);
+            
+            // Log rejection
+            \Log::info('Expense rejected', [
+                'expense_id' => $expense->id,
+                'approver_id' => $user->id,
+                'approver_role' => $userRole,
+                'notes' => $request->notes
+            ]);
         } else {
             // Check if all required approvals are complete
             $requiredApprovals = ['finance_manager'];
@@ -141,15 +149,37 @@ class ExpenseApprovalController extends Controller
             } else {
                 $requiredApprovals[] = 'project_manager';
             }
-            
+
             $completedApprovals = $expense->approvals()
                 ->whereIn('level', $requiredApprovals)
                 ->where('status', 'approved')
                 ->pluck('level')
                 ->toArray();
-            
+
             if (count($completedApprovals) >= count($requiredApprovals)) {
+                // Use update method to trigger observer
                 $expense->update(['status' => 'approved']);
+                
+                // Log successful approval
+                \Log::info('Expense fully approved', [
+                    'expense_id' => $expense->id,
+                    'amount' => $expense->amount,
+                    'required_approvals' => $requiredApprovals,
+                    'completed_approvals' => $completedApprovals,
+                    'final_approver_id' => $user->id,
+                    'final_approver_role' => $userRole
+                ]);
+            } else {
+                // Log partial approval
+                \Log::info('Expense partially approved', [
+                    'expense_id' => $expense->id,
+                    'amount' => $expense->amount,
+                    'required_approvals' => $requiredApprovals,
+                    'completed_approvals' => $completedApprovals,
+                    'approver_id' => $user->id,
+                    'approver_role' => $userRole,
+                    'remaining_approvals' => array_diff($requiredApprovals, $completedApprovals)
+                ]);
             }
         }
         
