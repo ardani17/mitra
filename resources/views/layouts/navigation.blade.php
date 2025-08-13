@@ -321,21 +321,17 @@
 
             <!-- User Management Menu (Only for Direktur) -->
             @if(auth()->user()->hasRole('direktur'))
-            <x-responsive-nav-link :href="route('users.index')" :active="request()->routeIs('users.*')">
-                {{ __('Manajemen User') }}
-            </x-responsive-nav-link>
-            @endif
-                
-            @if(auth()->user()->roles && auth()->user()->hasRole(['direktur', 'finance_manager', 'project_manager']))
-            <x-responsive-nav-link :href="route('reports.index')" :active="request()->routeIs('reports.*')">
-                {{ __('Laporan') }}
-            </x-responsive-nav-link>
-            <x-responsive-nav-link :href="route('excel.index')" :active="request()->routeIs('excel.*')">
-                {{ __('Excel') }}
-            </x-responsive-nav-link>
-            <x-responsive-nav-link :href="route('documentation')" :active="request()->routeIs('documentation')">
-                {{ __('Dokumentasi') }}
-            </x-responsive-nav-link>
+                <div class="responsive-nav-section">
+                    <div class="responsive-nav-section-title">
+                        Manajemen
+                    </div>
+                    <x-responsive-nav-link :href="route('users.index')" :active="request()->routeIs('users.*')" class="responsive-nav-item {{ request()->routeIs('users.*') ? 'active' : '' }}">
+                        <svg class="mr-3 h-5 w-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4.354a4 4 0 110 5.292M15 21H3v-1a6 6 0 0112 0v1zm0 0h6v-1a6 6 0 00-9-2.239"/>
+                        </svg>
+                        {{ __('Manajemen User') }}
+                    </x-responsive-nav-link>
+                </div>
             @endif
         </div>
 
