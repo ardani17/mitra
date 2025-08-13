@@ -108,35 +108,35 @@
                             </svg>
                         </button>
                         
-                        <div x-show="open" @click.away="open = false" x-transition:enter="transition ease-out duration-200" x-transition:enter-start="opacity-0 scale-95" x-transition:enter-end="opacity-100 scale-100" x-transition:leave="transition ease-in duration-75" x-transition:leave-start="opacity-100 scale-100" x-transition:leave-end="opacity-0 scale-95" class="nav-dropdown-mobile sm:absolute sm:left-0 sm:mt-2 sm:w-64 sm:rounded-md sm:shadow-lg sm:bg-white sm:ring-1 sm:ring-black sm:ring-opacity-5 z-50" style="top: 100%;">
+                        <div x-show="open" @click.away="open = false" x-transition:enter="transition ease-out duration-200" x-transition:enter-start="opacity-0 scale-95" x-transition:enter-end="opacity-100 scale-100" x-transition:leave="transition ease-in duration-75" x-transition:leave-start="opacity-100 scale-100" x-transition:leave-end="opacity-0 scale-95" class="absolute left-0 mt-2 w-64 rounded-md shadow-lg bg-white ring-1 ring-black ring-opacity-5 z-50" style="top: 100%;">
                             <div class="py-1">
-                                <a href="{{ route('finance.dashboard') }}" class="dropdown-item {{ request()->routeIs('finance.dashboard') ? 'bg-indigo-50 text-indigo-700 font-medium' : '' }}">
+                                <a href="{{ route('finance.dashboard') }}" class="flex items-center px-4 py-2 text-sm text-gray-700 hover:bg-indigo-50 hover:text-indigo-700 transition duration-150 ease-in-out {{ request()->routeIs('finance.dashboard') ? 'bg-indigo-50 text-indigo-700 font-medium' : '' }}">
                                     <svg class="mr-3 h-4 w-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 19v-6a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2a2 2 0 002-2zm0 0V9a2 2 0 012-2h2a2 2 0 012 2v10m-6 0a2 2 0 002 2h2a2 2 0 002-2m0 0V5a2 2 0 012-2h2a2 2 0 012 2v14a2 2 0 01-2 2h-2a2 2 0 01-2-2z"/>
                                     </svg>
                                     Dashboard Keuangan
                                 </a>
                                 <div class="border-t border-gray-100 my-1"></div>
-                                <a href="{{ route('finance.cashflow.index') }}" class="dropdown-item {{ request()->routeIs('finance.cashflow.*') ? 'bg-indigo-50 text-indigo-700 font-medium' : '' }}">
+                                <a href="{{ route('finance.cashflow.index') }}" class="flex items-center px-4 py-2 text-sm text-gray-700 hover:bg-indigo-50 hover:text-indigo-700 transition duration-150 ease-in-out {{ request()->routeIs('finance.cashflow.*') ? 'bg-indigo-50 text-indigo-700 font-medium' : '' }}">
                                     <svg class="mr-3 h-4 w-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8c-1.657 0-3 .895-3 2s1.343 2 3 2 3 .895 3 2-1.343 2-3 2m0-8c1.11 0 2.08.402 2.599 1M12 8V7m0 1v8m0 0v1m0-1c-1.11 0-2.08-.402-2.599-1"/>
                                     </svg>
                                     Jurnal Cashflow
                                 </a>
-                                <a href="{{ route('finance.cashflow.income') }}" class="dropdown-item">
+                                <a href="{{ route('finance.cashflow.income') }}" class="flex items-center px-4 py-2 text-sm text-gray-700 hover:bg-indigo-50 hover:text-indigo-700 transition duration-150 ease-in-out">
                                     <svg class="mr-3 h-4 w-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M7 11l5-5m0 0l5 5m-5-5v12"/>
                                     </svg>
                                     Pemasukan
                                 </a>
-                                <a href="{{ route('finance.cashflow.expense') }}" class="dropdown-item">
+                                <a href="{{ route('finance.cashflow.expense') }}" class="flex items-center px-4 py-2 text-sm text-gray-700 hover:bg-indigo-50 hover:text-indigo-700 transition duration-150 ease-in-out">
                                     <svg class="mr-3 h-4 w-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 13l-5 5m0 0l-5-5m5 5V6"/>
                                     </svg>
                                     Pengeluaran
                                 </a>
                                 <div class="border-t border-gray-100 my-1"></div>
-                                <a href="{{ route('finance.employees.index') }}" class="dropdown-item {{ request()->routeIs('finance.employees.*') ? 'bg-indigo-50 text-indigo-700 font-medium' : '' }}">
+                                <a href="{{ route('finance.employees.index') }}" class="flex items-center px-4 py-2 text-sm text-gray-700 hover:bg-indigo-50 hover:text-indigo-700 transition duration-150 ease-in-out {{ request()->routeIs('finance.employees.*') ? 'bg-indigo-50 text-indigo-700 font-medium' : '' }}">
                                     <svg class="mr-3 h-4 w-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4.354a4 4 0 110 5.292M15 21H3v-1a6 6 0 0112 0v1zm0 0h6v-1a6 6 0 00-9-2.239"/>
                                     </svg>
