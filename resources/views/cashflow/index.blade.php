@@ -267,78 +267,99 @@
             </div>
 
             <!-- Mobile Card View -->
-            <div class="sm:hidden space-y-3">
+            <div class="sm:hidden p-4 space-y-4">
                 @foreach($entries as $entry)
-                    <div class="transaction-card">
-                        <div class="transaction-card-header">
-                            <div class="transaction-card-icon {{ $entry->type === 'income' ? 'bg-green-100 text-green-600' : 'bg-red-100 text-red-600' }}">
-                                @if($entry->type === 'income')
-                                    <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M7 11l5-5m0 0l5 5m-5-5v12"/>
-                                    </svg>
-                                @else
-                                    <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 13l-5 5m0 0l-5-5m5 5V6"/>
-                                    </svg>
-                                @endif
+                    <div class="bg-white border border-gray-200 rounded-lg p-4 shadow-sm">
+                        <!-- Card Header -->
+                        <div class="flex items-start justify-between mb-3">
+                            <div class="flex items-center space-x-3 flex-1 min-w-0">
+                                <div class="w-10 h-10 rounded-full flex items-center justify-center flex-shrink-0 {{ $entry->type === 'income' ? 'bg-green-100 text-green-600' : 'bg-red-100 text-red-600' }}">
+                                    @if($entry->type === 'income')
+                                        <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M7 11l5-5m0 0l5 5m-5-5v12"/>
+                                        </svg>
+                                    @else
+                                        <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 13l-5 5m0 0l-5-5m5 5V6"/>
+                                        </svg>
+                                    @endif
+                                </div>
+                                <div class="min-w-0 flex-1">
+                                    <h3 class="text-sm font-medium text-gray-900 truncate">{{ $entry->description }}</h3>
+                                    <p class="text-xs text-gray-500 mt-1">{{ $entry->transaction_date->format('d M Y') }}</p>
+                                </div>
                             </div>
-                            <div class="transaction-card-info">
-                                <div class="transaction-card-title">{{ Str::limit($entry->description, 40) }}</div>
-                                <div class="transaction-card-subtitle">{{ $entry->transaction_date->format('d M Y') }} • {{ $entry->category->name }}</div>
-                            </div>
-                            <div class="transaction-card-amount">
-                                <div class="transaction-card-amount-value {{ $entry->type === 'income' ? 'text-green-600' : 'text-red-600' }}">
+                            <div class="text-right flex-shrink-0 ml-3">
+                                <p class="text-sm font-semibold {{ $entry->type === 'income' ? 'text-green-600' : 'text-red-600' }}">
                                     {{ $entry->type === 'income' ? '+' : '-' }} {{ $entry->formatted_amount }}
-                                </div>
-                                <div class="transaction-card-amount-label">
-                                    <span class="inline-flex items-center px-2 py-1 rounded-full text-xs font-medium {{ $entry->status_badge_class }}">
-                                        {{ $entry->formatted_status }}
-                                    </span>
-                                </div>
+                                </p>
+                                <span class="inline-flex items-center px-2 py-1 rounded-full text-xs font-medium {{ $entry->status_badge_class }} mt-1">
+                                    {{ $entry->formatted_status }}
+                                </span>
                             </div>
                         </div>
                         
-                        <div class="transaction-card-details">
-                            <div class="transaction-card-detail">
-                                <div class="transaction-card-detail-label">Tipe</div>
-                                <div class="transaction-card-detail-value">
-                                    <span class="inline-flex items-center px-2 py-1 rounded-full text-xs font-medium {{ $entry->type === 'income' ? 'bg-green-100 text-green-800' : 'bg-red-100 text-red-800' }}">
-                                        {{ $entry->formatted_type }}
-                                    </span>
-                                </div>
+                        <!-- Card Details -->
+                        <div class="grid grid-cols-2 gap-3 text-xs mb-3">
+                            <div>
+                                <span class="text-gray-500">Kategori:</span>
+                                <span class="text-gray-900 font-medium ml-1">{{ $entry->category->name }}</span>
                             </div>
-                            <div class="transaction-card-detail">
-                                <div class="transaction-card-detail-label">Proyek</div>
-                                <div class="transaction-card-detail-value">{{ $entry->project?->name ?? '-' }}</div>
+                            <div>
+                                <span class="text-gray-500">Tipe:</span>
+                                <span class="inline-flex items-center px-2 py-0.5 rounded-full text-xs font-medium ml-1 {{ $entry->type === 'income' ? 'bg-green-100 text-green-800' : 'bg-red-100 text-red-800' }}">
+                                    {{ $entry->formatted_type }}
+                                </span>
                             </div>
+                            @if($entry->project)
+                            <div class="col-span-2">
+                                <span class="text-gray-500">Proyek:</span>
+                                <span class="text-gray-900 font-medium ml-1">{{ $entry->project->name }}</span>
+                            </div>
+                            @endif
                         </div>
                         
                         @if($entry->notes)
-                            <div class="mt-3 pt-3 border-t border-gray-100">
-                                <div class="text-xs text-gray-500">Catatan:</div>
-                                <div class="text-sm text-gray-700 mt-1">{{ Str::limit($entry->notes, 100) }}</div>
+                            <div class="mb-3 p-2 bg-gray-50 rounded text-xs">
+                                <span class="text-gray-500 font-medium">Catatan:</span>
+                                <p class="text-gray-700 mt-1">{{ Str::limit($entry->notes, 100) }}</p>
                             </div>
                         @endif
                         
-                        <div class="mobile-table-card-actions">
-                            <input type="checkbox" name="entries[]" value="{{ $entry->id }}" class="entry-checkbox rounded border-slate-300 text-blue-600 focus:ring-blue-500 mr-3">
-                            <a href="{{ route('finance.cashflow.show', $entry) }}" class="action-btn-mobile primary">
-                                <i class="fas fa-eye"></i>
-                            </a>
-                            @if($entry->canBeEdited())
-                                <a href="{{ route('finance.cashflow.edit', $entry) }}" class="action-btn-mobile warning">
-                                    <i class="fas fa-edit"></i>
+                        <!-- Card Actions -->
+                        <div class="flex items-center justify-between pt-3 border-t border-gray-100">
+                            <div class="flex items-center">
+                                <input type="checkbox" name="entries[]" value="{{ $entry->id }}" class="entry-checkbox rounded border-gray-300 text-blue-600 focus:ring-blue-500">
+                            </div>
+                            <div class="flex items-center space-x-2">
+                                <a href="{{ route('finance.cashflow.show', $entry) }}" class="inline-flex items-center px-2 py-1 bg-blue-100 text-blue-700 rounded text-xs font-medium hover:bg-blue-200">
+                                    <svg class="w-3 h-3 mr-1" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z"/>
+                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z"/>
+                                    </svg>
+                                    Lihat
                                 </a>
-                            @endif
-                            @if($entry->canBeDeleted())
-                                <form method="POST" action="{{ route('finance.cashflow.destroy', $entry) }}" class="inline" onsubmit="return confirm('Yakin ingin menghapus transaksi ini?')">
-                                    @csrf
-                                    @method('DELETE')
-                                    <button type="submit" class="action-btn-mobile danger">
-                                        <i class="fas fa-trash"></i>
-                                    </button>
-                                </form>
-                            @endif
+                                @if($entry->canBeEdited())
+                                    <a href="{{ route('finance.cashflow.edit', $entry) }}" class="inline-flex items-center px-2 py-1 bg-yellow-100 text-yellow-700 rounded text-xs font-medium hover:bg-yellow-200">
+                                        <svg class="w-3 h-3 mr-1" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z"/>
+                                        </svg>
+                                        Edit
+                                    </a>
+                                @endif
+                                @if($entry->canBeDeleted())
+                                    <form method="POST" action="{{ route('finance.cashflow.destroy', $entry) }}" class="inline" onsubmit="return confirm('Yakin ingin menghapus transaksi ini?')">
+                                        @csrf
+                                        @method('DELETE')
+                                        <button type="submit" class="inline-flex items-center px-2 py-1 bg-red-100 text-red-700 rounded text-xs font-medium hover:bg-red-200">
+                                            <svg class="w-3 h-3 mr-1" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16"/>
+                                            </svg>
+                                            Hapus
+                                        </button>
+                                    </form>
+                                @endif
+                            </div>
                         </div>
                     </div>
                 @endforeach
