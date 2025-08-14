@@ -112,6 +112,41 @@
                     <div class="bg-green-50 border border-green-200 rounded-lg p-3">
                         <p class="text-sm text-green-800">This expense has been approved.</p>
                     </div>
+                    
+                    @if($expense->canBeModified())
+                        <!-- Edit Request Button -->
+                        @can('requestModification', $expense)
+                            <a href="{{ route('expense-modifications.edit-form', $expense) }}"
+                               class="w-full bg-blue-600 hover:bg-blue-700 text-white font-bold py-2 px-4 rounded inline-block text-center transition-colors duration-200">
+                                <svg class="w-4 h-4 inline mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z"/>
+                                </svg>
+                                Request Edit
+                            </a>
+                        @endcan
+                        
+                        <!-- Delete Request Button -->
+                        @can('requestModification', $expense)
+                            <a href="{{ route('expense-modifications.delete-form', $expense) }}"
+                               class="w-full bg-red-600 hover:bg-red-700 text-white font-bold py-2 px-4 rounded inline-block text-center transition-colors duration-200">
+                                <svg class="w-4 h-4 inline mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16"/>
+                                </svg>
+                                Request Delete
+                            </a>
+                        @endcan
+                    @endif
+                    
+                    @if($expense->hasPendingModifications())
+                        <div class="bg-yellow-50 border border-yellow-200 rounded-lg p-3">
+                            <p class="text-sm text-yellow-800 font-medium">Pending Modification Request</p>
+                            <p class="text-xs text-yellow-700 mt-1">This expense has a pending modification request.</p>
+                            <a href="{{ route('expense-modifications.history', $expense) }}"
+                               class="text-yellow-800 hover:text-yellow-900 text-xs underline">
+                                View History
+                            </a>
+                        </div>
+                    @endif
                 </div>
                 @elseif($expense->status == 'rejected')
                 <div class="space-y-3">

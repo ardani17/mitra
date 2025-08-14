@@ -38,7 +38,7 @@ class ProjectExpensePolicy
     public function update(User $user, ProjectExpense $projectExpense): bool
     {
         // User bisa update expense yang mereka buat, atau direktur/project manager bisa update semua
-        return $projectExpense->created_by === $user->id || 
+        return $projectExpense->user_id === $user->id ||
                $user->hasAnyRole(['direktur', 'project_manager']);
     }
 
@@ -48,8 +48,20 @@ class ProjectExpensePolicy
     public function delete(User $user, ProjectExpense $projectExpense): bool
     {
         // User bisa delete expense yang mereka buat (jika masih pending), atau direktur bisa delete semua
-        return ($projectExpense->created_by === $user->id && $projectExpense->status === 'pending') || 
+        return ($projectExpense->user_id === $user->id && $projectExpense->status === 'pending') ||
                $user->hasRole('direktur');
+    }
+
+    /**
+     * Determine whether the user can request modifications for an expense.
+     */
+    public function requestModification(User $user, ProjectExpense $projectExpense): bool
+    {
+        // User can request modification if:
+        // 1. They created the expense, OR
+        // 2. They have project manager or higher role
+        return $projectExpense->user_id === $user->id ||
+               $user->hasAnyRole(['project_manager', 'finance_manager', 'direktur']);
     }
 
     /**

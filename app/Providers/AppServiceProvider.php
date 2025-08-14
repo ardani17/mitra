@@ -12,12 +12,14 @@ use App\Models\ProjectBilling;
 use App\Models\Employee;
 use App\Models\DailySalary;
 use App\Models\SalaryRelease;
+use App\Models\ExpenseModificationApproval;
 use App\Policies\ProjectPolicy;
 use App\Policies\ExpensePolicy;
 use App\Policies\BillingPolicy;
 use App\Policies\EmployeePolicy;
 use App\Policies\DailySalaryPolicy;
 use App\Policies\SalaryReleasePolicy;
+use App\Policies\ExpenseModificationPolicy;
 use App\Observers\ProjectBillingObserver;
 use App\Observers\ProjectExpenseObserver;
 use App\Observers\SalaryReleaseObserver;
@@ -44,6 +46,7 @@ class AppServiceProvider extends ServiceProvider
         Gate::policy(Employee::class, EmployeePolicy::class);
         Gate::policy(DailySalary::class, DailySalaryPolicy::class);
         Gate::policy(SalaryRelease::class, SalaryReleasePolicy::class);
+        Gate::policy(ExpenseModificationApproval::class, ExpenseModificationPolicy::class);
         
         // Register observers
         ProjectBilling::observe(ProjectBillingObserver::class);

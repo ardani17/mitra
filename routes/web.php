@@ -255,4 +255,7 @@ Route::middleware('auth')->group(function () {
     });
 });
 
+// Include expense modification routes
+require __DIR__.'/expense-modifications.php';
+
 require __DIR__.'/auth.php';

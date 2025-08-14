@@ -196,6 +196,12 @@ class ExpenseController extends Controller
         $expense = ProjectExpense::findOrFail($id);
         $this->authorize('update', $expense);
         
+        // Check if expense can be directly edited
+        if (!$expense->canBeDirectlyEdited()) {
+            return redirect()->route('expense-modifications.edit-form', $expense)
+                ->with('info', 'Pengeluaran yang sudah disetujui memerlukan persetujuan untuk diedit. Anda akan diarahkan ke form permintaan edit.');
+        }
+        
         $projects = Project::all();
         $categories = [
             'material' => 'Material',
@@ -235,6 +241,12 @@ class ExpenseController extends Controller
     {
         $expense = ProjectExpense::findOrFail($id);
         $this->authorize('delete', $expense);
+        
+        // Check if expense can be directly deleted
+        if (!$expense->canBeDirectlyDeleted()) {
+            return redirect()->route('expense-modifications.delete-form', $expense)
+                ->with('info', 'Pengeluaran yang sudah disetujui memerlukan persetujuan untuk dihapus. Anda akan diarahkan ke form permintaan hapus.');
+        }
         
         $projectId = $expense->project_id;
         $description = $expense->description;
