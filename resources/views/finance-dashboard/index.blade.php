@@ -11,7 +11,7 @@
             <p class="text-slate-600 mt-1 text-sm sm:text-base">Ringkasan dan analisis keuangan perusahaan</p>
         </div>
         <div class="flex flex-col sm:flex-row space-y-2 sm:space-y-0 sm:space-x-3">
-            <select id="period-filter" class="form-input-mobile sm:form-input px-3 py-2 text-sm">
+            <select id="period-filter" class="w-full sm:w-auto px-3 py-2 text-sm border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 bg-white">
                 <option value="this_month">Bulan Ini</option>
                 <option value="last_month">Bulan Lalu</option>
                 <option value="this_quarter">Kuartal Ini</option>
@@ -19,7 +19,7 @@
                 <option value="custom">Custom</option>
             </select>
             <a href="{{ route('finance.cashflow.create') }}"
-               class="btn-primary-mobile sm:btn-primary sm:w-auto flex items-center justify-center">
+               class="bg-blue-600 hover:bg-blue-700 text-white font-bold py-2 px-4 rounded text-sm text-center flex items-center justify-center">
                 <svg class="w-5 h-5 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 6v6m0 0v6m0-6h6m-6 0H6"/>
                 </svg>
@@ -130,7 +130,7 @@
         <div class="mobile-chart-container bg-white rounded-lg shadow-sm border border-slate-200 p-4 sm:p-6">
             <div class="finance-chart-header flex flex-col sm:flex-row sm:items-center sm:justify-between mb-4">
                 <h3 class="finance-chart-title text-base sm:text-lg font-semibold text-slate-800 mb-2 sm:mb-0">Breakdown Kategori</h3>
-                <select id="category-type-filter" class="form-select-mobile sm:form-select px-3 py-2 text-sm">
+                <select id="category-type-filter" class="w-full sm:w-auto px-3 py-2 text-sm border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 bg-white">
                     <option value="expense">Pengeluaran</option>
                     <option value="income">Pemasukan</option>
                 </select>

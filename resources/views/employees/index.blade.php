@@ -1,16 +1,16 @@
 <x-app-layout>
     <x-slot name="header">
-        <div class="flex justify-between items-center">
-            <h2 class="font-semibold text-xl text-gray-800 leading-tight">
+        <div class="mobile-header sm:flex sm:justify-between sm:items-center">
+            <h2 class="mobile-header-title sm:font-semibold sm:text-xl sm:text-gray-800 sm:leading-tight">
                 {{ __('Manajemen Karyawan') }}
             </h2>
-            <div class="flex space-x-2">
+            <div class="mobile-header-actions sm:flex sm:space-x-2 sm:space-y-0 sm:w-auto">
                 <a href="{{ route('finance.employees.export') }}"
-                   class="bg-green-500 hover:bg-green-700 text-white font-bold py-2 px-4 rounded">
+                   class="mobile-btn-success sm:w-auto sm:min-h-0 sm:px-4 sm:py-2 sm:text-sm sm:font-bold">
                     <i class="fas fa-download mr-2"></i>Export
                 </a>
                 <a href="{{ route('finance.employees.create') }}"
-                   class="bg-blue-500 hover:bg-blue-700 text-white font-bold py-2 px-4 rounded">
+                   class="mobile-btn-primary sm:w-auto sm:min-h-0 sm:px-4 sm:py-2 sm:text-sm sm:font-bold">
                     <i class="fas fa-plus mr-2"></i>Tambah Karyawan
                 </a>
             </div>
@@ -20,143 +20,139 @@
     <div class="py-12">
         <div class="max-w-7xl mx-auto sm:px-6 lg:px-8">
             <!-- Statistics Cards -->
-            <div class="grid grid-cols-1 md:grid-cols-4 gap-6 mb-6">
-                <div class="bg-white overflow-hidden shadow-sm sm:rounded-lg">
-                    <div class="p-6">
-                        <div class="flex items-center">
-                            <div class="flex-shrink-0">
-                                <div class="w-8 h-8 bg-blue-100 rounded-full flex items-center justify-center">
-                                    <i class="fas fa-users text-blue-600"></i>
-                                </div>
-                            </div>
-                            <div class="ml-4">
-                                <p class="text-sm font-medium text-gray-500">Total Karyawan</p>
-                                <p class="text-2xl font-semibold text-gray-900">{{ $stats['total'] }}</p>
-                            </div>
+            <div class="mobile-stats-grid sm:grid sm:grid-cols-2 md:grid-cols-4 sm:gap-6 mb-6">
+                <div class="mobile-stat-card">
+                    <div class="flex items-center">
+                        <div class="stat-icon bg-blue-100">
+                            <i class="fas fa-users text-blue-600"></i>
+                        </div>
+                        <div class="stat-content">
+                            <p class="stat-label">Total Karyawan</p>
+                            <p class="stat-value sm:text-2xl">{{ $stats['total'] }}</p>
                         </div>
                     </div>
                 </div>
 
-                <div class="bg-white overflow-hidden shadow-sm sm:rounded-lg">
-                    <div class="p-6">
-                        <div class="flex items-center">
-                            <div class="flex-shrink-0">
-                                <div class="w-8 h-8 bg-green-100 rounded-full flex items-center justify-center">
-                                    <i class="fas fa-user-check text-green-600"></i>
-                                </div>
-                            </div>
-                            <div class="ml-4">
-                                <p class="text-sm font-medium text-gray-500">Aktif</p>
-                                <p class="text-2xl font-semibold text-gray-900">{{ $stats['active'] }}</p>
-                            </div>
+                <div class="mobile-stat-card">
+                    <div class="flex items-center">
+                        <div class="stat-icon bg-green-100">
+                            <i class="fas fa-user-check text-green-600"></i>
+                        </div>
+                        <div class="stat-content">
+                            <p class="stat-label">Aktif</p>
+                            <p class="stat-value sm:text-2xl">{{ $stats['active'] }}</p>
                         </div>
                     </div>
                 </div>
 
-                <div class="bg-white overflow-hidden shadow-sm sm:rounded-lg">
-                    <div class="p-6">
-                        <div class="flex items-center">
-                            <div class="flex-shrink-0">
-                                <div class="w-8 h-8 bg-red-100 rounded-full flex items-center justify-center">
-                                    <i class="fas fa-user-times text-red-600"></i>
-                                </div>
-                            </div>
-                            <div class="ml-4">
-                                <p class="text-sm font-medium text-gray-500">Tidak Aktif</p>
-                                <p class="text-2xl font-semibold text-gray-900">{{ $stats['inactive'] }}</p>
-                            </div>
+                <div class="mobile-stat-card">
+                    <div class="flex items-center">
+                        <div class="stat-icon bg-red-100">
+                            <i class="fas fa-user-times text-red-600"></i>
+                        </div>
+                        <div class="stat-content">
+                            <p class="stat-label">Tidak Aktif</p>
+                            <p class="stat-value sm:text-2xl">{{ $stats['inactive'] }}</p>
                         </div>
                     </div>
                 </div>
 
-                <div class="bg-white overflow-hidden shadow-sm sm:rounded-lg">
-                    <div class="p-6">
-                        <div class="flex items-center">
-                            <div class="flex-shrink-0">
-                                <div class="w-8 h-8 bg-yellow-100 rounded-full flex items-center justify-center">
-                                    <i class="fas fa-exclamation-triangle text-yellow-600"></i>
-                                </div>
-                            </div>
-                            <div class="ml-4">
-                                <p class="text-sm font-medium text-gray-500">Kontrak Berakhir</p>
-                                <p class="text-2xl font-semibold text-gray-900">{{ $stats['contract_expiring'] }}</p>
-                            </div>
+                <div class="mobile-stat-card">
+                    <div class="flex items-center">
+                        <div class="stat-icon bg-yellow-100">
+                            <i class="fas fa-exclamation-triangle text-yellow-600"></i>
+                        </div>
+                        <div class="stat-content">
+                            <p class="stat-label">Kontrak Berakhir</p>
+                            <p class="stat-value sm:text-2xl">{{ $stats['contract_expiring'] }}</p>
                         </div>
                     </div>
                 </div>
             </div>
 
             <!-- Search and Filter Section -->
-            <div class="bg-white overflow-hidden shadow-sm sm:rounded-lg mb-6">
-                <div class="p-6 bg-white border-b border-gray-200">
-                    <form method="GET" action="{{ route('finance.employees.index') }}" class="space-y-4">
-                        <div class="grid grid-cols-1 md:grid-cols-6 gap-4">
-                            <div class="md:col-span-2">
-                                <label for="search" class="block text-sm font-medium text-gray-700">Pencarian</label>
-                                <input type="text" name="search" id="search" value="{{ request('search') }}" 
-                                       placeholder="Nama, kode, posisi, departemen..." 
-                                       class="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500">
+            <div class="mobile-filter-container">
+                <div class="mobile-filter-header">
+                    <h3 class="mobile-filter-title">Filter Karyawan</h3>
+                    <button type="button" class="mobile-filter-toggle sm:hidden" onclick="toggleEmployeeFilter()">
+                        <span id="employee-filter-toggle-text">Tampilkan Filter</span>
+                    </button>
+                </div>
+                
+                <div id="employee-filter-content" class="mobile-filter-content hidden sm:block">
+                    <form method="GET" action="{{ route('finance.employees.index') }}">
+                        <div class="mobile-filter-row sm:grid sm:grid-cols-6 sm:gap-4">
+                            <div class="mobile-filter-group sm:col-span-2">
+                                <label for="search" class="mobile-filter-label">Pencarian</label>
+                                <input type="text" name="search" id="search" value="{{ request('search') }}"
+                                       placeholder="Nama, kode, posisi, departemen..."
+                                       class="mobile-filter-input">
                             </div>
-                            <div>
-                                <label for="status" class="block text-sm font-medium text-gray-700">Status</label>
-                                <select name="status" id="status" class="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500">
+                            <div class="mobile-filter-group">
+                                <label for="status" class="mobile-filter-label">Status</label>
+                                <select name="status" id="status" class="mobile-filter-select">
                                     <option value="">Semua Status</option>
                                     <option value="active" {{ request('status') === 'active' ? 'selected' : '' }}>Aktif</option>
                                     <option value="inactive" {{ request('status') === 'inactive' ? 'selected' : '' }}>Tidak Aktif</option>
                                 </select>
                             </div>
-                            <div>
-                                <label for="department" class="block text-sm font-medium text-gray-700">Departemen</label>
-                                <select name="department" id="department" class="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500">
+                            <div class="mobile-filter-group">
+                                <label for="department" class="mobile-filter-label">Departemen</label>
+                                <select name="department" id="department" class="mobile-filter-select">
                                     <option value="">Semua Departemen</option>
                                     @foreach($departments as $dept)
                                         <option value="{{ $dept }}" {{ request('department') === $dept ? 'selected' : '' }}>{{ $dept }}</option>
                                     @endforeach
                                 </select>
                             </div>
-                            <div>
-                                <label for="employment_type" class="block text-sm font-medium text-gray-700">Tipe Karyawan</label>
-                                <select name="employment_type" id="employment_type" class="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500">
+                            <div class="mobile-filter-group">
+                                <label for="employment_type" class="mobile-filter-label">Tipe Karyawan</label>
+                                <select name="employment_type" id="employment_type" class="mobile-filter-select">
                                     <option value="">Semua Tipe</option>
                                     <option value="permanent" {{ request('employment_type') === 'permanent' ? 'selected' : '' }}>Tetap</option>
                                     <option value="contract" {{ request('employment_type') === 'contract' ? 'selected' : '' }}>Kontrak</option>
                                     <option value="freelance" {{ request('employment_type') === 'freelance' ? 'selected' : '' }}>Freelance</option>
                                 </select>
                             </div>
-                            <div class="flex items-end space-x-2">
-                                <button type="submit" class="bg-gray-500 hover:bg-gray-700 text-white font-bold py-2 px-4 rounded">
-                                    <i class="fas fa-search mr-2"></i>Filter
-                                </button>
-                                <a href="{{ route('finance.employees.index') }}" class="bg-gray-300 hover:bg-gray-400 text-gray-800 font-bold py-2 px-4 rounded">
-                                    Reset
-                                </a>
+                            <div class="mobile-filter-group sm:flex sm:items-end">
+                                <div class="flex flex-col sm:flex-row space-y-2 sm:space-y-0 sm:space-x-2 w-full">
+                                    <button type="submit" class="mobile-btn-primary sm:w-auto sm:min-h-0 sm:px-4 sm:py-2 sm:text-sm">
+                                        <i class="fas fa-search mr-2"></i>Filter
+                                    </button>
+                                    <a href="{{ route('finance.employees.index') }}" class="mobile-btn-secondary sm:w-auto sm:min-h-0 sm:px-4 sm:py-2 sm:text-sm text-center">
+                                        Reset
+                                    </a>
+                                </div>
                             </div>
                         </div>
                         
                         <!-- Sort Options -->
-                        <div class="flex items-center space-x-4">
-                            <label class="text-sm font-medium text-gray-700">Urutkan:</label>
-                            <select name="sort_by" class="rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500">
-                                <option value="name" {{ request('sort_by') === 'name' ? 'selected' : '' }}>Nama</option>
-                                <option value="employee_code" {{ request('sort_by') === 'employee_code' ? 'selected' : '' }}>Kode</option>
-                                <option value="hire_date" {{ request('sort_by') === 'hire_date' ? 'selected' : '' }}>Tanggal Masuk</option>
-                                <option value="daily_rate" {{ request('sort_by') === 'daily_rate' ? 'selected' : '' }}>Gaji Harian</option>
-                                <option value="department" {{ request('sort_by') === 'department' ? 'selected' : '' }}>Departemen</option>
-                            </select>
-                            <select name="sort_order" class="rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500">
-                                <option value="asc" {{ request('sort_order') === 'asc' ? 'selected' : '' }}>A-Z</option>
-                                <option value="desc" {{ request('sort_order') === 'desc' ? 'selected' : '' }}>Z-A</option>
-                            </select>
+                        <div class="mobile-filter-row sm:flex sm:items-center sm:space-x-4 mt-4 pt-4 border-t border-gray-200">
+                            <label class="mobile-filter-label sm:text-sm sm:font-medium sm:text-gray-700 sm:mb-0">Urutkan:</label>
+                            <div class="flex flex-col sm:flex-row space-y-2 sm:space-y-0 sm:space-x-2">
+                                <select name="sort_by" class="mobile-filter-select sm:w-auto">
+                                    <option value="name" {{ request('sort_by') === 'name' ? 'selected' : '' }}>Nama</option>
+                                    <option value="employee_code" {{ request('sort_by') === 'employee_code' ? 'selected' : '' }}>Kode</option>
+                                    <option value="hire_date" {{ request('sort_by') === 'hire_date' ? 'selected' : '' }}>Tanggal Masuk</option>
+                                    <option value="daily_rate" {{ request('sort_by') === 'daily_rate' ? 'selected' : '' }}>Gaji Harian</option>
+                                    <option value="department" {{ request('sort_by') === 'department' ? 'selected' : '' }}>Departemen</option>
+                                </select>
+                                <select name="sort_order" class="mobile-filter-select sm:w-auto">
+                                    <option value="asc" {{ request('sort_order') === 'asc' ? 'selected' : '' }}>A-Z</option>
+                                    <option value="desc" {{ request('sort_order') === 'desc' ? 'selected' : '' }}>Z-A</option>
+                                </select>
+                            </div>
                         </div>
                     </form>
                 </div>
             </div>
 
 
-            <!-- Employees Table -->
+            <!-- Employees Table/Cards -->
             <div class="bg-white overflow-hidden shadow-sm sm:rounded-lg">
-                <div class="p-6 bg-white border-b border-gray-200">
-                    @if($employees->count() > 0)
+                @if($employees->count() > 0)
+                    <!-- Desktop Table View -->
+                    <div class="hidden sm:block p-6 bg-white border-b border-gray-200">
                         <div class="overflow-x-auto">
                             <table class="min-w-full divide-y divide-gray-200">
                                 <thead class="bg-gray-50">
@@ -190,8 +186,8 @@
                                             <td class="px-6 py-4 whitespace-nowrap">
                                                 <div class="flex items-center">
                                                     <div class="flex-shrink-0 h-10 w-10">
-                                                        <img class="h-10 w-10 rounded-full object-cover" 
-                                                             src="{{ $employee->avatar_url }}" 
+                                                        <img class="h-10 w-10 rounded-full object-cover"
+                                                             src="{{ $employee->avatar_url }}"
                                                              alt="{{ $employee->name }}">
                                                     </div>
                                                     <div class="ml-4">
@@ -233,18 +229,18 @@
                                             </td>
                                             <td class="px-6 py-4 whitespace-nowrap text-sm font-medium">
                                                 <div class="flex space-x-2">
-                                                    <a href="{{ route('finance.employees.show', $employee) }}" 
+                                                    <a href="{{ route('finance.employees.show', $employee) }}"
                                                        class="text-indigo-600 hover:text-indigo-900" title="Lihat Detail">
                                                         <i class="fas fa-eye"></i>
                                                     </a>
                                                     @can('update', $employee)
-                                                        <a href="{{ route('finance.employees.edit', $employee) }}" 
+                                                        <a href="{{ route('finance.employees.edit', $employee) }}"
                                                            class="text-yellow-600 hover:text-yellow-900" title="Edit">
                                                             <i class="fas fa-edit"></i>
                                                         </a>
                                                     @endcan
                                                     @can('delete', $employee)
-                                                        <form action="{{ route('finance.employees.destroy', $employee) }}" 
+                                                        <form action="{{ route('finance.employees.destroy', $employee) }}"
                                                               method="POST" class="inline"
                                                               onsubmit="return confirm('Apakah Anda yakin ingin menghapus karyawan ini?')">
                                                             @csrf
@@ -261,53 +257,227 @@
                                 </tbody>
                             </table>
                         </div>
+                    </div>
 
-                        <!-- Pagination -->
-                        <div class="mt-6">
-                            {{ $employees->appends(request()->query())->links() }}
-                        </div>
-                    @else
-                        <div class="text-center py-12">
-                            <div class="text-gray-500 text-lg mb-4">
-                                <i class="fas fa-users text-4xl mb-4"></i>
-                                <p>Belum ada data karyawan</p>
+                    <!-- Mobile Card View -->
+                    <div class="sm:hidden mobile-table-container p-4">
+                        @foreach($employees as $employee)
+                            <div class="mobile-table-card mobile-fade-in">
+                                <div class="mobile-table-card-header">
+                                    <div class="flex items-center">
+                                        <img class="w-12 h-12 rounded-full object-cover flex-shrink-0"
+                                             src="{{ $employee->avatar_url }}"
+                                             alt="{{ $employee->name }}">
+                                        <div class="ml-3 flex-1">
+                                            <div class="mobile-table-card-title">{{ $employee->name }}</div>
+                                            <div class="mobile-table-card-subtitle">{{ $employee->employee_code }} • {{ $employee->position }}</div>
+                                            @if($employee->is_contract_expiring)
+                                                <div class="text-xs text-red-600 font-medium mt-1">
+                                                    <i class="fas fa-exclamation-triangle mr-1"></i>Kontrak Berakhir
+                                                </div>
+                                            @endif
+                                        </div>
+                                    </div>
+                                    <div class="mobile-table-card-meta">
+                                        <div class="mobile-table-card-amount text-slate-900">
+                                            {{ $employee->formatted_daily_rate }}
+                                        </div>
+                                        <div class="mobile-table-card-status mt-1">
+                                            @php
+                                                $salaryStatus = $salaryStatusesKeyed[$employee->id] ?? null;
+                                            @endphp
+                                            
+                                            @if($salaryStatus)
+                                                <x-salary-status-indicator :status="$salaryStatus" />
+                                            @else
+                                                <span class="mobile-badge-secondary">-</span>
+                                            @endif
+                                        </div>
+                                    </div>
+                                </div>
+                                
+                                <div class="mobile-table-card-body">
+                                    <div class="mobile-table-card-row">
+                                        <span class="mobile-table-card-label">Departemen</span>
+                                        <span class="mobile-table-card-value">{{ $employee->department }}</span>
+                                    </div>
+                                    <div class="mobile-table-card-row">
+                                        <span class="mobile-table-card-label">Email</span>
+                                        <span class="mobile-table-card-value">{{ $employee->email ?: '-' }}</span>
+                                    </div>
+                                    <div class="mobile-table-card-row">
+                                        <span class="mobile-table-card-label">Telepon</span>
+                                        <span class="mobile-table-card-value">{{ $employee->phone ?: '-' }}</span>
+                                    </div>
+                                    <div class="mobile-table-card-row">
+                                        <span class="mobile-table-card-label">Tipe & Status</span>
+                                        <span class="mobile-table-card-value">
+                                            <div class="flex flex-wrap gap-1">
+                                                {!! $employee->employment_type_badge !!}
+                                                {!! $employee->status_badge !!}
+                                            </div>
+                                        </span>
+                                    </div>
+                                </div>
+                                
+                                <div class="mobile-table-card-actions">
+                                    <a href="{{ route('finance.employees.show', $employee) }}"
+                                       class="mobile-table-card-action primary" title="Lihat Detail">
+                                        <i class="fas fa-eye"></i>
+                                    </a>
+                                    @can('update', $employee)
+                                        <a href="{{ route('finance.employees.edit', $employee) }}"
+                                           class="mobile-table-card-action warning" title="Edit">
+                                            <i class="fas fa-edit"></i>
+                                        </a>
+                                    @endcan
+                                    @can('delete', $employee)
+                                        <form action="{{ route('finance.employees.destroy', $employee) }}"
+                                              method="POST" class="inline"
+                                              onsubmit="return confirm('Apakah Anda yakin ingin menghapus karyawan ini?')">
+                                            @csrf
+                                            @method('DELETE')
+                                            <button type="submit" class="mobile-table-card-action danger" title="Hapus">
+                                                <i class="fas fa-trash"></i>
+                                            </button>
+                                        </form>
+                                    @endcan
+                                </div>
                             </div>
-                            <a href="{{ route('finance.employees.create') }}" 
-                               class="bg-blue-500 hover:bg-blue-700 text-white font-bold py-2 px-4 rounded">
-                                <i class="fas fa-plus mr-2"></i>Tambah Karyawan Pertama
-                            </a>
+                        @endforeach
+                    </div>
+
+                    <!-- Pagination -->
+                    <div class="px-6 py-4 border-t border-gray-200">
+                        {{ $employees->appends(request()->query())->links() }}
+                    </div>
+                @else
+                    <div class="mobile-empty-state">
+                        <div class="mobile-empty-state-icon">
+                            <i class="fas fa-users text-4xl"></i>
                         </div>
-                    @endif
-                </div>
+                        <h3 class="mobile-empty-state-title">Belum ada data karyawan</h3>
+                        <p class="mobile-empty-state-description">Mulai dengan menambahkan karyawan pertama Anda.</p>
+                        <a href="{{ route('finance.employees.create') }}" class="mobile-empty-state-action">
+                            <i class="fas fa-plus mr-2"></i>Tambah Karyawan Pertama
+                        </a>
+                    </div>
+                @endif
             </div>
         </div>
     </div>
 
     @push('scripts')
     <script>
-        // Auto-submit form on select change
         document.addEventListener('DOMContentLoaded', function() {
+            // Mobile employee filter toggle functionality
+            window.toggleEmployeeFilter = function() {
+                const content = document.getElementById('employee-filter-content');
+                const toggleText = document.getElementById('employee-filter-toggle-text');
+                
+                if (content.classList.contains('hidden')) {
+                    content.classList.remove('hidden');
+                    toggleText.textContent = 'Sembunyikan Filter';
+                } else {
+                    content.classList.add('hidden');
+                    toggleText.textContent = 'Tampilkan Filter';
+                }
+            };
+
+            // Mobile responsive adjustments
+            function handleResize() {
+                const isMobile = window.innerWidth < 640;
+                const filterContent = document.getElementById('employee-filter-content');
+                
+                if (!isMobile) {
+                    // Show filter content on desktop
+                    filterContent.classList.remove('hidden');
+                } else {
+                    // Hide filter content on mobile by default
+                    if (!filterContent.classList.contains('hidden')) {
+                        // Only hide if it wasn't manually opened
+                        const hasActiveFilters = document.querySelector('form input[name="search"]').value ||
+                                                document.querySelector('form select[name="status"]').value ||
+                                                document.querySelector('form select[name="department"]').value ||
+                                                document.querySelector('form select[name="employment_type"]').value;
+                        
+                        if (!hasActiveFilters) {
+                            filterContent.classList.add('hidden');
+                            document.getElementById('employee-filter-toggle-text').textContent = 'Tampilkan Filter';
+                        }
+                    }
+                }
+            }
+
+            // Initial call and resize listener
+            handleResize();
+            window.addEventListener('resize', handleResize);
+
+            // Auto-submit form on select change (desktop only)
             const statusSelect = document.getElementById('status');
             const deptSelect = document.getElementById('department');
             const typeSelect = document.getElementById('employment_type');
             
             if (statusSelect) {
                 statusSelect.addEventListener('change', function() {
-                    this.form.submit();
+                    // Only auto-submit on desktop
+                    if (window.innerWidth >= 640) {
+                        this.form.submit();
+                    }
                 });
             }
             
             if (deptSelect) {
                 deptSelect.addEventListener('change', function() {
-                    this.form.submit();
+                    // Only auto-submit on desktop
+                    if (window.innerWidth >= 640) {
+                        this.form.submit();
+                    }
                 });
             }
             
             if (typeSelect) {
                 typeSelect.addEventListener('change', function() {
-                    this.form.submit();
+                    // Only auto-submit on desktop
+                    if (window.innerWidth >= 640) {
+                        this.form.submit();
+                    }
                 });
             }
+
+            // Search with debounce
+            const searchInput = document.getElementById('search');
+            let searchTimeout;
+            
+            if (searchInput) {
+                searchInput.addEventListener('input', function() {
+                    clearTimeout(searchTimeout);
+                    searchTimeout = setTimeout(() => {
+                        // Only auto-submit on desktop
+                        if (window.innerWidth >= 640) {
+                            this.form.submit();
+                        }
+                    }, 500);
+                });
+            }
+
+            // Add loading states for better UX
+            const forms = document.querySelectorAll('form');
+            forms.forEach(form => {
+                form.addEventListener('submit', function() {
+                    const submitBtn = form.querySelector('button[type="submit"]');
+                    if (submitBtn) {
+                        const originalText = submitBtn.innerHTML;
+                        submitBtn.innerHTML = `
+                            <svg class="w-5 h-5 mr-2 animate-spin" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15"/>
+                            </svg>
+                            Memuat...
+                        `;
+                        submitBtn.disabled = true;
+                    }
+                });
+            });
         });
     </script>
     @endpush
