@@ -1,28 +1,28 @@
 @extends('layouts.app')
 
 @section('content')
-<div class="container mx-auto px-4 py-8">
-    <div class="flex justify-between items-center mb-6">
+<div class="container mx-auto px-4 py-6 sm:py-8">
+    <div class="flex flex-col sm:flex-row sm:justify-between sm:items-center mb-6 space-y-3 sm:space-y-0">
         <div>
-            <h1 class="text-3xl font-bold text-gray-800">Update Progress Timeline</h1>
-            <p class="text-gray-600 mt-1">Proyek: {{ $project->name }} ({{ $project->code }})</p>
+            <h1 class="text-xl sm:text-2xl lg:text-3xl font-bold text-gray-800">Update Progress Timeline</h1>
+            <p class="text-sm sm:text-base text-gray-600 mt-1">Proyek: {{ $project->name }} ({{ $project->code }})</p>
         </div>
-        <a href="{{ route('projects.show', $project) }}" class="bg-gray-600 hover:bg-gray-700 text-white font-bold py-2 px-4 rounded">
+        <a href="{{ route('projects.show', $project) }}" class="bg-gray-600 hover:bg-gray-700 text-white font-bold py-2 px-3 sm:px-4 rounded text-sm sm:text-base text-center">
             Kembali ke Proyek
         </a>
     </div>
 
     <!-- Project Info Card -->
-    <div class="bg-blue-50 border border-blue-200 rounded-lg p-4 mb-6">
-        <div class="flex items-center">
+    <div class="bg-blue-50 border border-blue-200 rounded-lg p-3 sm:p-4 mb-6">
+        <div class="flex items-start sm:items-center">
             <div class="flex-shrink-0">
-                <svg class="h-5 w-5 text-blue-400" fill="currentColor" viewBox="0 0 20 20">
+                <svg class="h-4 w-4 sm:h-5 sm:w-5 text-blue-400" fill="currentColor" viewBox="0 0 20 20">
                     <path fill-rule="evenodd" d="M18 10a8 8 0 11-16 0 8 8 0 0116 0zm-7-4a1 1 0 11-2 0 1 1 0 012 0zM9 9a1 1 0 000 2v3a1 1 0 001 1h1a1 1 0 100-2v-3a1 1 0 00-1-1H9z" clip-rule="evenodd"></path>
                 </svg>
             </div>
             <div class="ml-3">
-                <h3 class="text-sm font-medium text-blue-800">Informasi Proyek</h3>
-                <div class="mt-1 text-sm text-blue-700">
+                <h3 class="text-xs sm:text-sm font-medium text-blue-800">Informasi Proyek</h3>
+                <div class="mt-1 text-xs sm:text-sm text-blue-700 space-y-1">
                     <p><strong>Nama:</strong> {{ $project->name }}</p>
                     <p><strong>Status:</strong> {{ ucfirst(str_replace('_', ' ', $project->status)) }}</p>
                     @if($project->start_date && $project->end_date)
@@ -33,7 +33,7 @@
         </div>
     </div>
 
-    <div class="bg-white rounded-lg shadow-md p-6">
+    <div class="bg-white rounded-lg shadow-md p-4 sm:p-6">
         <form action="{{ route('timelines.update', $timeline) }}" method="POST">
             @csrf
             @method('PUT')
@@ -41,53 +41,53 @@
             <!-- Hidden project_id field -->
             <input type="hidden" name="project_id" value="{{ $project->id }}">
             
-            <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
-                <div class="md:col-span-2">
-                    <label class="block text-sm font-medium text-gray-700 mb-2">Nama Progres *</label>
+            <div class="grid grid-cols-1 lg:grid-cols-2 gap-4 sm:gap-6">
+                <div class="lg:col-span-2">
+                    <label class="block text-xs sm:text-sm font-medium text-gray-700 mb-2">Nama Progres *</label>
                     <input type="text" name="milestone" value="{{ old('milestone', $timeline->milestone) }}" required
-                           class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
+                           class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 text-xs sm:text-sm"
                            placeholder="Masukkan nama progres">
                     @error('milestone')
-                        <p class="mt-1 text-sm text-red-600">{{ $message }}</p>
+                        <p class="mt-1 text-xs sm:text-sm text-red-600">{{ $message }}</p>
                     @enderror
                 </div>
                 
                 <div>
-                    <label class="block text-sm font-medium text-gray-700 mb-2">Tanggal Rencana *</label>
+                    <label class="block text-xs sm:text-sm font-medium text-gray-700 mb-2">Tanggal Rencana *</label>
                     <input type="date" name="planned_date" value="{{ old('planned_date', $timeline->planned_date->format('Y-m-d')) }}" required
-                           class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500">
+                           class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 text-xs sm:text-sm">
                     @error('planned_date')
-                        <p class="mt-1 text-sm text-red-600">{{ $message }}</p>
+                        <p class="mt-1 text-xs sm:text-sm text-red-600">{{ $message }}</p>
                     @enderror
                 </div>
                 
                 <div>
-                    <label class="block text-sm font-medium text-gray-700 mb-2">Tanggal Aktual</label>
+                    <label class="block text-xs sm:text-sm font-medium text-gray-700 mb-2">Tanggal Aktual</label>
                     <input type="date" name="actual_date" value="{{ old('actual_date', $timeline->actual_date ? $timeline->actual_date->format('Y-m-d') : '') }}"
-                           class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500">
+                           class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 text-xs sm:text-sm">
                     <p class="mt-1 text-xs text-gray-500">Akan diisi otomatis saat status diubah ke "Selesai"</p>
                     @error('actual_date')
-                        <p class="mt-1 text-sm text-red-600">{{ $message }}</p>
+                        <p class="mt-1 text-xs sm:text-sm text-red-600">{{ $message }}</p>
                     @enderror
                 </div>
                 
                 <div>
-                    <label class="block text-sm font-medium text-gray-700 mb-2">Status *</label>
-                    <select name="status" id="status" required class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500">
+                    <label class="block text-xs sm:text-sm font-medium text-gray-700 mb-2">Status *</label>
+                    <select name="status" id="status" required class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 text-xs sm:text-sm">
                         <option value="planned" {{ old('status', $timeline->status) == 'planned' ? 'selected' : '' }}>Direncanakan</option>
                         <option value="in_progress" {{ old('status', $timeline->status) == 'in_progress' ? 'selected' : '' }}>Sedang Berjalan</option>
                         <option value="completed" {{ old('status', $timeline->status) == 'completed' ? 'selected' : '' }}>Selesai</option>
                         <option value="delayed" {{ old('status', $timeline->status) == 'delayed' ? 'selected' : '' }}>Terlambat</option>
                     </select>
                     @error('status')
-                        <p class="mt-1 text-sm text-red-600">{{ $message }}</p>
+                        <p class="mt-1 text-xs sm:text-sm text-red-600">{{ $message }}</p>
                     @enderror
                 </div>
                 
                 <div>
-                    <label class="block text-sm font-medium text-gray-700 mb-2">Progress (%) *</label>
+                    <label class="block text-xs sm:text-sm font-medium text-gray-700 mb-2">Progress (%) *</label>
                     <input type="number" name="progress_percentage" id="progress_percentage" value="{{ old('progress_percentage', $timeline->progress_percentage) }}" required min="0" max="100"
-                           class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500">
+                           class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 text-xs sm:text-sm">
                     <div class="mt-2">
                         <div class="w-full bg-gray-200 rounded-full h-2">
                             <div id="progress_bar" class="bg-blue-600 h-2 rounded-full transition-all duration-300" style="width: {{ $timeline->progress_percentage }}%"></div>
@@ -95,42 +95,42 @@
                         <p class="text-xs text-gray-500 mt-1">Progress saat ini: <span id="progress_text">{{ $timeline->progress_percentage }}%</span></p>
                     </div>
                     @error('progress_percentage')
-                        <p class="mt-1 text-sm text-red-600">{{ $message }}</p>
+                        <p class="mt-1 text-xs sm:text-sm text-red-600">{{ $message }}</p>
                     @enderror
                 </div>
             </div>
             
-            <div class="mt-6">
-                <label class="block text-sm font-medium text-gray-700 mb-2">Deskripsi</label>
-                <textarea name="description" rows="4" 
-                          class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
+            <div class="mt-4 sm:mt-6">
+                <label class="block text-xs sm:text-sm font-medium text-gray-700 mb-2">Deskripsi</label>
+                <textarea name="description" rows="4"
+                          class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 text-xs sm:text-sm"
                           placeholder="Masukkan deskripsi progres">{{ old('description', $timeline->description) }}</textarea>
                 @error('description')
-                    <p class="mt-1 text-sm text-red-600">{{ $message }}</p>
+                    <p class="mt-1 text-xs sm:text-sm text-red-600">{{ $message }}</p>
                 @enderror
             </div>
             
-            <div class="mt-8 flex justify-end">
-                <a href="{{ route('projects.show', $project) }}" class="bg-gray-300 hover:bg-gray-400 text-gray-800 font-bold py-2 px-4 rounded mr-2">
+            <div class="mt-6 sm:mt-8 flex flex-col sm:flex-row sm:justify-end space-y-2 sm:space-y-0 sm:space-x-2">
+                <a href="{{ route('projects.show', $project) }}" class="bg-gray-300 hover:bg-gray-400 text-gray-800 font-bold py-2 px-3 sm:px-4 rounded text-xs sm:text-sm text-center">
                     Batal
                 </a>
-                <button type="submit" class="bg-blue-600 hover:bg-blue-700 text-white font-bold py-2 px-4 rounded">
+                <button type="submit" class="bg-blue-600 hover:bg-blue-700 text-white font-bold py-2 px-3 sm:px-4 rounded text-xs sm:text-sm">
                     Update Progress
                 </button>
             </div>
         </form>
     </div>
     
-    <div class="mt-6 bg-yellow-50 border border-yellow-200 rounded-lg p-4">
+    <div class="mt-6 bg-yellow-50 border border-yellow-200 rounded-lg p-3 sm:p-4">
         <div class="flex">
             <div class="flex-shrink-0">
-                <svg class="h-5 w-5 text-yellow-400" fill="currentColor" viewBox="0 0 20 20">
+                <svg class="h-4 w-4 sm:h-5 sm:w-5 text-yellow-400" fill="currentColor" viewBox="0 0 20 20">
                     <path fill-rule="evenodd" d="M18 10a8 8 0 11-16 0 8 8 0 0116 0zm-7-4a1 1 0 11-2 0 1 1 0 012 0zM9 9a1 1 0 000 2v3a1 1 0 001 1h1a1 1 0 100-2v-3a1 1 0 00-1-1H9z" clip-rule="evenodd"></path>
                 </svg>
             </div>
             <div class="ml-3">
-                <h3 class="text-sm font-medium text-yellow-800">Informasi Update Timeline</h3>
-                <div class="mt-2 text-sm text-yellow-700">
+                <h3 class="text-xs sm:text-sm font-medium text-yellow-800">Informasi Update Timeline</h3>
+                <div class="mt-2 text-xs sm:text-sm text-yellow-700">
                     <ul class="list-disc list-inside space-y-1">
                         <li>Ketika status diubah ke "Selesai", tanggal aktual akan otomatis diisi dengan tanggal hari ini jika belum diisi.</li>
                         <li>Progress 100% akan otomatis diset ketika status diubah ke "Selesai".</li>
