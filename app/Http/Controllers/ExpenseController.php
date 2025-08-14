@@ -8,6 +8,8 @@ use App\Http\Requests\ExpenseRequest;
 use App\Models\ProjectExpense;
 use App\Models\Project;
 use App\Models\ExpenseApproval;
+use App\Models\Setting;
+use App\Services\BypassApprovalService;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Foundation\Auth\Access\AuthorizesRequests;
 use App\Exports\ExpensesExport;
@@ -107,7 +109,10 @@ class ExpenseController extends Controller
             'other' => 'Lainnya'
         ];
         
-        return view('expenses.create', compact('project', 'projects', 'categories'));
+        // Get bypass information for current user
+        $bypassInfo = BypassApprovalService::getBypassInfo();
+        
+        return view('expenses.create', compact('project', 'projects', 'categories', 'bypassInfo'));
     }
 
     /**
@@ -119,17 +124,30 @@ class ExpenseController extends Controller
         
         $data = $request->validated();
         $data['user_id'] = Auth::id();
-        $data['status'] = 'pending';
         
-        $expense = ProjectExpense::create($data);
+        $user = Auth::user();
         
-        // Buat approval records untuk workflow
-        $this->createApprovalWorkflow($expense);
-        
-        // Log activity using ActivityLogger
-        ActivityLogger::logExpenseCreated($expense);
-        
-        return redirect()->route('expenses.index')->with('success', 'Pengeluaran berhasil dibuat dan menunggu persetujuan.');
+        // Check if director bypass should be applied
+        if (BypassApprovalService::shouldBypassExpenseApproval($user)) {
+            $data['status'] = 'approved';
+            $expense = ProjectExpense::create($data);
+            
+            // Log activity using ActivityLogger
+            ActivityLogger::logExpenseCreated($expense);
+            
+            return redirect()->route('expenses.index')->with('success', 'Pengeluaran berhasil dibuat dan langsung disetujui (Director Bypass).');
+        } else {
+            $data['status'] = 'pending';
+            $expense = ProjectExpense::create($data);
+            
+            // Buat approval records untuk workflow
+            $this->createApprovalWorkflow($expense);
+            
+            // Log activity using ActivityLogger
+            ActivityLogger::logExpenseCreated($expense);
+            
+            return redirect()->route('expenses.index')->with('success', 'Pengeluaran berhasil dibuat dan menunggu persetujuan.');
+        }
     }
     
     /**
@@ -137,6 +155,20 @@ class ExpenseController extends Controller
      */
     private function createApprovalWorkflow(ProjectExpense $expense)
     {
+        $user = Auth::user();
+        
+        // Skip workflow if director bypass should be applied
+        if (BypassApprovalService::canBypass($user)) {
+            BypassApprovalService::logBypassAction('approval_workflow_skipped', [
+                'expense_id' => $expense->id,
+                'amount' => $expense->amount
+            ]);
+            return;
+        }
+        
+        // Get high amount threshold from settings
+        $highAmountThreshold = Setting::get('expense_high_amount_threshold', 10000000);
+        
         // Cari user dengan role finance_manager
         $financeManager = \App\Models\User::whereHas('roles', function($q) {
             $q->where('name', 'finance_manager');
@@ -150,9 +182,9 @@ class ExpenseController extends Controller
             'status' => 'pending'
         ]);
         
-        // Jika amount > 10 juta, perlu approval Direktur
-        // Jika <= 10 juta, perlu approval Project Manager
-        if ($expense->amount > 10000000) {
+        // Jika amount > threshold, perlu approval Direktur
+        // Jika <= threshold, perlu approval Project Manager
+        if ($expense->amount > $highAmountThreshold) {
             $director = \App\Models\User::whereHas('roles', function($q) {
                 $q->where('name', 'direktur');
             })->first();

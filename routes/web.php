@@ -48,6 +48,14 @@ Route::middleware('auth')->group(function () {
     // User Management routes (Only for Direktur)
     Route::middleware('role:direktur')->group(function () {
         Route::resource('users', UserController::class);
+        
+        // Settings routes (Only for Direktur)
+        Route::get('/settings', [App\Http\Controllers\SettingController::class, 'index'])->name('settings.index');
+        Route::patch('/settings/director-bypass', [App\Http\Controllers\SettingController::class, 'updateDirectorBypass'])->name('settings.update-director-bypass');
+        Route::patch('/settings/notification', [App\Http\Controllers\SettingController::class, 'updateNotificationSetting'])->name('settings.update-notification');
+        Route::patch('/settings/threshold', [App\Http\Controllers\SettingController::class, 'updateHighAmountThreshold'])->name('settings.update-threshold');
+        Route::patch('/settings/reset-default', [App\Http\Controllers\SettingController::class, 'resetToDefault'])->name('settings.reset-default');
+        Route::get('/api/settings', [App\Http\Controllers\SettingController::class, 'getSettings'])->name('api.settings');
     });
     
     // Company routes
