@@ -3,12 +3,18 @@
 namespace App\Http\Controllers;
 
 use App\Models\Employee;
+use App\Services\SalaryPeriodService;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Gate;
 
 class EmployeeController extends Controller
 {
-    // Constructor removed - middleware handled by routes
+    protected $salaryPeriodService;
+
+    public function __construct(SalaryPeriodService $salaryPeriodService)
+    {
+        $this->salaryPeriodService = $salaryPeriodService;
+    }
 
     /**
      * Display employee dashboard
@@ -85,7 +91,16 @@ class EmployeeController extends Controller
             'contract_expiring' => Employee::contractExpiringSoon()->count(),
         ];
 
-        return view('employees.index', compact('employees', 'departments', 'employmentTypes', 'stats'));
+        // Get salary status for all employees
+        try {
+            $salaryStatuses = $this->salaryPeriodService->getAllEmployeesSalaryStatus();
+            $salaryStatusesKeyed = $salaryStatuses->keyBy('employee_id');
+        } catch (\Exception $e) {
+            \Log::error('Error getting salary statuses: ' . $e->getMessage());
+            $salaryStatusesKeyed = collect();
+        }
+
+        return view('employees.index', compact('employees', 'departments', 'employmentTypes', 'stats', 'salaryStatusesKeyed'));
     }
 
     /**
@@ -696,5 +711,92 @@ class EmployeeController extends Controller
         if ($score >= 70) return 'Average';
         if ($score >= 60) return 'Below Average';
         return 'Poor';
+    }
+
+    /**
+     * Get salary status summary for API
+     */
+    public function getSalaryStatusSummary(Request $request)
+    {
+        try {
+            Gate::authorize('viewAny', Employee::class);
+
+            $month = $request->get('month');
+            $year = $request->get('year');
+            
+            $period = null;
+            if ($month && $year) {
+                $period = $this->salaryPeriodService->getPeriodForMonth($month, $year);
+            }
+
+            $summary = $this->salaryPeriodService->getSalaryStatusSummary($period);
+
+            return response()->json($summary);
+        } catch (\Exception $e) {
+            \Log::error('Error in getSalaryStatusSummary: ' . $e->getMessage());
+            
+            // Return default data structure
+            $currentPeriod = $this->salaryPeriodService->getCurrentPeriod();
+            return response()->json([
+                'period' => $currentPeriod,
+                'total' => 0,
+                'complete' => 0,
+                'partial' => 0,
+                'empty' => 0,
+                'complete_percentage' => 0,
+                'partial_percentage' => 0,
+                'empty_percentage' => 0,
+                'employees' => []
+            ]);
+        }
+    }
+
+    /**
+     * Get salary status detail for API
+     */
+    public function getSalaryStatusDetail(Request $request)
+    {
+        try {
+            Gate::authorize('viewAny', Employee::class);
+
+            $month = $request->get('month');
+            $year = $request->get('year');
+            
+            $period = null;
+            if ($month && $year) {
+                $period = $this->salaryPeriodService->getPeriodForMonth($month, $year);
+            }
+
+            $statuses = $this->salaryPeriodService->getAllEmployeesSalaryStatus($period);
+
+            return response()->json($statuses);
+        } catch (\Exception $e) {
+            \Log::error('Error in getSalaryStatusDetail: ' . $e->getMessage());
+            return response()->json([]);
+        }
+    }
+
+    /**
+     * Get calendar data for salary status popup
+     */
+    public function getSalaryCalendar(Request $request)
+    {
+        Gate::authorize('viewAny', Employee::class);
+
+        $month = $request->get('month');
+        $year = $request->get('year');
+        $employeeId = $request->get('employee_id');
+        
+        $period = null;
+        if ($month && $year) {
+            $period = $this->salaryPeriodService->getPeriodForMonth($month, $year);
+        }
+
+        $calendar = $this->salaryPeriodService->getCalendarData($period, $employeeId);
+
+        return response()->json([
+            'period' => $period,
+            'calendar' => $calendar
+        ]);
     }
 }

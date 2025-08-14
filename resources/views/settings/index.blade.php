@@ -22,6 +22,103 @@
                         </div>
                     @endif
 
+                    <!-- Salary Cut-off Settings -->
+                    <div class="mb-8 p-6 bg-blue-50 rounded-lg border border-blue-200">
+                        <h3 class="text-lg font-semibold mb-4 text-blue-800">
+                            <i class="fas fa-calendar-alt mr-2"></i>
+                            Pengaturan Periode Gaji
+                        </h3>
+                        
+                        <div class="mb-4">
+                            <p class="text-sm text-blue-600 mb-3">
+                                Atur periode cut-off gaji karyawan. Periode ini menentukan rentang tanggal untuk perhitungan status gaji.
+                            </p>
+                        </div>
+
+                        <form method="POST" action="{{ route('settings.update-salary-cutoff') }}" class="space-y-4">
+                            @csrf
+                            @method('PATCH')
+                            
+                            <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                                <div>
+                                    <label for="salary_cutoff_start_day" class="block text-sm font-medium text-gray-700">
+                                        Tanggal Mulai Periode
+                                    </label>
+                                    <select name="salary_cutoff_start_day" id="salary_cutoff_start_day"
+                                            class="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500">
+                                        @for($i = 1; $i <= 31; $i++)
+                                            <option value="{{ $i }}" {{ ($settings['salary_cutoff_start_day'] ?? 11) == $i ? 'selected' : '' }}>
+                                                {{ $i }}
+                                            </option>
+                                        @endfor
+                                    </select>
+                                    <p class="mt-1 text-xs text-gray-500">Tanggal mulai periode gaji (1-31)</p>
+                                </div>
+                                
+                                <div>
+                                    <label for="salary_cutoff_end_day" class="block text-sm font-medium text-gray-700">
+                                        Tanggal Akhir Periode
+                                    </label>
+                                    <select name="salary_cutoff_end_day" id="salary_cutoff_end_day"
+                                            class="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500">
+                                        @for($i = 1; $i <= 31; $i++)
+                                            <option value="{{ $i }}" {{ ($settings['salary_cutoff_end_day'] ?? 10) == $i ? 'selected' : '' }}>
+                                                {{ $i }}
+                                            </option>
+                                        @endfor
+                                    </select>
+                                    <p class="mt-1 text-xs text-gray-500">Tanggal akhir periode gaji (1-31)</p>
+                                </div>
+                            </div>
+                            
+                            <div class="bg-white border border-blue-200 rounded-md p-3">
+                                <div class="flex">
+                                    <div class="flex-shrink-0">
+                                        <i class="fas fa-info-circle text-blue-400"></i>
+                                    </div>
+                                    <div class="ml-3">
+                                        <h4 class="text-sm font-medium text-blue-800">Preview Periode</h4>
+                                        <div class="mt-1 text-xs text-blue-700">
+                                            <p><strong>Contoh dengan setting saat ini:</strong></p>
+                                            <p>• Januari 2025: {{ ($settings['salary_cutoff_start_day'] ?? 11) }} Des 2024 - {{ ($settings['salary_cutoff_end_day'] ?? 10) }} Jan 2025</p>
+                                            <p>• Februari 2025: {{ ($settings['salary_cutoff_start_day'] ?? 11) }} Jan 2025 - {{ ($settings['salary_cutoff_end_day'] ?? 10) }} Feb 2025</p>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                            
+                            <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                                <div>
+                                    <label for="salary_status_complete_threshold" class="block text-sm font-medium text-gray-700">
+                                        Threshold "Lengkap" (%)
+                                    </label>
+                                    <input type="number" name="salary_status_complete_threshold" id="salary_status_complete_threshold"
+                                           value="{{ $settings['salary_status_complete_threshold'] ?? 90 }}" min="1" max="100"
+                                           class="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500">
+                                    <p class="mt-1 text-xs text-gray-500">Persentase minimum untuk status lengkap</p>
+                                </div>
+                                
+                                <div>
+                                    <label for="salary_status_partial_threshold" class="block text-sm font-medium text-gray-700">
+                                        Threshold "Kurang" (%)
+                                    </label>
+                                    <input type="number" name="salary_status_partial_threshold" id="salary_status_partial_threshold"
+                                           value="{{ $settings['salary_status_partial_threshold'] ?? 50 }}" min="1" max="100"
+                                           class="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500">
+                                    <p class="mt-1 text-xs text-gray-500">Persentase minimum untuk status kurang</p>
+                                </div>
+                            </div>
+                            
+                            <div class="flex justify-end">
+                                <button type="submit"
+                                        class="px-4 py-2 bg-blue-600 text-white text-sm font-medium rounded-md hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2">
+                                    <i class="fas fa-save mr-1"></i>
+                                    Simpan Pengaturan Gaji
+                                </button>
+                            </div>
+                        </form>
+                    </div>
+
                     <!-- Director Bypass Setting -->
                     <div class="mb-8 p-6 bg-gray-50 rounded-lg">
                         <h3 class="text-lg font-semibold mb-4 text-gray-800">

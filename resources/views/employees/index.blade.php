@@ -5,11 +5,16 @@
                 {{ __('Manajemen Karyawan') }}
             </h2>
             <div class="flex space-x-2">
-                <a href="{{ route('finance.employees.export') }}" 
+                <button id="salary-status-btn"
+                        type="button"
+                        class="bg-purple-500 hover:bg-purple-700 text-white font-bold py-2 px-4 rounded">
+                    <i class="fas fa-chart-pie mr-2"></i>Status Gaji
+                </button>
+                <a href="{{ route('finance.employees.export') }}"
                    class="bg-green-500 hover:bg-green-700 text-white font-bold py-2 px-4 rounded">
                     <i class="fas fa-download mr-2"></i>Export
                 </a>
-                <a href="{{ route('finance.employees.create') }}" 
+                <a href="{{ route('finance.employees.create') }}"
                    class="bg-blue-500 hover:bg-blue-700 text-white font-bold py-2 px-4 rounded">
                     <i class="fas fa-plus mr-2"></i>Tambah Karyawan
                 </a>
@@ -174,6 +179,9 @@
                                             Tipe & Status
                                         </th>
                                         <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                                            Status Gaji
+                                        </th>
+                                        <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
                                             Gaji Harian
                                         </th>
                                         <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
@@ -213,6 +221,17 @@
                                             <td class="px-6 py-4 whitespace-nowrap">
                                                 <div class="mb-1">{!! $employee->employment_type_badge !!}</div>
                                                 <div>{!! $employee->status_badge !!}</div>
+                                            </td>
+                                            <td class="px-6 py-4 whitespace-nowrap" data-employee-id="{{ $employee->id }}">
+                                                @php
+                                                    $salaryStatus = $salaryStatusesKeyed[$employee->id] ?? null;
+                                                @endphp
+                                                
+                                                @if($salaryStatus)
+                                                    <x-salary-status-indicator :status="$salaryStatus" />
+                                                @else
+                                                    <span class="text-gray-400 text-sm">-</span>
+                                                @endif
                                             </td>
                                             <td class="px-6 py-4 whitespace-nowrap text-sm font-medium text-gray-900">
                                                 {{ $employee->formatted_daily_rate }}
@@ -269,21 +288,16 @@
         </div>
     </div>
 
+    <!-- Salary Status Modal -->
+    <div id="salary-status-modal" class="hidden fixed inset-0 bg-gray-600 bg-opacity-50 overflow-y-auto h-full w-full z-50">
+        <div class="relative top-20 mx-auto p-5 border w-11/12 md:w-3/4 lg:w-2/3 xl:w-1/2 shadow-lg rounded-md bg-white">
+            <div id="modal-content">
+                <!-- Modal content will be loaded here -->
+            </div>
+        </div>
+    </div>
+
     @push('scripts')
-    <script>
-        // Auto-submit form on select change
-        document.getElementById('status').addEventListener('change', function() {
-            this.form.submit();
-        });
-        
-        document.getElementById('department').addEventListener('change', function() {
-            this.form.submit();
-        });
-
-        document.getElementById('employment_type').addEventListener('change', function() {
-            this.form.submit();
-        });
-
-    </script>
+    @include('employees.salary-status-script')
     @endpush
 </x-app-layout>

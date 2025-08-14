@@ -31,6 +31,43 @@ class SettingsSeeder extends Seeder
                 'value' => '10000000',
                 'description' => 'Amount threshold for high-value expenses requiring director approval (in Rupiah)',
                 'type' => 'integer'
+            ],
+            // Salary Cut-off Settings
+            [
+                'key' => 'salary_cutoff_start_day',
+                'value' => '11',
+                'description' => 'Tanggal mulai periode gaji (1-31)',
+                'type' => 'integer'
+            ],
+            [
+                'key' => 'salary_cutoff_end_day',
+                'value' => '10',
+                'description' => 'Tanggal akhir periode gaji (1-31)',
+                'type' => 'integer'
+            ],
+            [
+                'key' => 'salary_status_complete_threshold',
+                'value' => '90',
+                'description' => 'Persentase minimum untuk status lengkap (%)',
+                'type' => 'integer'
+            ],
+            [
+                'key' => 'salary_status_partial_threshold',
+                'value' => '50',
+                'description' => 'Persentase minimum untuk status kurang (%)',
+                'type' => 'integer'
+            ],
+            [
+                'key' => 'salary_status_auto_refresh',
+                'value' => '1',
+                'description' => 'Auto refresh status setiap 5 menit (0=off, 1=on)',
+                'type' => 'boolean'
+            ],
+            [
+                'key' => 'salary_status_email_notification',
+                'value' => '1',
+                'description' => 'Email notification untuk status rendah (0=off, 1=on)',
+                'type' => 'boolean'
             ]
         ];
 
