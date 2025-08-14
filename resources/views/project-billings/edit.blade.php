@@ -3,25 +3,25 @@
 @section('title', 'Edit Penagihan Proyek')
 
 @section('content')
-<div class="container mx-auto px-4 py-6">
+<div class="container mx-auto px-4 py-6 sm:py-8">
     <!-- Header -->
-    <div class="flex items-center justify-between mb-6">
-        <div>
-            <h1 class="text-3xl font-bold text-slate-800">Edit Penagihan Proyek</h1>
-            <p class="text-slate-600 mt-1">Edit penagihan untuk proyek {{ $projectBilling->project->name }}</p>
+    <div class="flex flex-col sm:flex-row sm:items-center sm:justify-between mb-4 sm:mb-6 space-y-4 sm:space-y-0">
+        <div class="min-w-0 flex-1">
+            <h1 class="text-xl sm:text-2xl lg:text-3xl font-bold text-slate-800">Edit Penagihan Proyek</h1>
+            <p class="text-slate-600 mt-1 text-sm sm:text-base break-words">Edit penagihan untuk proyek {{ $projectBilling->project->name }}</p>
         </div>
-        <div class="flex space-x-3">
-            <a href="{{ route('project-billings.show', $projectBilling) }}" 
-               class="bg-slate-600 hover:bg-slate-700 text-white px-4 py-2 rounded-lg font-medium transition-colors duration-200 flex items-center">
-                <svg class="w-5 h-5 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+        <div class="flex flex-col sm:flex-row space-y-2 sm:space-y-0 sm:space-x-3">
+            <a href="{{ route('project-billings.show', $projectBilling) }}"
+               class="bg-slate-600 hover:bg-slate-700 text-white px-3 sm:px-4 py-2 rounded-lg font-medium transition-colors duration-200 flex items-center justify-center text-sm sm:text-base">
+                <svg class="w-4 h-4 sm:w-5 sm:h-5 mr-1 sm:mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z"/>
                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z"/>
                 </svg>
                 Lihat
             </a>
-            <a href="{{ route('project-billings.index') }}" 
-               class="bg-gray-600 hover:bg-gray-700 text-white px-4 py-2 rounded-lg font-medium transition-colors duration-200 flex items-center">
-                <svg class="w-5 h-5 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <a href="{{ route('project-billings.index') }}"
+               class="bg-gray-600 hover:bg-gray-700 text-white px-3 sm:px-4 py-2 rounded-lg font-medium transition-colors duration-200 flex items-center justify-center text-sm sm:text-base">
+                <svg class="w-4 h-4 sm:w-5 sm:h-5 mr-1 sm:mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 19l-7-7m0 0l7-7m-7 7h18"/>
                 </svg>
                 Kembali
@@ -29,26 +29,26 @@
         </div>
     </div>
 
-    <form action="{{ route('project-billings.update', $projectBilling) }}" method="POST" class="space-y-6" id="billing-form">
+    <form action="{{ route('project-billings.update', $projectBilling) }}" method="POST" class="space-y-4 sm:space-y-6" id="billing-form">
         @csrf
         @method('PUT')
         
         <!-- Project Info (Read-only) -->
-        <div class="bg-white rounded-lg shadow-sm border border-slate-200 p-6">
-            <h2 class="text-lg font-semibold text-slate-800 mb-4">Informasi Proyek</h2>
+        <div class="bg-white rounded-lg shadow-sm border border-slate-200 p-4 sm:p-6">
+            <h2 class="text-base sm:text-lg font-semibold text-slate-800 mb-4">Informasi Proyek</h2>
             
-            <div class="grid grid-cols-1 md:grid-cols-3 gap-4 p-4 bg-slate-50 rounded-lg">
+            <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-3 sm:gap-4 p-3 sm:p-4 bg-slate-50 rounded-lg">
                 <div>
-                    <span class="text-slate-600 text-sm">Nama Proyek:</span>
-                    <p class="font-medium text-slate-900">{{ $projectBilling->project->name }}</p>
+                    <span class="text-slate-600 text-xs sm:text-sm">Nama Proyek:</span>
+                    <p class="font-medium text-slate-900 text-sm sm:text-base break-words">{{ $projectBilling->project->name }}</p>
                 </div>
                 <div>
-                    <span class="text-slate-600 text-sm">Kode Proyek:</span>
-                    <p class="font-medium text-slate-900">{{ $projectBilling->project->code }}</p>
+                    <span class="text-slate-600 text-xs sm:text-sm">Kode Proyek:</span>
+                    <p class="font-medium text-slate-900 text-sm sm:text-base">{{ $projectBilling->project->code }}</p>
                 </div>
-                <div>
-                    <span class="text-slate-600 text-sm">Tipe Pembayaran:</span>
-                    <p class="font-medium text-slate-900">
+                <div class="sm:col-span-2 lg:col-span-1">
+                    <span class="text-slate-600 text-xs sm:text-sm">Tipe Pembayaran:</span>
+                    <p class="font-medium text-slate-900 text-sm sm:text-base">
                         {{ $projectBilling->payment_type == 'full' ? 'Pembayaran Penuh' : 'Pembayaran Termin' }}
                     </p>
                 </div>
@@ -56,65 +56,64 @@
         </div>
 
         <!-- Billing Details -->
-        <div class="bg-white rounded-lg shadow-sm border border-slate-200 p-6">
-            <h2 class="text-lg font-semibold text-slate-800 mb-4">Detail Penagihan</h2>
+        <div class="bg-white rounded-lg shadow-sm border border-slate-200 p-4 sm:p-6">
+            <h2 class="text-base sm:text-lg font-semibold text-slate-800 mb-4">Detail Penagihan</h2>
             
-            <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+            <div class="grid grid-cols-1 sm:grid-cols-2 gap-4 sm:gap-6">
                 <div>
-                    <label for="invoice_number" class="block text-sm font-medium text-slate-700 mb-2">
+                    <label for="invoice_number" class="block text-xs sm:text-sm font-medium text-slate-700 mb-2">
                         Nomor Invoice <span class="text-red-500">*</span>
                     </label>
                     <input type="text" name="invoice_number" id="invoice_number" required
                            value="{{ old('invoice_number', $projectBilling->invoice_number) }}"
-                           class="w-full px-3 py-2 border border-slate-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent @error('invoice_number') border-red-500 @enderror"
+                           class="w-full px-3 py-2 border border-slate-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent text-sm sm:text-base @error('invoice_number') border-red-500 @enderror"
                            placeholder="Contoh: INV-2025-001">
                     @error('invoice_number')
-                        <p class="mt-1 text-sm text-red-600">{{ $message }}</p>
+                        <p class="mt-1 text-xs sm:text-sm text-red-600">{{ $message }}</p>
                     @enderror
                 </div>
 
                 <div>
-                    <label for="billing_date" class="block text-sm font-medium text-slate-700 mb-2">
+                    <label for="billing_date" class="block text-xs sm:text-sm font-medium text-slate-700 mb-2">
                         Tanggal Penagihan <span class="text-red-500">*</span>
                     </label>
                     <input type="date" name="billing_date" id="billing_date" required
                            value="{{ old('billing_date', $projectBilling->billing_date) }}"
-                           class="w-full px-3 py-2 border border-slate-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent @error('billing_date') border-red-500 @enderror">
+                           class="w-full px-3 py-2 border border-slate-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent text-sm sm:text-base @error('billing_date') border-red-500 @enderror">
                     @error('billing_date')
-                        <p class="mt-1 text-sm text-red-600">{{ $message }}</p>
+                        <p class="mt-1 text-xs sm:text-sm text-red-600">{{ $message }}</p>
                     @enderror
                 </div>
 
-
-                <div>
-                    <label for="status" class="block text-sm font-medium text-slate-700 mb-2">
+                <div class="sm:col-span-2">
+                    <label for="status" class="block text-xs sm:text-sm font-medium text-slate-700 mb-2">
                         Status <span class="text-red-500">*</span>
                     </label>
                     <select name="status" id="status" required
-                            class="w-full px-3 py-2 border border-slate-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent @error('status') border-red-500 @enderror">
+                            class="w-full px-3 py-2 border border-slate-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent text-sm sm:text-base @error('status') border-red-500 @enderror">
                         <option value="draft" {{ old('status', $projectBilling->status) == 'draft' ? 'selected' : '' }}>Draft</option>
                         <option value="sent" {{ old('status', $projectBilling->status) == 'sent' ? 'selected' : '' }}>Terkirim</option>
                         <option value="paid" {{ old('status', $projectBilling->status) == 'paid' ? 'selected' : '' }}>Lunas</option>
                         <option value="overdue" {{ old('status', $projectBilling->status) == 'overdue' ? 'selected' : '' }}>Terlambat</option>
                     </select>
                     @error('status')
-                        <p class="mt-1 text-sm text-red-600">{{ $message }}</p>
+                        <p class="mt-1 text-xs sm:text-sm text-red-600">{{ $message }}</p>
                     @enderror
                 </div>
             </div>
 
             <!-- Paid Date (shown when status is paid) -->
-            <div id="paid-date-section" class="mt-6 {{ old('status', $projectBilling->status) == 'paid' ? '' : 'hidden' }}">
-                <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+            <div id="paid-date-section" class="mt-4 sm:mt-6 {{ old('status', $projectBilling->status) == 'paid' ? '' : 'hidden' }}">
+                <div class="grid grid-cols-1 sm:grid-cols-2 gap-4 sm:gap-6">
                     <div>
-                        <label for="paid_date" class="block text-sm font-medium text-slate-700 mb-2">
+                        <label for="paid_date" class="block text-xs sm:text-sm font-medium text-slate-700 mb-2">
                             Tanggal Pembayaran <span class="text-red-500">*</span>
                         </label>
                         <input type="date" name="paid_date" id="paid_date"
                                value="{{ old('paid_date', $projectBilling->paid_date) }}"
-                               class="w-full px-3 py-2 border border-slate-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent @error('paid_date') border-red-500 @enderror">
+                               class="w-full px-3 py-2 border border-slate-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent text-sm sm:text-base @error('paid_date') border-red-500 @enderror">
                         @error('paid_date')
-                            <p class="mt-1 text-sm text-red-600">{{ $message }}</p>
+                            <p class="mt-1 text-xs sm:text-sm text-red-600">{{ $message }}</p>
                         @enderror
                     </div>
                 </div>
@@ -122,84 +121,84 @@
         </div>
 
         <!-- Amount Configuration -->
-        <div class="bg-white rounded-lg shadow-sm border border-slate-200 p-6">
-            <h2 class="text-lg font-semibold text-slate-800 mb-4">Konfigurasi Nilai</h2>
+        <div class="bg-white rounded-lg shadow-sm border border-slate-200 p-4 sm:p-6">
+            <h2 class="text-base sm:text-lg font-semibold text-slate-800 mb-4">Konfigurasi Nilai</h2>
             
-            <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+            <div class="grid grid-cols-1 sm:grid-cols-2 gap-4 sm:gap-6">
                 <div>
-                    <label for="nilai_jasa_display" class="block text-sm font-medium text-slate-700 mb-2">
+                    <label for="nilai_jasa_display" class="block text-xs sm:text-sm font-medium text-slate-700 mb-2">
                         Nilai Jasa <span class="text-red-500">*</span>
                     </label>
                     <input type="text" id="nilai_jasa_display"
                            value="{{ old('nilai_jasa') ? number_format(old('nilai_jasa'), 0, ',', '.') : number_format($projectBilling->nilai_jasa, 0, ',', '.') }}"
-                           class="w-full px-3 py-2 border border-slate-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent @error('nilai_jasa') border-red-500 @enderror"
+                           class="w-full px-3 py-2 border border-slate-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent text-sm sm:text-base @error('nilai_jasa') border-red-500 @enderror"
                            placeholder="5.000.000">
                     <input type="hidden" name="nilai_jasa" id="nilai_jasa" value="{{ old('nilai_jasa', $projectBilling->nilai_jasa) }}">
                     @error('nilai_jasa')
-                        <p class="mt-1 text-sm text-red-600">{{ $message }}</p>
+                        <p class="mt-1 text-xs sm:text-sm text-red-600">{{ $message }}</p>
                     @enderror
                 </div>
 
                 <div>
-                    <label for="nilai_material_display" class="block text-sm font-medium text-slate-700 mb-2">
+                    <label for="nilai_material_display" class="block text-xs sm:text-sm font-medium text-slate-700 mb-2">
                         Nilai Material <span class="text-red-500">*</span>
                     </label>
                     <input type="text" id="nilai_material_display"
                            value="{{ old('nilai_material') ? number_format(old('nilai_material'), 0, ',', '.') : number_format($projectBilling->nilai_material, 0, ',', '.') }}"
-                           class="w-full px-3 py-2 border border-slate-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent @error('nilai_material') border-red-500 @enderror"
+                           class="w-full px-3 py-2 border border-slate-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent text-sm sm:text-base @error('nilai_material') border-red-500 @enderror"
                            placeholder="0">
                     <input type="hidden" name="nilai_material" id="nilai_material" value="{{ old('nilai_material', $projectBilling->nilai_material) }}">
                     @error('nilai_material')
-                        <p class="mt-1 text-sm text-red-600">{{ $message }}</p>
+                        <p class="mt-1 text-xs sm:text-sm text-red-600">{{ $message }}</p>
                     @enderror
                 </div>
             </div>
 
             <!-- PPN Configuration -->
-            <div class="grid grid-cols-1 md:grid-cols-2 gap-6 mt-6">
+            <div class="grid grid-cols-1 sm:grid-cols-2 gap-4 sm:gap-6 mt-4 sm:mt-6">
                 <div>
-                    <label for="ppn_rate" class="block text-sm font-medium text-slate-700 mb-2">
+                    <label for="ppn_rate" class="block text-xs sm:text-sm font-medium text-slate-700 mb-2">
                         PPN (%) <span class="text-red-500">*</span>
                     </label>
                     <input type="number" name="ppn_rate" id="ppn_rate" required min="0" max="100" step="0.01"
                            value="{{ old('ppn_rate', $projectBilling->ppn_rate) }}"
-                           class="w-full px-3 py-2 border border-slate-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent @error('ppn_rate') border-red-500 @enderror">
+                           class="w-full px-3 py-2 border border-slate-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent text-sm sm:text-base @error('ppn_rate') border-red-500 @enderror">
                     @error('ppn_rate')
-                        <p class="mt-1 text-sm text-red-600">{{ $message }}</p>
+                        <p class="mt-1 text-xs sm:text-sm text-red-600">{{ $message }}</p>
                     @enderror
                 </div>
 
                 <div>
-                    <label for="ppn_calculation" class="block text-sm font-medium text-slate-700 mb-2">
+                    <label for="ppn_calculation" class="block text-xs sm:text-sm font-medium text-slate-700 mb-2">
                         Metode Perhitungan PPN <span class="text-red-500">*</span>
                     </label>
                     <select name="ppn_calculation" id="ppn_calculation" required
-                            class="w-full px-3 py-2 border border-slate-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent @error('ppn_calculation') border-red-500 @enderror">
+                            class="w-full px-3 py-2 border border-slate-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent text-sm sm:text-base @error('ppn_calculation') border-red-500 @enderror">
                         <option value="normal" {{ old('ppn_calculation', $projectBilling->ppn_calculation) == 'normal' ? 'selected' : '' }}>Normal</option>
                         <option value="round_up" {{ old('ppn_calculation', $projectBilling->ppn_calculation) == 'round_up' ? 'selected' : '' }}>Pembulatan Ke Atas</option>
                         <option value="round_down" {{ old('ppn_calculation', $projectBilling->ppn_calculation) == 'round_down' ? 'selected' : '' }}>Pembulatan Ke Bawah</option>
                     </select>
                     @error('ppn_calculation')
-                        <p class="mt-1 text-sm text-red-600">{{ $message }}</p>
+                        <p class="mt-1 text-xs sm:text-sm text-red-600">{{ $message }}</p>
                     @enderror
                 </div>
             </div>
 
             <!-- Total Amount Display -->
-            <div class="mt-6 p-4 bg-slate-50 rounded-lg">
+            <div class="mt-4 sm:mt-6 p-3 sm:p-4 bg-slate-50 rounded-lg">
                 <div class="space-y-2">
                     <div class="flex justify-between items-center">
-                        <span class="text-sm text-slate-600">Subtotal:</span>
-                        <span id="subtotal-display" class="font-medium text-slate-900">Rp 0</span>
+                        <span class="text-xs sm:text-sm text-slate-600">Subtotal:</span>
+                        <span id="subtotal-display" class="font-medium text-slate-900 text-sm sm:text-base">Rp 0</span>
                     </div>
                     <div class="flex justify-between items-center">
-                        <span class="text-sm text-slate-600">PPN:</span>
-                        <span id="ppn-display" class="font-medium text-slate-900">Rp 0</span>
+                        <span class="text-xs sm:text-sm text-slate-600">PPN:</span>
+                        <span id="ppn-display" class="font-medium text-slate-900 text-sm sm:text-base">Rp 0</span>
                     </div>
                     <hr class="border-slate-300">
                     <div class="flex justify-between items-center">
-                        <span class="text-lg font-medium text-slate-700">Total Nilai:</span>
-                        <span id="total-display" class="text-2xl font-bold text-slate-900">Rp 0</span>
+                        <span class="text-base sm:text-lg font-medium text-slate-700">Total Nilai:</span>
+                        <span id="total-display" class="text-lg sm:text-2xl font-bold text-slate-900">Rp 0</span>
                     </div>
                 </div>
                 
@@ -211,30 +210,30 @@
         </div>
 
         <!-- Description -->
-        <div class="bg-white rounded-lg shadow-sm border border-slate-200 p-6">
-            <h2 class="text-lg font-semibold text-slate-800 mb-4">Deskripsi</h2>
+        <div class="bg-white rounded-lg shadow-sm border border-slate-200 p-4 sm:p-6">
+            <h2 class="text-base sm:text-lg font-semibold text-slate-800 mb-4">Deskripsi</h2>
             
             <div>
-                <label for="description" class="block text-sm font-medium text-slate-700 mb-2">
+                <label for="description" class="block text-xs sm:text-sm font-medium text-slate-700 mb-2">
                     Deskripsi Penagihan
                 </label>
                 <textarea name="description" id="description" rows="4"
-                          class="w-full px-3 py-2 border border-slate-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent @error('description') border-red-500 @enderror"
+                          class="w-full px-3 py-2 border border-slate-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent text-sm sm:text-base @error('description') border-red-500 @enderror"
                           placeholder="Masukkan deskripsi atau catatan untuk penagihan ini...">{{ old('description', $projectBilling->notes) }}</textarea>
                 @error('description')
-                    <p class="mt-1 text-sm text-red-600">{{ $message }}</p>
+                    <p class="mt-1 text-xs sm:text-sm text-red-600">{{ $message }}</p>
                 @enderror
             </div>
         </div>
 
         <!-- Action Buttons -->
-        <div class="flex justify-end space-x-4">
-            <a href="{{ route('project-billings.show', $projectBilling) }}" 
-               class="px-6 py-2 border border-slate-300 text-slate-700 bg-white hover:bg-slate-50 rounded-lg font-medium transition-colors duration-200">
+        <div class="flex flex-col sm:flex-row sm:justify-end space-y-3 sm:space-y-0 sm:space-x-4">
+            <a href="{{ route('project-billings.show', $projectBilling) }}"
+               class="px-4 sm:px-6 py-2 border border-slate-300 text-slate-700 bg-white hover:bg-slate-50 rounded-lg font-medium transition-colors duration-200 text-center text-sm sm:text-base order-2 sm:order-1">
                 Batal
             </a>
-            <button type="submit" 
-                    class="px-6 py-2 bg-blue-600 hover:bg-blue-700 text-white rounded-lg font-medium transition-colors duration-200">
+            <button type="submit"
+                    class="px-4 sm:px-6 py-2 bg-blue-600 hover:bg-blue-700 text-white rounded-lg font-medium transition-colors duration-200 text-sm sm:text-base order-1 sm:order-2">
                 Update Penagihan
             </button>
         </div>

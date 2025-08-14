@@ -1,20 +1,18 @@
-<x-app-layout>
-    <x-slot name="header">
-        <div class="flex justify-between items-center">
-            <h2 class="font-semibold text-xl text-gray-800 leading-tight">
-                {{ __('Preview Import Proyek') }}
-            </h2>
-            <a href="{{ route('projects.import') }}" 
-               class="bg-gray-500 hover:bg-gray-700 text-white font-bold py-2 px-4 rounded">
-                Kembali
-            </a>
-        </div>
-    </x-slot>
+@extends('layouts.app')
 
-    <div class="py-12">
-        <div class="max-w-7xl mx-auto sm:px-6 lg:px-8">
-            <div class="bg-white overflow-hidden shadow-sm sm:rounded-lg">
-                <div class="p-6 text-gray-900">
+@section('content')
+<div class="container mx-auto px-4 py-6 sm:py-8">
+    <div class="flex flex-col sm:flex-row sm:justify-between sm:items-center mb-4 sm:mb-6 space-y-4 sm:space-y-0">
+        <div class="min-w-0 flex-1">
+            <h1 class="text-xl sm:text-2xl lg:text-3xl font-bold text-gray-800">Preview Import Proyek</h1>
+        </div>
+        <a href="{{ route('projects.import') }}"
+           class="bg-gray-500 hover:bg-gray-700 text-white font-bold py-2 px-3 sm:px-4 rounded text-center text-sm sm:text-base">
+            Kembali
+        </a>
+    </div>
+
+    <div class="bg-white rounded-lg shadow-md p-4 sm:p-6">
                     
                     <!-- Summary -->
                     <div class="grid grid-cols-1 md:grid-cols-3 gap-4 mb-6">
@@ -165,62 +163,74 @@
                     </div>
                     @endif
 
-                    <!-- Invalid Data Preview -->
-                    @if(count($invalidData) > 0)
-                    <div class="mb-8">
-                        <h3 class="text-lg font-semibold text-red-800 mb-4">Data Error ({{ count($invalidData) }} baris)</h3>
-                        <div class="overflow-x-auto">
-                            <table class="min-w-full bg-white border border-gray-200 rounded-lg">
-                                <thead class="bg-red-50">
-                                    <tr>
-                                        <th class="px-4 py-2 text-left text-xs font-medium text-gray-500 uppercase">Baris</th>
-                                        <th class="px-4 py-2 text-left text-xs font-medium text-gray-500 uppercase">Nama Proyek</th>
-                                        <th class="px-4 py-2 text-left text-xs font-medium text-gray-500 uppercase">Error</th>
-                                        <th class="px-4 py-2 text-left text-xs font-medium text-gray-500 uppercase">Data Asli</th>
-                                    </tr>
-                                </thead>
-                                <tbody class="divide-y divide-gray-200">
-                                    @foreach($invalidData as $item)
-                                    <tr class="hover:bg-gray-50">
-                                        <td class="px-4 py-2 text-sm font-medium text-gray-900">{{ $item['row_number'] }}</td>
-                                        <td class="px-4 py-2 text-sm text-gray-900">{{ $item['data']['nama_proyek'] ?: '-' }}</td>
-                                        <td class="px-4 py-2 text-sm">
-                                            <ul class="list-disc list-inside text-red-600">
-                                                @foreach($item['errors'] as $error)
-                                                <li class="text-xs">{{ $error }}</li>
-                                                @endforeach
-                                            </ul>
-                                        </td>
-                                        <td class="px-4 py-2 text-sm text-gray-500">
-                                            <details class="cursor-pointer">
-                                                <summary class="text-blue-600 hover:text-blue-800">Lihat data asli</summary>
-                                                <div class="mt-2 p-2 bg-gray-100 rounded text-xs">
-                                                    @foreach($item['original_row'] as $key => $value)
-                                                        <div><strong>{{ $key }}:</strong> {{ $value ?: 'null' }}</div>
-                                                    @endforeach
-                                                </div>
-                                            </details>
-                                        </td>
-                                    </tr>
+        <!-- Invalid Data Preview -->
+        @if(count($invalidData) > 0)
+        <div class="mb-6 sm:mb-8">
+            <h3 class="text-base sm:text-lg font-semibold text-red-800 mb-4">Data Error ({{ count($invalidData) }} baris)</h3>
+            <div class="overflow-x-auto">
+                <table class="min-w-full bg-white border border-gray-200 rounded-lg">
+                    <thead class="bg-red-50">
+                        <tr>
+                            <th class="px-2 sm:px-4 py-2 text-left text-xs font-medium text-gray-500 uppercase">Baris</th>
+                            <th class="px-2 sm:px-4 py-2 text-left text-xs font-medium text-gray-500 uppercase">Nama Proyek</th>
+                            <th class="px-2 sm:px-4 py-2 text-left text-xs font-medium text-gray-500 uppercase">Error</th>
+                            <th class="px-2 sm:px-4 py-2 text-left text-xs font-medium text-gray-500 uppercase hidden sm:table-cell">Data Asli</th>
+                        </tr>
+                    </thead>
+                    <tbody class="divide-y divide-gray-200">
+                        @foreach($invalidData as $item)
+                        <tr class="hover:bg-gray-50">
+                            <td class="px-2 sm:px-4 py-2 text-xs sm:text-sm font-medium text-gray-900">{{ $item['row_number'] }}</td>
+                            <td class="px-2 sm:px-4 py-2 text-xs sm:text-sm text-gray-900">
+                                <div class="max-w-xs truncate" title="{{ $item['data']['nama_proyek'] ?: '-' }}">
+                                    {{ $item['data']['nama_proyek'] ?: '-' }}
+                                </div>
+                            </td>
+                            <td class="px-2 sm:px-4 py-2 text-xs sm:text-sm">
+                                <ul class="list-disc list-inside text-red-600 space-y-1">
+                                    @foreach($item['errors'] as $error)
+                                    <li class="text-xs">{{ $error }}</li>
                                     @endforeach
-                                </tbody>
-                            </table>
-                        </div>
-                    </div>
-                    @endif
-
-                    @if(count($validData) == 0 && count($invalidData) == 0)
-                    <div class="text-center py-8">
-                        <svg class="mx-auto h-12 w-12 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"></path>
-                        </svg>
-                        <h3 class="mt-2 text-sm font-medium text-gray-900">Tidak ada data ditemukan</h3>
-                        <p class="mt-1 text-sm text-gray-500">File Excel tidak mengandung data yang dapat diproses.</p>
-                    </div>
-                    @endif
-
-                </div>
+                                </ul>
+                                <!-- Mobile data preview -->
+                                <div class="sm:hidden mt-2">
+                                    <details class="cursor-pointer">
+                                        <summary class="text-blue-600 hover:text-blue-800 text-xs">Data asli</summary>
+                                        <div class="mt-1 p-2 bg-gray-100 rounded text-xs">
+                                            @foreach($item['original_row'] as $key => $value)
+                                                <div><strong>{{ $key }}:</strong> {{ $value ?: 'null' }}</div>
+                                            @endforeach
+                                        </div>
+                                    </details>
+                                </div>
+                            </td>
+                            <td class="px-2 sm:px-4 py-2 text-xs sm:text-sm text-gray-500 hidden sm:table-cell">
+                                <details class="cursor-pointer">
+                                    <summary class="text-blue-600 hover:text-blue-800">Lihat data asli</summary>
+                                    <div class="mt-2 p-2 bg-gray-100 rounded text-xs">
+                                        @foreach($item['original_row'] as $key => $value)
+                                            <div><strong>{{ $key }}:</strong> {{ $value ?: 'null' }}</div>
+                                        @endforeach
+                                    </div>
+                                </details>
+                            </td>
+                        </tr>
+                        @endforeach
+                    </tbody>
+                </table>
             </div>
         </div>
+        @endif
+
+        @if(count($validData) == 0 && count($invalidData) == 0)
+        <div class="text-center py-6 sm:py-8">
+            <svg class="mx-auto h-8 w-8 sm:h-12 sm:w-12 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"></path>
+            </svg>
+            <h3 class="mt-2 text-sm sm:text-base font-medium text-gray-900">Tidak ada data ditemukan</h3>
+            <p class="mt-1 text-xs sm:text-sm text-gray-500">File Excel tidak mengandung data yang dapat diproses.</p>
+        </div>
+        @endif
     </div>
-</x-app-layout>
+</div>
+@endsection

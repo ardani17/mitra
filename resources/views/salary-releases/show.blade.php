@@ -225,14 +225,14 @@
             <!-- Actions -->
             @can('delete', $salaryRelease)
                 @if($salaryRelease->status === 'draft')
-                    <div class="mt-6 flex justify-end">
-                        <form action="{{ route('finance.salary-releases.destroy', $salaryRelease) }}" 
-                              method="POST" class="inline"
+                    <div class="mt-4 sm:mt-6 flex justify-end">
+                        <form action="{{ route('finance.salary-releases.destroy', $salaryRelease) }}"
+                              method="POST" class="inline w-full sm:w-auto"
                               onsubmit="return confirm('Apakah Anda yakin ingin menghapus rilis gaji ini? Semua gaji harian akan dikembalikan ke status belum dirilis.')">
                             @csrf
                             @method('DELETE')
-                            <button type="submit" class="bg-red-500 hover:bg-red-700 text-white font-bold py-2 px-4 rounded">
-                                <i class="fas fa-trash mr-2"></i>Hapus Rilis Gaji
+                            <button type="submit" class="w-full sm:w-auto bg-red-500 hover:bg-red-700 text-white font-medium py-2 px-3 sm:px-4 rounded text-sm sm:text-base">
+                                <i class="fas fa-trash mr-1 sm:mr-2"></i>Hapus Rilis Gaji
                             </button>
                         </form>
                     </div>

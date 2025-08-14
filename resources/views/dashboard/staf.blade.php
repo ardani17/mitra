@@ -10,63 +10,63 @@
         </div>
     </x-slot>
 
-    <div class="py-12">
-        <div class="max-w-7xl mx-auto sm:px-6 lg:px-8">
+    <div class="py-6 sm:py-12">
+        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
             <!-- Welcome Section -->
-            <div class="bg-gradient-to-r from-indigo-600 to-indigo-800 rounded-lg shadow-lg p-6 mb-8 text-white">
-                <h1 class="text-3xl font-bold mb-2">Selamat Datang, {{ Auth::user()->name }}</h1>
-                <p class="text-indigo-100">Kelola tugas dan pengeluaran proyek Anda</p>
+            <div class="bg-gradient-to-r from-indigo-600 to-indigo-800 rounded-lg shadow-lg p-4 sm:p-6 mb-6 sm:mb-8 text-white">
+                <h1 class="text-2xl sm:text-3xl font-bold mb-2">Selamat Datang, {{ Auth::user()->name }}</h1>
+                <p class="text-sm sm:text-base text-indigo-100">Kelola tugas dan pengeluaran proyek Anda</p>
             </div>
 
             <!-- Staff Statistics -->
-            <div class="grid grid-cols-1 md:grid-cols-4 gap-6 mb-8">
-                <div class="bg-gradient-to-br from-blue-500 to-blue-600 text-white rounded-xl p-6 shadow-lg">
+            <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-3 sm:gap-6 mb-6 sm:mb-8">
+                <div class="bg-gradient-to-br from-blue-500 to-blue-600 text-white rounded-xl p-3 sm:p-6 shadow-lg">
                     <div class="flex items-center justify-between">
-                        <div>
-                            <h3 class="text-lg font-semibold opacity-90">Proyek Aktif</h3>
-                            <p class="text-3xl font-bold">{{ $activeProjects }}</p>
-                            <p class="text-sm opacity-75">Sedang berjalan</p>
+                        <div class="min-w-0 flex-1">
+                            <h3 class="text-sm sm:text-lg font-semibold opacity-90 truncate">Proyek Aktif</h3>
+                            <p class="text-2xl sm:text-3xl font-bold">{{ $activeProjects }}</p>
+                            <p class="text-xs sm:text-sm opacity-75">Sedang berjalan</p>
                         </div>
-                        <div class="text-4xl opacity-75">
+                        <div class="text-2xl sm:text-4xl opacity-75 ml-2">
                             🚀
                         </div>
                     </div>
                 </div>
 
-                <div class="bg-gradient-to-br from-green-500 to-green-600 text-white rounded-xl p-6 shadow-lg">
+                <div class="bg-gradient-to-br from-green-500 to-green-600 text-white rounded-xl p-3 sm:p-6 shadow-lg">
                     <div class="flex items-center justify-between">
-                        <div>
-                            <h3 class="text-lg font-semibold opacity-90">Total Pengeluaran</h3>
-                            <p class="text-3xl font-bold">{{ $myExpenses }}</p>
-                            <p class="text-sm opacity-75">Yang saya buat</p>
+                        <div class="min-w-0 flex-1">
+                            <h3 class="text-sm sm:text-lg font-semibold opacity-90 truncate">Total Pengeluaran</h3>
+                            <p class="text-2xl sm:text-3xl font-bold">{{ $myExpenses }}</p>
+                            <p class="text-xs sm:text-sm opacity-75">Yang saya buat</p>
                         </div>
-                        <div class="text-4xl opacity-75">
+                        <div class="text-2xl sm:text-4xl opacity-75 ml-2">
                             📝
                         </div>
                     </div>
                 </div>
 
-                <div class="bg-gradient-to-br from-yellow-500 to-yellow-600 text-white rounded-xl p-6 shadow-lg">
+                <div class="bg-gradient-to-br from-yellow-500 to-yellow-600 text-white rounded-xl p-3 sm:p-6 shadow-lg">
                     <div class="flex items-center justify-between">
-                        <div>
-                            <h3 class="text-lg font-semibold opacity-90">Menunggu Persetujuan</h3>
-                            <p class="text-3xl font-bold">{{ $myPendingExpenses }}</p>
-                            <p class="text-sm opacity-75">Menunggu persetujuan</p>
+                        <div class="min-w-0 flex-1">
+                            <h3 class="text-sm sm:text-lg font-semibold opacity-90 truncate">Menunggu Persetujuan</h3>
+                            <p class="text-2xl sm:text-3xl font-bold">{{ $myPendingExpenses }}</p>
+                            <p class="text-xs sm:text-sm opacity-75">Menunggu persetujuan</p>
                         </div>
-                        <div class="text-4xl opacity-75">
+                        <div class="text-2xl sm:text-4xl opacity-75 ml-2">
                             ⏳
                         </div>
                     </div>
                 </div>
 
-                <div class="bg-gradient-to-br from-purple-500 to-purple-600 text-white rounded-xl p-6 shadow-lg">
+                <div class="bg-gradient-to-br from-purple-500 to-purple-600 text-white rounded-xl p-3 sm:p-6 shadow-lg">
                     <div class="flex items-center justify-between">
-                        <div>
-                            <h3 class="text-lg font-semibold opacity-90">Disetujui</h3>
-                            <p class="text-3xl font-bold">{{ $myApprovedExpenses }}</p>
-                            <p class="text-sm opacity-75">Sudah disetujui</p>
+                        <div class="min-w-0 flex-1">
+                            <h3 class="text-sm sm:text-lg font-semibold opacity-90 truncate">Disetujui</h3>
+                            <p class="text-2xl sm:text-3xl font-bold">{{ $myApprovedExpenses }}</p>
+                            <p class="text-xs sm:text-sm opacity-75">Sudah disetujui</p>
                         </div>
-                        <div class="text-4xl opacity-75">
+                        <div class="text-2xl sm:text-4xl opacity-75 ml-2">
                             ✅
                         </div>
                     </div>
@@ -74,38 +74,39 @@
             </div>
 
             <!-- Expense Summary -->
-            <div class="bg-white rounded-lg shadow-lg p-6 mb-8">
-                <h3 class="text-xl font-bold text-gray-800 mb-4">Ringkasan Pengeluaran Saya</h3>
-                <div class="grid grid-cols-1 md:grid-cols-3 gap-6">
+            <div class="card p-4 sm:p-6 mb-6 sm:mb-8">
+                <h3 class="text-lg sm:text-xl font-bold text-gray-800 mb-3 sm:mb-4">Ringkasan Pengeluaran Saya</h3>
+                <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4 sm:gap-6">
                     <div class="text-center">
-                        <h4 class="text-lg font-semibold text-gray-700">Total Pengajuan</h4>
-                        <p class="text-2xl font-bold text-blue-600">{{ $myExpenses }}</p>
-                        <p class="text-sm text-gray-500">Semua expense yang dibuat</p>
+                        <h4 class="text-base sm:text-lg font-semibold text-gray-700">Total Pengajuan</h4>
+                        <p class="text-xl sm:text-2xl font-bold text-blue-600">{{ $myExpenses }}</p>
+                        <p class="text-xs sm:text-sm text-gray-500">Semua expense yang dibuat</p>
                     </div>
                     <div class="text-center">
-                        <h4 class="text-lg font-semibold text-gray-700">Tingkat Keberhasilan</h4>
+                        <h4 class="text-base sm:text-lg font-semibold text-gray-700">Tingkat Keberhasilan</h4>
                         @php
                             $successRate = $myExpenses > 0 ? ($myApprovedExpenses / $myExpenses) * 100 : 0;
                         @endphp
-                        <p class="text-2xl font-bold text-green-600">{{ number_format($successRate, 1) }}%</p>
-                        <div class="w-full bg-gray-200 rounded-full h-3 mt-2">
-                            <div class="bg-green-500 h-3 rounded-full transition-all duration-300" style="width: {{ $successRate }}%"></div>
+                        <p class="text-xl sm:text-2xl font-bold text-green-600">{{ number_format($successRate, 1) }}%</p>
+                        <div class="w-full bg-gray-200 rounded-full h-2 sm:h-3 mt-2">
+                            <div class="bg-green-500 h-2 sm:h-3 rounded-full transition-all duration-300" style="width: {{ $successRate }}%"></div>
                         </div>
                     </div>
                     <div class="text-center">
-                        <h4 class="text-lg font-semibold text-gray-700">Menunggu Review</h4>
-                        <p class="text-2xl font-bold text-yellow-600">{{ $myPendingExpenses }}</p>
-                        <p class="text-sm text-gray-500">Butuh tindak lanjut</p>
+                        <h4 class="text-base sm:text-lg font-semibold text-gray-700">Menunggu Review</h4>
+                        <p class="text-xl sm:text-2xl font-bold text-yellow-600">{{ $myPendingExpenses }}</p>
+                        <p class="text-xs sm:text-sm text-gray-500">Butuh tindak lanjut</p>
                     </div>
                 </div>
             </div>
 
             <!-- Recent Expenses -->
-            <div class="bg-white overflow-hidden shadow-sm sm:rounded-lg mb-6">
-                <div class="p-6">
-                    <h3 class="text-lg font-semibold text-gray-700 mb-4">Pengeluaran Terbaru Saya</h3>
+            <div class="card mb-4 sm:mb-6">
+                <div class="p-4 sm:p-6">
+                    <h3 class="text-base sm:text-lg font-semibold text-gray-700 mb-3 sm:mb-4">Pengeluaran Terbaru Saya</h3>
                     @if($recentExpenses->count() > 0)
-                        <div class="overflow-x-auto">
+                        <!-- Desktop Table View -->
+                        <div class="hidden lg:block overflow-x-auto">
                             <table class="min-w-full divide-y divide-gray-200">
                                 <thead class="bg-gray-50">
                                     <tr>
@@ -144,18 +145,48 @@
                                 </tbody>
                             </table>
                         </div>
+
+                        <!-- Mobile Card View -->
+                        <div class="lg:hidden space-y-3">
+                            @foreach($recentExpenses as $expense)
+                            <div class="border border-gray-200 rounded-lg p-3 hover:bg-gray-50">
+                                <div class="flex justify-between items-start mb-2">
+                                    <div class="flex-1 min-w-0">
+                                        <h4 class="text-sm font-medium text-gray-900 truncate" title="{{ $expense->project->name }}">
+                                            {{ Str::limit($expense->project->name, 20) }}
+                                        </h4>
+                                        <p class="text-xs text-gray-500 mt-1 break-words">{{ Str::limit($expense->description, 40) }}</p>
+                                    </div>
+                                    <span class="px-2 py-1 text-xs font-semibold rounded-full ml-2 whitespace-nowrap
+                                        @if($expense->status == 'approved') bg-green-100 text-green-800
+                                        @elseif($expense->status == 'pending') bg-yellow-100 text-yellow-800
+                                        @else bg-red-100 text-red-800 @endif">
+                                        {{ ucfirst($expense->status) }}
+                                    </span>
+                                </div>
+                                <div class="flex justify-between items-center">
+                                    <span class="text-sm font-semibold text-gray-900">
+                                        Rp {{ number_format($expense->amount / 1000000, 1) }}M
+                                    </span>
+                                    <span class="text-xs text-gray-500">
+                                        {{ \Carbon\Carbon::parse($expense->created_at)->format('d/m/Y') }}
+                                    </span>
+                                </div>
+                            </div>
+                            @endforeach
+                        </div>
                     @else
-                        <p class="text-gray-500">Belum ada pengeluaran yang dibuat.</p>
+                        <p class="text-gray-500 text-center py-4 text-sm">Belum ada pengeluaran yang dibuat.</p>
                     @endif
                 </div>
             </div>
 
             <!-- Charts dan Data -->
-            <div class="grid grid-cols-1 md:grid-cols-2 gap-6 mb-6">
+            <div class="grid grid-cols-1 lg:grid-cols-2 gap-4 sm:gap-6 mb-4 sm:mb-6">
                 <!-- Proyek berdasarkan Status -->
-                <div class="bg-white overflow-hidden shadow-sm sm:rounded-lg">
-                    <div class="p-6">
-                        <h3 class="text-lg font-semibold text-gray-700 mb-4">Proyek berdasarkan Status</h3>
+                <div class="card">
+                    <div class="p-4 sm:p-6">
+                        <h3 class="text-base sm:text-lg font-semibold text-gray-700 mb-3 sm:mb-4">Proyek berdasarkan Status</h3>
                         <div class="space-y-2">
                             @foreach($projectsByStatus as $status)
                                 <div class="flex justify-between items-center">
@@ -168,14 +199,14 @@
                 </div>
 
                 <!-- Aktivitas Terbaru -->
-                <div class="bg-white overflow-hidden shadow-sm sm:rounded-lg">
-                    <div class="p-6">
-                        <h3 class="text-lg font-semibold text-gray-700 mb-4">Aktivitas Terbaru Saya</h3>
-                        <div class="space-y-2 max-h-48 overflow-y-auto">
+                <div class="card">
+                    <div class="p-4 sm:p-6">
+                        <h3 class="text-base sm:text-lg font-semibold text-gray-700 mb-3 sm:mb-4">Aktivitas Terbaru Saya</h3>
+                        <div class="space-y-2 max-h-40 sm:max-h-48 overflow-y-auto">
                             @foreach($myActivities as $activity)
-                                <div class="text-sm">
-                                    <span class="text-gray-600">{{ $activity->description }}</span>
-                                    <div class="text-xs text-gray-500">{{ $activity->project_name }} - {{ \Carbon\Carbon::parse($activity->created_at)->format('d/m/Y H:i') }}</div>
+                                <div class="text-xs sm:text-sm">
+                                    <span class="text-gray-600 break-words">{{ Str::limit($activity->description, 50) }}</span>
+                                    <div class="text-xs text-gray-500 mt-1">{{ $activity->project_name }} - {{ \Carbon\Carbon::parse($activity->created_at)->format('d/m/Y H:i') }}</div>
                                 </div>
                             @endforeach
                         </div>
@@ -184,14 +215,14 @@
             </div>
 
             <!-- Analytics Charts Section -->
-            <div class="bg-white rounded-lg shadow-lg p-6 mb-8">
-                <div class="flex justify-between items-center mb-6">
-                    <h3 class="text-xl font-bold text-gray-800">Analisis Visual Proyek</h3>
-                    <div class="flex items-center space-x-4">
-                        <select id="yearFilter" class="rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500">
+            <div class="card p-4 sm:p-6 mb-6 sm:mb-8">
+                <div class="flex flex-col sm:flex-row sm:justify-between sm:items-center mb-4 sm:mb-6 space-y-4 sm:space-y-0">
+                    <h3 class="text-lg sm:text-xl font-bold text-gray-800">Analisis Visual Proyek</h3>
+                    <div class="flex flex-col sm:flex-row items-stretch sm:items-center space-y-2 sm:space-y-0 sm:space-x-4">
+                        <select id="yearFilter" class="form-select text-sm">
                             <option value="">Pilih Tahun...</option>
                         </select>
-                        <button id="refreshBtn" class="bg-blue-500 hover:bg-blue-700 text-white font-bold py-2 px-4 rounded">
+                        <button id="refreshBtn" class="btn-primary text-sm py-2 px-3 sm:px-4">
                             Refresh
                         </button>
                     </div>
@@ -266,20 +297,20 @@
             </div>
 
             <!-- Aksi Cepat -->
-            <div class="bg-white overflow-hidden shadow-sm sm:rounded-lg">
-                <div class="p-6">
-                    <h3 class="text-lg font-semibold text-gray-700 mb-4">Aksi Cepat</h3>
-                    <div class="grid grid-cols-2 md:grid-cols-4 gap-4">
-                        <a href="{{ route('expenses.create') }}" class="bg-blue-500 hover:bg-blue-700 text-white font-bold py-2 px-4 rounded text-center">
+            <div class="card">
+                <div class="p-4 sm:p-6">
+                    <h3 class="text-base sm:text-lg font-semibold text-gray-700 mb-3 sm:mb-4">Aksi Cepat</h3>
+                    <div class="grid grid-cols-2 lg:grid-cols-4 gap-2 sm:gap-4">
+                        <a href="{{ route('expenses.create') }}" class="btn-primary text-center text-xs sm:text-sm py-2 px-2 sm:px-4">
                             Buat Pengeluaran
                         </a>
-                        <a href="{{ route('expenses.index') }}" class="bg-green-500 hover:bg-green-700 text-white font-bold py-2 px-4 rounded text-center">
+                        <a href="{{ route('expenses.index') }}" class="bg-green-500 hover:bg-green-700 text-white font-bold py-2 px-2 sm:px-4 rounded text-center text-xs sm:text-sm">
                             Lihat Pengeluaran
                         </a>
-                        <a href="{{ route('projects.index') }}" class="bg-yellow-500 hover:bg-yellow-700 text-white font-bold py-2 px-4 rounded text-center">
+                        <a href="{{ route('projects.index') }}" class="bg-yellow-500 hover:bg-yellow-700 text-white font-bold py-2 px-2 sm:px-4 rounded text-center text-xs sm:text-sm">
                             Lihat Proyek
                         </a>
-                        <a href="{{ route('timelines.index') }}" class="bg-purple-500 hover:bg-purple-700 text-white font-bold py-2 px-4 rounded text-center">
+                        <a href="{{ route('timelines.index') }}" class="bg-purple-500 hover:bg-purple-700 text-white font-bold py-2 px-2 sm:px-4 rounded text-center text-xs sm:text-sm">
                             Lihat Timeline
                         </a>
                     </div>

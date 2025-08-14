@@ -1,85 +1,85 @@
 <x-app-layout>
     <x-slot name="header">
-        <div class="flex justify-between items-center">
-            <h2 class="font-semibold text-xl text-gray-800 leading-tight">
+        <div class="flex flex-col sm:flex-row sm:justify-between sm:items-center space-y-3 sm:space-y-0">
+            <h2 class="font-semibold text-lg sm:text-xl text-gray-800 leading-tight">
                 {{ __('Dashboard Karyawan') }}
             </h2>
-            <div class="flex space-x-2">
-                <a href="{{ route('finance.employees.create') }}" 
-                   class="bg-blue-500 hover:bg-blue-700 text-white font-bold py-2 px-4 rounded">
-                    <i class="fas fa-plus mr-2"></i>Tambah Karyawan
+            <div class="flex flex-col sm:flex-row space-y-2 sm:space-y-0 sm:space-x-2">
+                <a href="{{ route('finance.employees.create') }}"
+                   class="bg-blue-500 hover:bg-blue-700 text-white font-medium py-2 px-3 sm:px-4 rounded text-center text-sm sm:text-base">
+                    <i class="fas fa-plus mr-1 sm:mr-2"></i>Tambah Karyawan
                 </a>
-                <a href="{{ route('finance.employees.index') }}" 
-                   class="bg-gray-500 hover:bg-gray-700 text-white font-bold py-2 px-4 rounded">
-                    <i class="fas fa-list mr-2"></i>Daftar Karyawan
+                <a href="{{ route('finance.employees.index') }}"
+                   class="bg-gray-500 hover:bg-gray-700 text-white font-medium py-2 px-3 sm:px-4 rounded text-center text-sm sm:text-base">
+                    <i class="fas fa-list mr-1 sm:mr-2"></i>Daftar Karyawan
                 </a>
             </div>
         </div>
     </x-slot>
 
-    <div class="py-12">
-        <div class="max-w-7xl mx-auto sm:px-6 lg:px-8 space-y-6">
+    <div class="py-6 sm:py-12">
+        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 space-y-4 sm:space-y-6">
             <!-- Key Metrics -->
-            <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
+            <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-3 sm:gap-6">
                 <div class="bg-white overflow-hidden shadow-sm sm:rounded-lg">
-                    <div class="p-6">
+                    <div class="p-4 sm:p-6">
                         <div class="flex items-center">
                             <div class="flex-shrink-0">
-                                <div class="w-8 h-8 bg-blue-100 rounded-full flex items-center justify-center">
-                                    <i class="fas fa-users text-blue-600"></i>
+                                <div class="w-6 h-6 sm:w-8 sm:h-8 bg-blue-100 rounded-full flex items-center justify-center">
+                                    <i class="fas fa-users text-blue-600 text-xs sm:text-sm"></i>
                                 </div>
                             </div>
-                            <div class="ml-4">
-                                <p class="text-sm font-medium text-gray-500">Total Karyawan</p>
-                                <p class="text-2xl font-semibold text-gray-900" id="total-employees">-</p>
+                            <div class="ml-3 sm:ml-4">
+                                <p class="text-xs sm:text-sm font-medium text-gray-500">Total Karyawan</p>
+                                <p class="text-lg sm:text-2xl font-semibold text-gray-900" id="total-employees">-</p>
                             </div>
                         </div>
                     </div>
                 </div>
 
                 <div class="bg-white overflow-hidden shadow-sm sm:rounded-lg">
-                    <div class="p-6">
+                    <div class="p-4 sm:p-6">
                         <div class="flex items-center">
                             <div class="flex-shrink-0">
-                                <div class="w-8 h-8 bg-green-100 rounded-full flex items-center justify-center">
-                                    <i class="fas fa-user-check text-green-600"></i>
+                                <div class="w-6 h-6 sm:w-8 sm:h-8 bg-green-100 rounded-full flex items-center justify-center">
+                                    <i class="fas fa-user-check text-green-600 text-xs sm:text-sm"></i>
                                 </div>
                             </div>
-                            <div class="ml-4">
-                                <p class="text-sm font-medium text-gray-500">Karyawan Aktif</p>
-                                <p class="text-2xl font-semibold text-gray-900" id="active-employees">-</p>
+                            <div class="ml-3 sm:ml-4">
+                                <p class="text-xs sm:text-sm font-medium text-gray-500">Karyawan Aktif</p>
+                                <p class="text-lg sm:text-2xl font-semibold text-gray-900" id="active-employees">-</p>
                             </div>
                         </div>
                     </div>
                 </div>
 
                 <div class="bg-white overflow-hidden shadow-sm sm:rounded-lg">
-                    <div class="p-6">
+                    <div class="p-4 sm:p-6">
                         <div class="flex items-center">
                             <div class="flex-shrink-0">
-                                <div class="w-8 h-8 bg-yellow-100 rounded-full flex items-center justify-center">
-                                    <i class="fas fa-exclamation-triangle text-yellow-600"></i>
+                                <div class="w-6 h-6 sm:w-8 sm:h-8 bg-yellow-100 rounded-full flex items-center justify-center">
+                                    <i class="fas fa-exclamation-triangle text-yellow-600 text-xs sm:text-sm"></i>
                                 </div>
                             </div>
-                            <div class="ml-4">
-                                <p class="text-sm font-medium text-gray-500">Kontrak Berakhir</p>
-                                <p class="text-2xl font-semibold text-gray-900" id="contract-expiring">-</p>
+                            <div class="ml-3 sm:ml-4">
+                                <p class="text-xs sm:text-sm font-medium text-gray-500">Kontrak Berakhir</p>
+                                <p class="text-lg sm:text-2xl font-semibold text-gray-900" id="contract-expiring">-</p>
                             </div>
                         </div>
                     </div>
                 </div>
 
                 <div class="bg-white overflow-hidden shadow-sm sm:rounded-lg">
-                    <div class="p-6">
+                    <div class="p-4 sm:p-6">
                         <div class="flex items-center">
                             <div class="flex-shrink-0">
-                                <div class="w-8 h-8 bg-purple-100 rounded-full flex items-center justify-center">
-                                    <i class="fas fa-user-plus text-purple-600"></i>
+                                <div class="w-6 h-6 sm:w-8 sm:h-8 bg-purple-100 rounded-full flex items-center justify-center">
+                                    <i class="fas fa-user-plus text-purple-600 text-xs sm:text-sm"></i>
                                 </div>
                             </div>
-                            <div class="ml-4">
-                                <p class="text-sm font-medium text-gray-500">Karyawan Baru (30 hari)</p>
-                                <p class="text-2xl font-semibold text-gray-900" id="recent-hires">-</p>
+                            <div class="ml-3 sm:ml-4">
+                                <p class="text-xs sm:text-sm font-medium text-gray-500">Karyawan Baru (30 hari)</p>
+                                <p class="text-lg sm:text-2xl font-semibold text-gray-900" id="recent-hires">-</p>
                             </div>
                         </div>
                     </div>
@@ -87,12 +87,12 @@
             </div>
 
             <!-- Charts Row -->
-            <div class="grid grid-cols-1 lg:grid-cols-2 gap-6">
+            <div class="grid grid-cols-1 lg:grid-cols-2 gap-3 sm:gap-6">
                 <!-- Department Distribution -->
                 <div class="bg-white overflow-hidden shadow-sm sm:rounded-lg">
-                    <div class="p-6">
-                        <h3 class="text-lg font-medium text-gray-900 mb-4">Distribusi per Departemen</h3>
-                        <div class="h-64">
+                    <div class="p-4 sm:p-6">
+                        <h3 class="text-base sm:text-lg font-medium text-gray-900 mb-3 sm:mb-4">Distribusi per Departemen</h3>
+                        <div class="h-48 sm:h-64">
                             <canvas id="departmentChart"></canvas>
                         </div>
                     </div>
@@ -100,9 +100,9 @@
 
                 <!-- Employment Type Distribution -->
                 <div class="bg-white overflow-hidden shadow-sm sm:rounded-lg">
-                    <div class="p-6">
-                        <h3 class="text-lg font-medium text-gray-900 mb-4">Tipe Karyawan</h3>
-                        <div class="h-64">
+                    <div class="p-4 sm:p-6">
+                        <h3 class="text-base sm:text-lg font-medium text-gray-900 mb-3 sm:mb-4">Tipe Karyawan</h3>
+                        <div class="h-48 sm:h-64">
                             <canvas id="employmentTypeChart"></canvas>
                         </div>
                     </div>
@@ -110,17 +110,17 @@
             </div>
 
             <!-- Additional Analytics -->
-            <div class="grid grid-cols-1 lg:grid-cols-3 gap-6">
+            <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-3 sm:gap-6">
                 <!-- Average Daily Rate -->
                 <div class="bg-white overflow-hidden shadow-sm sm:rounded-lg">
-                    <div class="p-6">
+                    <div class="p-4 sm:p-6">
                         <div class="flex items-center justify-between">
                             <div>
-                                <p class="text-sm font-medium text-gray-500">Rata-rata Gaji Harian</p>
-                                <p class="text-2xl font-semibold text-gray-900" id="average-daily-rate">-</p>
+                                <p class="text-xs sm:text-sm font-medium text-gray-500">Rata-rata Gaji Harian</p>
+                                <p class="text-lg sm:text-2xl font-semibold text-gray-900" id="average-daily-rate">-</p>
                             </div>
-                            <div class="w-8 h-8 bg-green-100 rounded-full flex items-center justify-center">
-                                <i class="fas fa-money-bill text-green-600"></i>
+                            <div class="w-6 h-6 sm:w-8 sm:h-8 bg-green-100 rounded-full flex items-center justify-center">
+                                <i class="fas fa-money-bill text-green-600 text-xs sm:text-sm"></i>
                             </div>
                         </div>
                     </div>
@@ -128,8 +128,8 @@
 
                 <!-- Top Performers -->
                 <div class="bg-white overflow-hidden shadow-sm sm:rounded-lg">
-                    <div class="p-6">
-                        <h3 class="text-lg font-medium text-gray-900 mb-4">Top Performers</h3>
+                    <div class="p-4 sm:p-6">
+                        <h3 class="text-base sm:text-lg font-medium text-gray-900 mb-3 sm:mb-4">Top Performers</h3>
                         <div id="top-performers" class="space-y-2">
                             <!-- Will be populated by JavaScript -->
                         </div>
@@ -138,8 +138,8 @@
 
                 <!-- Contract Expiring Soon -->
                 <div class="bg-white overflow-hidden shadow-sm sm:rounded-lg">
-                    <div class="p-6">
-                        <h3 class="text-lg font-medium text-gray-900 mb-4">Kontrak Berakhir Segera</h3>
+                    <div class="p-4 sm:p-6">
+                        <h3 class="text-base sm:text-lg font-medium text-gray-900 mb-3 sm:mb-4">Kontrak Berakhir Segera</h3>
                         <div id="expiring-contracts" class="space-y-2">
                             <!-- Will be populated by JavaScript -->
                         </div>
@@ -149,25 +149,25 @@
 
             <!-- Recent Activities -->
             <div class="bg-white overflow-hidden shadow-sm sm:rounded-lg">
-                <div class="p-6">
-                    <h3 class="text-lg font-medium text-gray-900 mb-4">Aktivitas Terbaru</h3>
+                <div class="p-4 sm:p-6">
+                    <h3 class="text-base sm:text-lg font-medium text-gray-900 mb-3 sm:mb-4">Aktivitas Terbaru</h3>
                     <div class="overflow-x-auto">
                         <table class="min-w-full divide-y divide-gray-200">
                             <thead class="bg-gray-50">
                                 <tr>
-                                    <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                                    <th class="px-3 sm:px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
                                         Karyawan
                                     </th>
-                                    <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                                    <th class="px-3 sm:px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider hidden sm:table-cell">
                                         Departemen
                                     </th>
-                                    <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                                    <th class="px-3 sm:px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider hidden md:table-cell">
                                         Tanggal Masuk
                                     </th>
-                                    <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                                    <th class="px-3 sm:px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
                                         Status
                                     </th>
-                                    <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                                    <th class="px-3 sm:px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
                                         Aksi
                                     </th>
                                 </tr>

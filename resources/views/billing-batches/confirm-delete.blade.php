@@ -164,42 +164,42 @@
         @endif
 
         <!-- Action Buttons -->
-        <div class="flex justify-between items-center">
-            <a href="{{ route('billing-batches.show', $billingBatch) }}" 
-               class="bg-gray-600 hover:bg-gray-700 text-white font-bold py-3 px-6 rounded-lg">
-                <svg class="inline w-4 h-4 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+        <div class="flex flex-col sm:flex-row justify-between items-center space-y-4 sm:space-y-0">
+            <a href="{{ route('billing-batches.show', $billingBatch) }}"
+               class="btn-secondary text-sm sm:text-base py-2 sm:py-3 px-4 sm:px-6 w-full sm:w-auto text-center">
+                <svg class="inline w-3 h-3 sm:w-4 sm:h-4 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 19l-7-7m0 0l7-7m-7 7h18"></path>
                 </svg>
                 Batal
             </a>
 
             @if($canDelete['can_delete'])
-            <form action="{{ route('billing-batches.destroy', $billingBatch) }}" method="POST" class="inline">
+            <form action="{{ route('billing-batches.destroy', $billingBatch) }}" method="POST" class="w-full sm:w-auto">
                 @csrf
                 @method('DELETE')
-                <button type="submit" 
+                <button type="submit"
                         onclick="return confirm('Apakah Anda benar-benar yakin ingin menghapus batch penagihan ini? Tindakan ini tidak dapat dibatalkan!')"
-                        class="bg-red-600 hover:bg-red-700 text-white font-bold py-3 px-6 rounded-lg">
-                    <svg class="inline w-4 h-4 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        class="bg-red-600 hover:bg-red-700 text-white font-bold py-2 sm:py-3 px-4 sm:px-6 rounded-lg text-sm sm:text-base w-full sm:w-auto">
+                    <svg class="inline w-3 h-3 sm:w-4 sm:h-4 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16"></path>
                     </svg>
                     Ya, Hapus Batch
                 </button>
             </form>
             @else
-            <button disabled class="bg-gray-400 text-white font-bold py-3 px-6 rounded-lg cursor-not-allowed">
-                <svg class="inline w-4 h-4 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <button disabled class="bg-gray-400 text-white font-bold py-2 sm:py-3 px-4 sm:px-6 rounded-lg cursor-not-allowed text-sm sm:text-base w-full sm:w-auto">
+                <svg class="inline w-3 h-3 sm:w-4 sm:h-4 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16"></path>
-                    </svg>
-                    Tidak Dapat Dihapus
-                </button>
+                </svg>
+                Tidak Dapat Dihapus
+            </button>
             @endif
         </div>
 
         <!-- Additional Information -->
-        <div class="mt-8 p-4 bg-gray-100 rounded-lg">
-            <h4 class="font-semibold text-gray-800 mb-2">Informasi Tambahan:</h4>
-            <ul class="text-sm text-gray-600 space-y-1">
+        <div class="mt-6 sm:mt-8 p-3 sm:p-4 bg-gray-100 rounded-lg">
+            <h4 class="font-semibold text-gray-800 mb-2 text-sm sm:text-base">Informasi Tambahan:</h4>
+            <ul class="text-xs sm:text-sm text-gray-600 space-y-1">
                 <li>• Batch penagihan hanya dapat dihapus jika statusnya masih "Draft"</li>
                 <li>• Setelah dihapus, penagihan proyek akan dikembalikan ke status individual</li>
                 <li>• Semua dokumen yang terkait dengan batch ini akan dihapus permanen</li>

@@ -230,20 +230,20 @@
             </div>
 
             <!-- Quick Actions -->
-            <div class="bg-white overflow-hidden shadow-sm sm:rounded-lg">
-                <div class="p-6">
-                    <h3 class="text-lg font-semibold text-gray-700 mb-4">Aksi Cepat</h3>
-                    <div class="grid grid-cols-2 md:grid-cols-4 gap-4">
-                        <a href="{{ route('billings.index') }}" class="bg-blue-500 hover:bg-blue-700 text-white font-bold py-2 px-4 rounded text-center">
+            <div class="card">
+                <div class="p-4 sm:p-6">
+                    <h3 class="text-base sm:text-lg font-semibold text-gray-700 mb-3 sm:mb-4">Aksi Cepat</h3>
+                    <div class="grid grid-cols-2 lg:grid-cols-4 gap-2 sm:gap-4">
+                        <a href="{{ route('billings.index') }}" class="btn-primary text-center text-xs sm:text-sm py-2 px-2 sm:px-4">
                             Lihat Penagihan
                         </a>
-                        <a href="{{ route('billings.create') }}" class="bg-green-500 hover:bg-green-700 text-white font-bold py-2 px-4 rounded text-center">
+                        <a href="{{ route('billings.create') }}" class="bg-green-500 hover:bg-green-700 text-white font-bold py-2 px-2 sm:px-4 rounded text-center text-xs sm:text-sm">
                             Buat Invoice
                         </a>
-                        <a href="{{ route('expenses.index') }}" class="bg-yellow-500 hover:bg-yellow-700 text-white font-bold py-2 px-4 rounded text-center">
+                        <a href="{{ route('expenses.index') }}" class="bg-yellow-500 hover:bg-yellow-700 text-white font-bold py-2 px-2 sm:px-4 rounded text-center text-xs sm:text-sm">
                             Review Expenses
                         </a>
-                        <a href="{{ route('projects.index') }}" class="bg-purple-500 hover:bg-purple-700 text-white font-bold py-2 px-4 rounded text-center">
+                        <a href="{{ route('projects.index') }}" class="bg-purple-500 hover:bg-purple-700 text-white font-bold py-2 px-2 sm:px-4 rounded text-center text-xs sm:text-sm">
                             Lihat Proyek
                         </a>
                     </div>

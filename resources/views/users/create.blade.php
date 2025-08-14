@@ -1,27 +1,31 @@
 <x-app-layout>
     <x-slot name="header">
-        <div class="flex justify-between items-center">
-            <h2 class="font-semibold text-xl text-gray-800 leading-tight">
-                Tambah User Baru
-            </h2>
-            <a href="{{ route('users.index') }}" class="bg-gray-600 hover:bg-gray-700 text-white px-4 py-2 rounded-lg transition duration-200">
-                <i class="fas fa-arrow-left mr-2"></i>Kembali
+        <div class="flex flex-col sm:flex-row sm:justify-between sm:items-center space-y-4 sm:space-y-0">
+            <div class="min-w-0 flex-1">
+                <h2 class="font-semibold text-lg sm:text-xl text-gray-800 leading-tight">
+                    Tambah User Baru
+                </h2>
+            </div>
+            <a href="{{ route('users.index') }}" class="bg-gray-600 hover:bg-gray-700 text-white px-3 sm:px-4 py-2 rounded-lg transition duration-200 text-center text-sm sm:text-base">
+                <i class="fas fa-arrow-left mr-2"></i>
+                <span class="hidden sm:inline">Kembali</span>
+                <span class="sm:hidden">Kembali</span>
             </a>
         </div>
     </x-slot>
 
-    <div class="py-12">
-        <div class="max-w-4xl mx-auto sm:px-6 lg:px-8">
+    <div class="py-6 sm:py-12">
+        <div class="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8">
             <div class="bg-white overflow-hidden shadow-sm sm:rounded-lg">
-                <div class="p-6">
+                <div class="p-4 sm:p-6">
                     <form method="POST" action="{{ route('users.store') }}" class="space-y-6">
                         @csrf
 
                         <!-- Informasi Akun -->
-                        <div class="border-b border-gray-200 pb-6">
-                            <h3 class="text-lg font-medium text-gray-900 mb-4">Informasi Akun</h3>
+                        <div class="border-b border-gray-200 pb-4 sm:pb-6">
+                            <h3 class="text-base sm:text-lg font-medium text-gray-900 mb-3 sm:mb-4">Informasi Akun</h3>
                             
-                            <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+                            <div class="grid grid-cols-1 sm:grid-cols-2 gap-4 sm:gap-6">
                                 <div>
                                     <x-input-label for="name" :value="__('Nama Lengkap')" />
                                     <x-text-input id="name" name="name" type="text" class="mt-1 block w-full" :value="old('name')" required autofocus />
@@ -46,9 +50,9 @@
                                     <x-input-error class="mt-2" :messages="$errors->get('password_confirmation')" />
                                 </div>
 
-                                <div class="md:col-span-2">
+                                <div class="sm:col-span-2">
                                     <x-input-label for="role" :value="__('Role')" />
-                                    <select id="role" name="role" class="mt-1 block w-full border-gray-300 focus:border-indigo-500 focus:ring-indigo-500 rounded-md shadow-sm" required>
+                                    <select id="role" name="role" class="mt-1 block w-full border-gray-300 focus:border-indigo-500 focus:ring-indigo-500 rounded-md shadow-sm text-sm sm:text-base" required>
                                         <option value="">Pilih Role</option>
                                         @foreach($roles as $role)
                                             <option value="{{ $role->name }}" {{ old('role') == $role->name ? 'selected' : '' }}>
@@ -63,9 +67,9 @@
 
                         <!-- Informasi Perusahaan -->
                         <div>
-                            <h3 class="text-lg font-medium text-gray-900 mb-4">Informasi Perusahaan</h3>
+                            <h3 class="text-base sm:text-lg font-medium text-gray-900 mb-3 sm:mb-4">Informasi Perusahaan</h3>
                             
-                            <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+                            <div class="grid grid-cols-1 sm:grid-cols-2 gap-4 sm:gap-6">
                                 <div>
                                     <x-input-label for="company_name" :value="__('Nama Perusahaan')" />
                                     <x-text-input id="company_name" name="company_name" type="text" class="mt-1 block w-full" :value="old('company_name')" />
@@ -84,19 +88,19 @@
                                     <x-input-error class="mt-2" :messages="$errors->get('company_phone')" />
                                 </div>
 
-                                <div class="md:col-span-2">
+                                <div class="sm:col-span-2">
                                     <x-input-label for="company_address" :value="__('Alamat Perusahaan')" />
-                                    <textarea id="company_address" name="company_address" rows="3" class="mt-1 block w-full border-gray-300 focus:border-indigo-500 focus:ring-indigo-500 rounded-md shadow-sm">{{ old('company_address') }}</textarea>
+                                    <textarea id="company_address" name="company_address" rows="3" class="mt-1 block w-full border-gray-300 focus:border-indigo-500 focus:ring-indigo-500 rounded-md shadow-sm text-sm sm:text-base">{{ old('company_address') }}</textarea>
                                     <x-input-error class="mt-2" :messages="$errors->get('company_address')" />
                                 </div>
                             </div>
                         </div>
 
-                        <div class="flex items-center justify-end space-x-4 pt-6 border-t border-gray-200">
-                            <a href="{{ route('users.index') }}" class="bg-gray-500 hover:bg-gray-600 text-white px-6 py-2 rounded-lg transition duration-200">
+                        <div class="flex flex-col sm:flex-row sm:items-center sm:justify-end space-y-2 sm:space-y-0 sm:space-x-4 pt-4 sm:pt-6 border-t border-gray-200">
+                            <a href="{{ route('users.index') }}" class="bg-gray-500 hover:bg-gray-600 text-white px-4 sm:px-6 py-2 rounded-lg transition duration-200 text-center text-sm sm:text-base">
                                 Batal
                             </a>
-                            <button type="submit" class="bg-blue-600 hover:bg-blue-700 text-white px-6 py-2 rounded-lg transition duration-200">
+                            <button type="submit" class="bg-blue-600 hover:bg-blue-700 text-white px-4 sm:px-6 py-2 rounded-lg transition duration-200 text-sm sm:text-base">
                                 <i class="fas fa-save mr-2"></i>Simpan User
                             </button>
                         </div>

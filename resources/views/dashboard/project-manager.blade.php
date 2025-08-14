@@ -10,50 +10,50 @@
         </div>
     </x-slot>
 
-    <div class="py-12">
-        <div class="max-w-7xl mx-auto sm:px-6 lg:px-8">
+    <div class="py-6 sm:py-12">
+        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
             <!-- Welcome Section -->
-            <div class="bg-gradient-to-r from-green-600 to-green-800 rounded-lg shadow-lg p-6 mb-8 text-white">
-                <h1 class="text-3xl font-bold mb-2">Selamat Datang, {{ Auth::user()->name }}</h1>
-                <p class="text-green-100">Kelola dan monitor semua proyek dengan efisien</p>
+            <div class="bg-gradient-to-r from-green-600 to-green-800 rounded-lg shadow-lg p-4 sm:p-6 mb-6 sm:mb-8 text-white">
+                <h1 class="text-2xl sm:text-3xl font-bold mb-2">Selamat Datang, {{ Auth::user()->name }}</h1>
+                <p class="text-sm sm:text-base text-green-100">Kelola dan monitor semua proyek dengan efisien</p>
             </div>
 
             <!-- Project Statistics -->
-            <div class="grid grid-cols-1 md:grid-cols-3 gap-6 mb-8">
-                <div class="bg-gradient-to-br from-blue-500 to-blue-600 text-white rounded-xl p-6 shadow-lg">
+            <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-3 sm:gap-6 mb-6 sm:mb-8">
+                <div class="bg-gradient-to-br from-blue-500 to-blue-600 text-white rounded-xl p-3 sm:p-6 shadow-lg">
                     <div class="flex items-center justify-between">
-                        <div>
-                            <h3 class="text-lg font-semibold opacity-90">Total Proyek</h3>
-                            <p class="text-3xl font-bold">{{ $totalProjects }}</p>
-                            <p class="text-sm opacity-75">Semua proyek</p>
+                        <div class="min-w-0 flex-1">
+                            <h3 class="text-sm sm:text-lg font-semibold opacity-90 truncate">Total Proyek</h3>
+                            <p class="text-2xl sm:text-3xl font-bold">{{ $totalProjects }}</p>
+                            <p class="text-xs sm:text-sm opacity-75">Semua proyek</p>
                         </div>
-                        <div class="text-4xl opacity-75">
+                        <div class="text-2xl sm:text-4xl opacity-75 ml-2">
                             📋
                         </div>
                     </div>
                 </div>
 
-                <div class="bg-gradient-to-br from-green-500 to-green-600 text-white rounded-xl p-6 shadow-lg">
+                <div class="bg-gradient-to-br from-green-500 to-green-600 text-white rounded-xl p-3 sm:p-6 shadow-lg">
                     <div class="flex items-center justify-between">
-                        <div>
-                            <h3 class="text-lg font-semibold opacity-90">Proyek Aktif</h3>
-                            <p class="text-3xl font-bold">{{ $myActiveProjects }}</p>
-                            <p class="text-sm opacity-75">Sedang berjalan</p>
+                        <div class="min-w-0 flex-1">
+                            <h3 class="text-sm sm:text-lg font-semibold opacity-90 truncate">Proyek Aktif</h3>
+                            <p class="text-2xl sm:text-3xl font-bold">{{ $myActiveProjects }}</p>
+                            <p class="text-xs sm:text-sm opacity-75">Sedang berjalan</p>
                         </div>
-                        <div class="text-4xl opacity-75">
+                        <div class="text-2xl sm:text-4xl opacity-75 ml-2">
                             🚀
                         </div>
                     </div>
                 </div>
 
-                <div class="bg-gradient-to-br from-purple-500 to-purple-600 text-white rounded-xl p-6 shadow-lg">
+                <div class="bg-gradient-to-br from-purple-500 to-purple-600 text-white rounded-xl p-3 sm:p-6 shadow-lg">
                     <div class="flex items-center justify-between">
-                        <div>
-                            <h3 class="text-lg font-semibold opacity-90">Proyek Selesai</h3>
-                            <p class="text-3xl font-bold">{{ $completedProjects }}</p>
-                            <p class="text-sm opacity-75">Berhasil diselesaikan</p>
+                        <div class="min-w-0 flex-1">
+                            <h3 class="text-sm sm:text-lg font-semibold opacity-90 truncate">Proyek Selesai</h3>
+                            <p class="text-2xl sm:text-3xl font-bold">{{ $completedProjects }}</p>
+                            <p class="text-xs sm:text-sm opacity-75">Berhasil diselesaikan</p>
                         </div>
-                        <div class="text-4xl opacity-75">
+                        <div class="text-2xl sm:text-4xl opacity-75 ml-2">
                             ✅
                         </div>
                     </div>
@@ -61,25 +61,25 @@
             </div>
 
             <!-- Pelacakan Anggaran -->
-            <div class="grid grid-cols-1 md:grid-cols-3 gap-6 mb-6">
-                <div class="bg-white overflow-hidden shadow-sm sm:rounded-lg">
-                    <div class="p-6 text-gray-900">
-                        <h3 class="text-lg font-semibold text-gray-700">Total Anggaran</h3>
-                        <p class="text-2xl font-bold text-blue-600">Rp {{ number_format($totalBudget) }}</p>
+            <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-3 sm:gap-6 mb-4 sm:mb-6">
+                <div class="card">
+                    <div class="p-4 sm:p-6 text-gray-900">
+                        <h3 class="text-base sm:text-lg font-semibold text-gray-700">Total Anggaran</h3>
+                        <p class="text-xl sm:text-2xl font-bold text-blue-600">Rp {{ number_format($totalBudget) }}</p>
                     </div>
                 </div>
 
-                <div class="bg-white overflow-hidden shadow-sm sm:rounded-lg">
-                    <div class="p-6 text-gray-900">
-                        <h3 class="text-lg font-semibold text-gray-700">Total Pengeluaran</h3>
-                        <p class="text-2xl font-bold text-red-600">Rp {{ number_format($totalExpenses) }}</p>
+                <div class="card">
+                    <div class="p-4 sm:p-6 text-gray-900">
+                        <h3 class="text-base sm:text-lg font-semibold text-gray-700">Total Pengeluaran</h3>
+                        <p class="text-xl sm:text-2xl font-bold text-red-600">Rp {{ number_format($totalExpenses) }}</p>
                     </div>
                 </div>
 
-                <div class="bg-white overflow-hidden shadow-sm sm:rounded-lg">
-                    <div class="p-6 text-gray-900">
-                        <h3 class="text-lg font-semibold text-gray-700">Utilisasi Anggaran</h3>
-                        <p class="text-2xl font-bold text-orange-600">{{ number_format($budgetUtilization, 1) }}%</p>
+                <div class="card">
+                    <div class="p-4 sm:p-6 text-gray-900">
+                        <h3 class="text-base sm:text-lg font-semibold text-gray-700">Utilisasi Anggaran</h3>
+                        <p class="text-xl sm:text-2xl font-bold text-orange-600">{{ number_format($budgetUtilization, 1) }}%</p>
                         <div class="w-full bg-gray-200 rounded-full h-2.5 mt-2">
                             <div class="bg-orange-600 h-2.5 rounded-full" style="width: {{ min($budgetUtilization, 100) }}%"></div>
                         </div>
@@ -88,11 +88,11 @@
             </div>
 
             <!-- Grafik dan Peringatan -->
-            <div class="grid grid-cols-1 md:grid-cols-2 gap-6 mb-6">
+            <div class="grid grid-cols-1 lg:grid-cols-2 gap-4 sm:gap-6 mb-4 sm:mb-6">
                 <!-- Proyek berdasarkan Tipe -->
-                <div class="bg-white overflow-hidden shadow-sm sm:rounded-lg">
-                    <div class="p-6">
-                        <h3 class="text-lg font-semibold text-gray-700 mb-4">Proyek berdasarkan Tipe</h3>
+                <div class="card">
+                    <div class="p-4 sm:p-6">
+                        <h3 class="text-base sm:text-lg font-semibold text-gray-700 mb-3 sm:mb-4">Proyek berdasarkan Tipe</h3>
                         <div class="space-y-2">
                             @foreach($projectsByType as $type)
                                 <div class="flex justify-between items-center">
@@ -105,20 +105,20 @@
                 </div>
 
                 <!-- Peringatan -->
-                <div class="bg-white overflow-hidden shadow-sm sm:rounded-lg">
-                    <div class="p-6">
-                        <h3 class="text-lg font-semibold text-gray-700 mb-4">Peringatan</h3>
-                        <div class="space-y-3">
+                <div class="card">
+                    <div class="p-4 sm:p-6">
+                        <h3 class="text-base sm:text-lg font-semibold text-gray-700 mb-3 sm:mb-4">Peringatan</h3>
+                        <div class="space-y-2 sm:space-y-3">
                             <div class="flex justify-between items-center">
-                                <span>Pengeluaran Tertunda</span>
-                                <span class="bg-yellow-100 text-yellow-800 px-2 py-1 rounded-full text-sm font-semibold">
+                                <span class="text-sm sm:text-base">Pengeluaran Tertunda</span>
+                                <span class="bg-yellow-100 text-yellow-800 px-2 py-1 rounded-full text-xs sm:text-sm font-semibold">
                                     {{ $pendingExpenses }}
                                 </span>
                             </div>
                             @if(isset($urgentProjects) && $urgentProjects->count() > 0)
-                                <div class="bg-red-50 border border-red-200 rounded p-3">
-                                    <h4 class="font-semibold text-red-800">Proyek Terlambat</h4>
-                                    <p class="text-sm text-red-600">{{ $urgentProjects->count() }} proyek melewati deadline</p>
+                                <div class="bg-red-50 border border-red-200 rounded p-2 sm:p-3">
+                                    <h4 class="font-semibold text-red-800 text-sm sm:text-base">Proyek Terlambat</h4>
+                                    <p class="text-xs sm:text-sm text-red-600">{{ $urgentProjects->count() }} proyek melewati deadline</p>
                                 </div>
                             @endif
                         </div>
@@ -128,10 +128,12 @@
 
             <!-- Proyek yang Perlu Perhatian -->
             @if(isset($urgentProjects) && $urgentProjects->count() > 0)
-            <div class="bg-white overflow-hidden shadow-sm sm:rounded-lg mb-6">
-                <div class="p-6">
-                    <h3 class="text-lg font-semibold text-gray-700 mb-4">Proyek yang Perlu Perhatian</h3>
-                    <div class="overflow-x-auto">
+            <div class="card mb-4 sm:mb-6">
+                <div class="p-4 sm:p-6">
+                    <h3 class="text-base sm:text-lg font-semibold text-gray-700 mb-3 sm:mb-4">Proyek yang Perlu Perhatian</h3>
+                    
+                    <!-- Desktop Table View -->
+                    <div class="hidden lg:block overflow-x-auto">
                         <table class="min-w-full divide-y divide-gray-200">
                             <thead class="bg-gray-50">
                                 <tr>
@@ -163,32 +165,56 @@
                             </tbody>
                         </table>
                     </div>
+
+                    <!-- Mobile Card View -->
+                    <div class="lg:hidden space-y-3">
+                        @foreach($urgentProjects as $project)
+                        <div class="border border-red-200 bg-red-50 rounded-lg p-3">
+                            <div class="flex justify-between items-start mb-2">
+                                <h4 class="text-sm font-semibold text-gray-900 truncate flex-1 mr-2" title="{{ $project->name }}">
+                                    {{ Str::limit($project->name, 25) }}
+                                </h4>
+                                <span class="px-2 py-1 text-xs font-semibold rounded-full bg-red-100 text-red-800 whitespace-nowrap">
+                                    {{ $project->status }}
+                                </span>
+                            </div>
+                            <div class="flex justify-between items-center">
+                                <span class="text-xs text-gray-500">
+                                    Deadline: {{ $project->end_date ? $project->end_date->format('d/m/Y') : '-' }}
+                                </span>
+                                <a href="{{ route('projects.show', $project->id) }}" class="text-indigo-600 hover:text-indigo-900 text-xs font-medium">
+                                    Lihat Detail
+                                </a>
+                            </div>
+                        </div>
+                        @endforeach
+                    </div>
                 </div>
             </div>
             @endif
 
             <!-- Analytics Charts Section -->
-            <div class="bg-white rounded-lg shadow-lg p-6 mb-8">
-                <div class="flex justify-between items-center mb-6">
-                    <h3 class="text-xl font-bold text-gray-800">Analisis Visual Proyek</h3>
-                    <div class="flex items-center space-x-4">
-                        <select id="yearFilter" class="rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500">
+            <div class="card p-4 sm:p-6 mb-6 sm:mb-8">
+                <div class="flex flex-col sm:flex-row sm:justify-between sm:items-center mb-4 sm:mb-6 space-y-4 sm:space-y-0">
+                    <h3 class="text-lg sm:text-xl font-bold text-gray-800">Analisis Visual Proyek</h3>
+                    <div class="flex flex-col sm:flex-row items-stretch sm:items-center space-y-2 sm:space-y-0 sm:space-x-4">
+                        <select id="yearFilter" class="form-select text-sm">
                             <option value="">Pilih Tahun...</option>
                         </select>
-                        <button id="refreshBtn" class="bg-blue-500 hover:bg-blue-700 text-white font-bold py-2 px-4 rounded">
+                        <button id="refreshBtn" class="btn-primary text-sm py-2 px-3 sm:px-4">
                             Refresh
                         </button>
                     </div>
                 </div>
 
                 <!-- Loading State -->
-                <div id="loadingState" class="text-center py-8">
-                    <div class="animate-spin rounded-full h-12 w-12 border-b-2 border-blue-500 mx-auto"></div>
-                    <p class="mt-4 text-gray-600">Memuat data analitik...</p>
+                <div id="loadingState" class="text-center py-6 sm:py-8">
+                    <div class="animate-spin rounded-full h-8 w-8 sm:h-12 sm:w-12 border-b-2 border-blue-500 mx-auto"></div>
+                    <p class="mt-3 sm:mt-4 text-gray-600 text-sm sm:text-base">Memuat data analitik...</p>
                 </div>
 
                 <!-- Charts Grid -->
-                <div id="chartsContainer" class="grid grid-cols-1 lg:grid-cols-2 xl:grid-cols-3 gap-6" style="display: none;">
+                <div id="chartsContainer" class="grid grid-cols-1 lg:grid-cols-2 xl:grid-cols-3 gap-3 sm:gap-6" style="display: none;">
                     <!-- Tipe Proyek Chart -->
                     <div class="bg-gray-50 rounded-lg p-4">
                         <h4 class="text-lg font-semibold text-gray-900 mb-4">Tipe Proyek</h4>
@@ -250,20 +276,20 @@
             </div>
 
             <!-- Aksi Cepat -->
-            <div class="bg-white overflow-hidden shadow-sm sm:rounded-lg">
-                <div class="p-6">
-                    <h3 class="text-lg font-semibold text-gray-700 mb-4">Aksi Cepat</h3>
-                    <div class="grid grid-cols-2 md:grid-cols-4 gap-4">
-                        <a href="{{ route('projects.index') }}" class="bg-blue-500 hover:bg-blue-700 text-white font-bold py-2 px-4 rounded text-center">
+            <div class="card">
+                <div class="p-4 sm:p-6">
+                    <h3 class="text-base sm:text-lg font-semibold text-gray-700 mb-3 sm:mb-4">Aksi Cepat</h3>
+                    <div class="grid grid-cols-2 lg:grid-cols-4 gap-2 sm:gap-4">
+                        <a href="{{ route('projects.index') }}" class="btn-primary text-center text-xs sm:text-sm py-2 px-2 sm:px-4">
                             Lihat Proyek
                         </a>
-                        <a href="{{ route('projects.create') }}" class="bg-green-500 hover:bg-green-700 text-white font-bold py-2 px-4 rounded text-center">
+                        <a href="{{ route('projects.create') }}" class="bg-green-500 hover:bg-green-700 text-white font-bold py-2 px-2 sm:px-4 rounded text-center text-xs sm:text-sm">
                             Buat Proyek
                         </a>
-                        <a href="{{ route('expenses.index') }}" class="bg-yellow-500 hover:bg-yellow-700 text-white font-bold py-2 px-4 rounded text-center">
+                        <a href="{{ route('expenses.index') }}" class="bg-yellow-500 hover:bg-yellow-700 text-white font-bold py-2 px-2 sm:px-4 rounded text-center text-xs sm:text-sm">
                             Lihat Pengeluaran
                         </a>
-                        <a href="{{ route('timelines.index') }}" class="bg-purple-500 hover:bg-purple-700 text-white font-bold py-2 px-4 rounded text-center">
+                        <a href="{{ route('timelines.index') }}" class="bg-purple-500 hover:bg-purple-700 text-white font-bold py-2 px-2 sm:px-4 rounded text-center text-xs sm:text-sm">
                             Lihat Timeline
                         </a>
                     </div>

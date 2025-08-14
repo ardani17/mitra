@@ -5,9 +5,9 @@
     <div class="max-w-7xl mx-auto sm:px-6 lg:px-8">
         <div class="bg-white overflow-hidden shadow-sm sm:rounded-lg">
             <div class="p-6 text-gray-900">
-                <div class="flex justify-between items-center mb-6">
-                    <h2 class="text-2xl font-bold text-gray-800">Export & Import Data Excel</h2>
-                    <a href="{{ route('excel.import-logs') }}" class="bg-gray-500 hover:bg-gray-700 text-white font-bold py-2 px-4 rounded">
+                <div class="flex flex-col sm:flex-row sm:justify-between sm:items-center mb-4 sm:mb-6 space-y-4 sm:space-y-0">
+                    <h2 class="text-xl sm:text-2xl font-bold text-gray-800">Export & Import Data Excel</h2>
+                    <a href="{{ route('excel.import-logs') }}" class="btn-secondary text-sm sm:text-base py-2 px-3 sm:px-4">
                         <i class="fas fa-history mr-2"></i>Log Import
                     </a>
                 </div>
@@ -41,20 +41,20 @@
                 @endif
 
                 <!-- Export/Import Tabs -->
-                <div class="mb-6">
+                <div class="mb-4 sm:mb-6">
                     <div class="border-b border-gray-200">
-                        <nav class="-mb-px flex space-x-8">
-                            <button onclick="showTab('projects')" id="tab-projects" class="tab-button active border-b-2 border-blue-500 py-2 px-1 text-sm font-medium text-blue-600">
-                                <i class="fas fa-project-diagram mr-2"></i>Proyek
+                        <nav class="-mb-px flex flex-wrap space-x-2 sm:space-x-8">
+                            <button onclick="showTab('projects')" id="tab-projects" class="tab-button active border-b-2 border-blue-500 py-2 px-2 sm:px-1 text-xs sm:text-sm font-medium text-blue-600 whitespace-nowrap">
+                                <i class="fas fa-project-diagram mr-1 sm:mr-2"></i>Proyek
                             </button>
-                            <button onclick="showTab('expenses')" id="tab-expenses" class="tab-button border-b-2 border-transparent py-2 px-1 text-sm font-medium text-gray-500 hover:text-gray-700 hover:border-gray-300">
-                                <i class="fas fa-money-bill-wave mr-2"></i>Pengeluaran
+                            <button onclick="showTab('expenses')" id="tab-expenses" class="tab-button border-b-2 border-transparent py-2 px-2 sm:px-1 text-xs sm:text-sm font-medium text-gray-500 hover:text-gray-700 hover:border-gray-300 whitespace-nowrap">
+                                <i class="fas fa-money-bill-wave mr-1 sm:mr-2"></i>Pengeluaran
                             </button>
-                            <button onclick="showTab('billings')" id="tab-billings" class="tab-button border-b-2 border-transparent py-2 px-1 text-sm font-medium text-gray-500 hover:text-gray-700 hover:border-gray-300">
-                                <i class="fas fa-file-invoice mr-2"></i>Tagihan
+                            <button onclick="showTab('billings')" id="tab-billings" class="tab-button border-b-2 border-transparent py-2 px-2 sm:px-1 text-xs sm:text-sm font-medium text-gray-500 hover:text-gray-700 hover:border-gray-300 whitespace-nowrap">
+                                <i class="fas fa-file-invoice mr-1 sm:mr-2"></i>Tagihan
                             </button>
-                            <button onclick="showTab('timelines')" id="tab-timelines" class="tab-button border-b-2 border-transparent py-2 px-1 text-sm font-medium text-gray-500 hover:text-gray-700 hover:border-gray-300">
-                                <i class="fas fa-calendar-alt mr-2"></i>Timeline
+                            <button onclick="showTab('timelines')" id="tab-timelines" class="tab-button border-b-2 border-transparent py-2 px-2 sm:px-1 text-xs sm:text-sm font-medium text-gray-500 hover:text-gray-700 hover:border-gray-300 whitespace-nowrap">
+                                <i class="fas fa-calendar-alt mr-1 sm:mr-2"></i>Timeline
                             </button>
                         </nav>
                     </div>
@@ -62,24 +62,24 @@
 
                 <!-- Projects Tab -->
                 <div id="content-projects" class="tab-content">
-                    <div class="grid grid-cols-1 lg:grid-cols-2 gap-6">
+                    <div class="grid grid-cols-1 lg:grid-cols-2 gap-4 sm:gap-6">
                         <!-- Export Section -->
-                        <div class="bg-blue-50 p-6 rounded-lg">
-                            <h3 class="text-lg font-semibold text-blue-800 mb-4">
+                        <div class="bg-blue-50 p-4 sm:p-6 rounded-lg">
+                            <h3 class="text-base sm:text-lg font-semibold text-blue-800 mb-3 sm:mb-4">
                                 <i class="fas fa-download mr-2"></i>Export Data Proyek
                             </h3>
-                            <form action="{{ route('excel.export', 'projects') }}" method="GET" class="space-y-4">
+                            <form action="{{ route('excel.export', 'projects') }}" method="GET" class="space-y-3 sm:space-y-4">
                                 <div>
-                                    <label class="block text-sm font-medium text-gray-700 mb-2">Format Export</label>
-                                    <select name="format" class="w-full border-gray-300 rounded-md shadow-sm">
+                                    <label class="block text-xs sm:text-sm font-medium text-gray-700 mb-2">Format Export</label>
+                                    <select name="format" class="form-select w-full text-sm">
                                         <option value="data">Data Lengkap</option>
                                         <option value="template">Template Kosong</option>
                                     </select>
                                 </div>
                                 
                                 <div>
-                                    <label class="block text-sm font-medium text-gray-700 mb-2">Filter Proyek</label>
-                                    <select name="project_id" class="w-full border-gray-300 rounded-md shadow-sm">
+                                    <label class="block text-xs sm:text-sm font-medium text-gray-700 mb-2">Filter Proyek</label>
+                                    <select name="project_id" class="form-select w-full text-sm">
                                         <option value="">Semua Proyek</option>
                                         @foreach($projects as $project)
                                             <option value="{{ $project->id }}">{{ $project->code }} - {{ $project->name }}</option>
@@ -87,46 +87,46 @@
                                     </select>
                                 </div>
 
-                                <div class="grid grid-cols-2 gap-4">
+                                <div class="grid grid-cols-1 sm:grid-cols-2 gap-3 sm:gap-4">
                                     <div>
-                                        <label class="block text-sm font-medium text-gray-700 mb-2">Dari Tanggal</label>
-                                        <input type="date" name="date_from" class="w-full border-gray-300 rounded-md shadow-sm">
+                                        <label class="block text-xs sm:text-sm font-medium text-gray-700 mb-2">Dari Tanggal</label>
+                                        <input type="date" name="date_from" class="form-input w-full text-sm">
                                     </div>
                                     <div>
-                                        <label class="block text-sm font-medium text-gray-700 mb-2">Sampai Tanggal</label>
-                                        <input type="date" name="date_to" class="w-full border-gray-300 rounded-md shadow-sm">
+                                        <label class="block text-xs sm:text-sm font-medium text-gray-700 mb-2">Sampai Tanggal</label>
+                                        <input type="date" name="date_to" class="form-input w-full text-sm">
                                     </div>
                                 </div>
 
-                                <button type="submit" class="w-full bg-blue-600 hover:bg-blue-700 text-white font-bold py-2 px-4 rounded">
+                                <button type="submit" class="w-full bg-blue-600 hover:bg-blue-700 text-white font-bold py-2 px-3 sm:px-4 rounded text-sm sm:text-base">
                                     <i class="fas fa-download mr-2"></i>Export Proyek
                                 </button>
                             </form>
 
-                            <div class="mt-4 pt-4 border-t border-blue-200">
-                                <a href="{{ route('excel.template', 'projects') }}" class="w-full inline-block text-center bg-blue-100 hover:bg-blue-200 text-blue-800 font-bold py-2 px-4 rounded">
+                            <div class="mt-3 sm:mt-4 pt-3 sm:pt-4 border-t border-blue-200">
+                                <a href="{{ route('excel.template', 'projects') }}" class="w-full inline-block text-center bg-blue-100 hover:bg-blue-200 text-blue-800 font-bold py-2 px-3 sm:px-4 rounded text-sm sm:text-base">
                                     <i class="fas fa-file-download mr-2"></i>Download Template
                                 </a>
                             </div>
                         </div>
 
                         <!-- Import Section -->
-                        <div class="bg-green-50 p-6 rounded-lg">
-                            <h3 class="text-lg font-semibold text-green-800 mb-4">
+                        <div class="bg-green-50 p-4 sm:p-6 rounded-lg">
+                            <h3 class="text-base sm:text-lg font-semibold text-green-800 mb-3 sm:mb-4">
                                 <i class="fas fa-upload mr-2"></i>Import Data Proyek
                             </h3>
-                            <form action="{{ route('excel.import', 'projects') }}" method="POST" enctype="multipart/form-data" class="space-y-4">
+                            <form action="{{ route('excel.import', 'projects') }}" method="POST" enctype="multipart/form-data" class="space-y-3 sm:space-y-4">
                                 @csrf
                                 <div>
-                                    <label class="block text-sm font-medium text-gray-700 mb-2">File Excel</label>
-                                    <input type="file" name="file" accept=".xlsx,.xls,.csv" required 
-                                           class="w-full border-gray-300 rounded-md shadow-sm">
+                                    <label class="block text-xs sm:text-sm font-medium text-gray-700 mb-2">File Excel</label>
+                                    <input type="file" name="file" accept=".xlsx,.xls,.csv" required
+                                           class="form-input w-full text-sm">
                                     <p class="text-xs text-gray-500 mt-1">Format: .xlsx, .xls, .csv (Max: 10MB)</p>
                                 </div>
 
-                                <div class="bg-green-100 p-4 rounded">
-                                    <h4 class="font-semibold text-green-800 mb-2">Petunjuk Import:</h4>
-                                    <ul class="text-sm text-green-700 space-y-1">
+                                <div class="bg-green-100 p-3 sm:p-4 rounded">
+                                    <h4 class="font-semibold text-green-800 mb-2 text-sm sm:text-base">Petunjuk Import:</h4>
+                                    <ul class="text-xs sm:text-sm text-green-700 space-y-1">
                                         <li>• Download template terlebih dahulu</li>
                                         <li>• Isi data sesuai format yang tersedia</li>
                                         <li>• Pastikan kode proyek unik</li>
@@ -134,7 +134,7 @@
                                     </ul>
                                 </div>
 
-                                <button type="submit" class="w-full bg-green-600 hover:bg-green-700 text-white font-bold py-2 px-4 rounded">
+                                <button type="submit" class="w-full bg-green-600 hover:bg-green-700 text-white font-bold py-2 px-3 sm:px-4 rounded text-sm sm:text-base">
                                     <i class="fas fa-upload mr-2"></i>Import Proyek
                                 </button>
                             </form>
@@ -144,24 +144,24 @@
 
                 <!-- Expenses Tab -->
                 <div id="content-expenses" class="tab-content hidden">
-                    <div class="grid grid-cols-1 lg:grid-cols-2 gap-6">
+                    <div class="grid grid-cols-1 lg:grid-cols-2 gap-4 sm:gap-6">
                         <!-- Export Section -->
-                        <div class="bg-yellow-50 p-6 rounded-lg">
-                            <h3 class="text-lg font-semibold text-yellow-800 mb-4">
+                        <div class="bg-yellow-50 p-4 sm:p-6 rounded-lg">
+                            <h3 class="text-base sm:text-lg font-semibold text-yellow-800 mb-3 sm:mb-4">
                                 <i class="fas fa-download mr-2"></i>Export Data Pengeluaran
                             </h3>
-                            <form action="{{ route('excel.export', 'expenses') }}" method="GET" class="space-y-4">
+                            <form action="{{ route('excel.export', 'expenses') }}" method="GET" class="space-y-3 sm:space-y-4">
                                 <div>
-                                    <label class="block text-sm font-medium text-gray-700 mb-2">Format Export</label>
-                                    <select name="format" class="w-full border-gray-300 rounded-md shadow-sm">
+                                    <label class="block text-xs sm:text-sm font-medium text-gray-700 mb-2">Format Export</label>
+                                    <select name="format" class="form-select w-full text-sm">
                                         <option value="data">Data Lengkap</option>
                                         <option value="template">Template Kosong</option>
                                     </select>
                                 </div>
                                 
                                 <div>
-                                    <label class="block text-sm font-medium text-gray-700 mb-2">Filter Proyek</label>
-                                    <select name="project_id" class="w-full border-gray-300 rounded-md shadow-sm">
+                                    <label class="block text-xs sm:text-sm font-medium text-gray-700 mb-2">Filter Proyek</label>
+                                    <select name="project_id" class="form-select w-full text-sm">
                                         <option value="">Semua Proyek</option>
                                         @foreach($projects as $project)
                                             <option value="{{ $project->id }}">{{ $project->code }} - {{ $project->name }}</option>
@@ -169,46 +169,46 @@
                                     </select>
                                 </div>
 
-                                <div class="grid grid-cols-2 gap-4">
+                                <div class="grid grid-cols-1 sm:grid-cols-2 gap-3 sm:gap-4">
                                     <div>
-                                        <label class="block text-sm font-medium text-gray-700 mb-2">Dari Tanggal</label>
-                                        <input type="date" name="date_from" class="w-full border-gray-300 rounded-md shadow-sm">
+                                        <label class="block text-xs sm:text-sm font-medium text-gray-700 mb-2">Dari Tanggal</label>
+                                        <input type="date" name="date_from" class="form-input w-full text-sm">
                                     </div>
                                     <div>
-                                        <label class="block text-sm font-medium text-gray-700 mb-2">Sampai Tanggal</label>
-                                        <input type="date" name="date_to" class="w-full border-gray-300 rounded-md shadow-sm">
+                                        <label class="block text-xs sm:text-sm font-medium text-gray-700 mb-2">Sampai Tanggal</label>
+                                        <input type="date" name="date_to" class="form-input w-full text-sm">
                                     </div>
                                 </div>
 
-                                <button type="submit" class="w-full bg-yellow-600 hover:bg-yellow-700 text-white font-bold py-2 px-4 rounded">
+                                <button type="submit" class="w-full bg-yellow-600 hover:bg-yellow-700 text-white font-bold py-2 px-3 sm:px-4 rounded text-sm sm:text-base">
                                     <i class="fas fa-download mr-2"></i>Export Pengeluaran
                                 </button>
                             </form>
 
-                            <div class="mt-4 pt-4 border-t border-yellow-200">
-                                <a href="{{ route('excel.template', 'expenses') }}" class="w-full inline-block text-center bg-yellow-100 hover:bg-yellow-200 text-yellow-800 font-bold py-2 px-4 rounded">
+                            <div class="mt-3 sm:mt-4 pt-3 sm:pt-4 border-t border-yellow-200">
+                                <a href="{{ route('excel.template', 'expenses') }}" class="w-full inline-block text-center bg-yellow-100 hover:bg-yellow-200 text-yellow-800 font-bold py-2 px-3 sm:px-4 rounded text-sm sm:text-base">
                                     <i class="fas fa-file-download mr-2"></i>Download Template
                                 </a>
                             </div>
                         </div>
 
                         <!-- Import Section -->
-                        <div class="bg-green-50 p-6 rounded-lg">
-                            <h3 class="text-lg font-semibold text-green-800 mb-4">
+                        <div class="bg-green-50 p-4 sm:p-6 rounded-lg">
+                            <h3 class="text-base sm:text-lg font-semibold text-green-800 mb-3 sm:mb-4">
                                 <i class="fas fa-upload mr-2"></i>Import Data Pengeluaran
                             </h3>
-                            <form action="{{ route('excel.import', 'expenses') }}" method="POST" enctype="multipart/form-data" class="space-y-4">
+                            <form action="{{ route('excel.import', 'expenses') }}" method="POST" enctype="multipart/form-data" class="space-y-3 sm:space-y-4">
                                 @csrf
                                 <div>
-                                    <label class="block text-sm font-medium text-gray-700 mb-2">File Excel</label>
-                                    <input type="file" name="file" accept=".xlsx,.xls,.csv" required 
-                                           class="w-full border-gray-300 rounded-md shadow-sm">
+                                    <label class="block text-xs sm:text-sm font-medium text-gray-700 mb-2">File Excel</label>
+                                    <input type="file" name="file" accept=".xlsx,.xls,.csv" required
+                                           class="form-input w-full text-sm">
                                     <p class="text-xs text-gray-500 mt-1">Format: .xlsx, .xls, .csv (Max: 10MB)</p>
                                 </div>
 
-                                <div class="bg-green-100 p-4 rounded">
-                                    <h4 class="font-semibold text-green-800 mb-2">Petunjuk Import:</h4>
-                                    <ul class="text-sm text-green-700 space-y-1">
+                                <div class="bg-green-100 p-3 sm:p-4 rounded">
+                                    <h4 class="font-semibold text-green-800 mb-2 text-sm sm:text-base">Petunjuk Import:</h4>
+                                    <ul class="text-xs sm:text-sm text-green-700 space-y-1">
                                         <li>• Kode proyek harus sudah ada di sistem</li>
                                         <li>• Format tanggal: YYYY-MM-DD</li>
                                         <li>• Jumlah dalam angka tanpa titik/koma</li>
@@ -216,7 +216,7 @@
                                     </ul>
                                 </div>
 
-                                <button type="submit" class="w-full bg-green-600 hover:bg-green-700 text-white font-bold py-2 px-4 rounded">
+                                <button type="submit" class="w-full bg-green-600 hover:bg-green-700 text-white font-bold py-2 px-3 sm:px-4 rounded text-sm sm:text-base">
                                     <i class="fas fa-upload mr-2"></i>Import Pengeluaran
                                 </button>
                             </form>
@@ -226,24 +226,24 @@
 
                 <!-- Billings Tab -->
                 <div id="content-billings" class="tab-content hidden">
-                    <div class="grid grid-cols-1 lg:grid-cols-2 gap-6">
+                    <div class="grid grid-cols-1 lg:grid-cols-2 gap-4 sm:gap-6">
                         <!-- Export Section -->
-                        <div class="bg-purple-50 p-6 rounded-lg">
-                            <h3 class="text-lg font-semibold text-purple-800 mb-4">
+                        <div class="bg-purple-50 p-4 sm:p-6 rounded-lg">
+                            <h3 class="text-base sm:text-lg font-semibold text-purple-800 mb-3 sm:mb-4">
                                 <i class="fas fa-download mr-2"></i>Export Data Tagihan
                             </h3>
-                            <form action="{{ route('excel.export', 'billings') }}" method="GET" class="space-y-4">
+                            <form action="{{ route('excel.export', 'billings') }}" method="GET" class="space-y-3 sm:space-y-4">
                                 <div>
-                                    <label class="block text-sm font-medium text-gray-700 mb-2">Format Export</label>
-                                    <select name="format" class="w-full border-gray-300 rounded-md shadow-sm">
+                                    <label class="block text-xs sm:text-sm font-medium text-gray-700 mb-2">Format Export</label>
+                                    <select name="format" class="form-select w-full text-sm">
                                         <option value="data">Data Lengkap</option>
                                         <option value="template">Template Kosong</option>
                                     </select>
                                 </div>
                                 
                                 <div>
-                                    <label class="block text-sm font-medium text-gray-700 mb-2">Filter Proyek</label>
-                                    <select name="project_id" class="w-full border-gray-300 rounded-md shadow-sm">
+                                    <label class="block text-xs sm:text-sm font-medium text-gray-700 mb-2">Filter Proyek</label>
+                                    <select name="project_id" class="form-select w-full text-sm">
                                         <option value="">Semua Proyek</option>
                                         @foreach($projects as $project)
                                             <option value="{{ $project->id }}">{{ $project->code }} - {{ $project->name }}</option>
@@ -251,46 +251,46 @@
                                     </select>
                                 </div>
 
-                                <div class="grid grid-cols-2 gap-4">
+                                <div class="grid grid-cols-1 sm:grid-cols-2 gap-3 sm:gap-4">
                                     <div>
-                                        <label class="block text-sm font-medium text-gray-700 mb-2">Dari Tanggal</label>
-                                        <input type="date" name="date_from" class="w-full border-gray-300 rounded-md shadow-sm">
+                                        <label class="block text-xs sm:text-sm font-medium text-gray-700 mb-2">Dari Tanggal</label>
+                                        <input type="date" name="date_from" class="form-input w-full text-sm">
                                     </div>
                                     <div>
-                                        <label class="block text-sm font-medium text-gray-700 mb-2">Sampai Tanggal</label>
-                                        <input type="date" name="date_to" class="w-full border-gray-300 rounded-md shadow-sm">
+                                        <label class="block text-xs sm:text-sm font-medium text-gray-700 mb-2">Sampai Tanggal</label>
+                                        <input type="date" name="date_to" class="form-input w-full text-sm">
                                     </div>
                                 </div>
 
-                                <button type="submit" class="w-full bg-purple-600 hover:bg-purple-700 text-white font-bold py-2 px-4 rounded">
+                                <button type="submit" class="w-full bg-purple-600 hover:bg-purple-700 text-white font-bold py-2 px-3 sm:px-4 rounded text-sm sm:text-base">
                                     <i class="fas fa-download mr-2"></i>Export Tagihan
                                 </button>
                             </form>
 
-                            <div class="mt-4 pt-4 border-t border-purple-200">
-                                <a href="{{ route('excel.template', 'billings') }}" class="w-full inline-block text-center bg-purple-100 hover:bg-purple-200 text-purple-800 font-bold py-2 px-4 rounded">
+                            <div class="mt-3 sm:mt-4 pt-3 sm:pt-4 border-t border-purple-200">
+                                <a href="{{ route('excel.template', 'billings') }}" class="w-full inline-block text-center bg-purple-100 hover:bg-purple-200 text-purple-800 font-bold py-2 px-3 sm:px-4 rounded text-sm sm:text-base">
                                     <i class="fas fa-file-download mr-2"></i>Download Template
                                 </a>
                             </div>
                         </div>
 
                         <!-- Import Section -->
-                        <div class="bg-green-50 p-6 rounded-lg">
-                            <h3 class="text-lg font-semibold text-green-800 mb-4">
+                        <div class="bg-green-50 p-4 sm:p-6 rounded-lg">
+                            <h3 class="text-base sm:text-lg font-semibold text-green-800 mb-3 sm:mb-4">
                                 <i class="fas fa-upload mr-2"></i>Import Data Tagihan
                             </h3>
-                            <form action="{{ route('excel.import', 'billings') }}" method="POST" enctype="multipart/form-data" class="space-y-4">
+                            <form action="{{ route('excel.import', 'billings') }}" method="POST" enctype="multipart/form-data" class="space-y-3 sm:space-y-4">
                                 @csrf
                                 <div>
-                                    <label class="block text-sm font-medium text-gray-700 mb-2">File Excel</label>
-                                    <input type="file" name="file" accept=".xlsx,.xls,.csv" required 
-                                           class="w-full border-gray-300 rounded-md shadow-sm">
+                                    <label class="block text-xs sm:text-sm font-medium text-gray-700 mb-2">File Excel</label>
+                                    <input type="file" name="file" accept=".xlsx,.xls,.csv" required
+                                           class="form-input w-full text-sm">
                                     <p class="text-xs text-gray-500 mt-1">Format: .xlsx, .xls, .csv (Max: 10MB)</p>
                                 </div>
 
-                                <div class="bg-green-100 p-4 rounded">
-                                    <h4 class="font-semibold text-green-800 mb-2">Petunjuk Import:</h4>
-                                    <ul class="text-sm text-green-700 space-y-1">
+                                <div class="bg-green-100 p-3 sm:p-4 rounded">
+                                    <h4 class="font-semibold text-green-800 mb-2 text-sm sm:text-base">Petunjuk Import:</h4>
+                                    <ul class="text-xs sm:text-sm text-green-700 space-y-1">
                                         <li>• Kode proyek harus sudah ada di sistem</li>
                                         <li>• Format tanggal: YYYY-MM-DD</li>
                                         <li>• Persentase dalam desimal (0.3 = 30%)</li>
@@ -298,7 +298,7 @@
                                     </ul>
                                 </div>
 
-                                <button type="submit" class="w-full bg-green-600 hover:bg-green-700 text-white font-bold py-2 px-4 rounded">
+                                <button type="submit" class="w-full bg-green-600 hover:bg-green-700 text-white font-bold py-2 px-3 sm:px-4 rounded text-sm sm:text-base">
                                     <i class="fas fa-upload mr-2"></i>Import Tagihan
                                 </button>
                             </form>
@@ -308,24 +308,24 @@
 
                 <!-- Timelines Tab -->
                 <div id="content-timelines" class="tab-content hidden">
-                    <div class="grid grid-cols-1 lg:grid-cols-2 gap-6">
+                    <div class="grid grid-cols-1 lg:grid-cols-2 gap-4 sm:gap-6">
                         <!-- Export Section -->
-                        <div class="bg-orange-50 p-6 rounded-lg">
-                            <h3 class="text-lg font-semibold text-orange-800 mb-4">
+                        <div class="bg-orange-50 p-4 sm:p-6 rounded-lg">
+                            <h3 class="text-base sm:text-lg font-semibold text-orange-800 mb-3 sm:mb-4">
                                 <i class="fas fa-download mr-2"></i>Export Data Timeline
                             </h3>
-                            <form action="{{ route('excel.export', 'timelines') }}" method="GET" class="space-y-4">
+                            <form action="{{ route('excel.export', 'timelines') }}" method="GET" class="space-y-3 sm:space-y-4">
                                 <div>
-                                    <label class="block text-sm font-medium text-gray-700 mb-2">Format Export</label>
-                                    <select name="format" class="w-full border-gray-300 rounded-md shadow-sm">
+                                    <label class="block text-xs sm:text-sm font-medium text-gray-700 mb-2">Format Export</label>
+                                    <select name="format" class="form-select w-full text-sm">
                                         <option value="data">Data Lengkap</option>
                                         <option value="template">Template Kosong</option>
                                     </select>
                                 </div>
                                 
                                 <div>
-                                    <label class="block text-sm font-medium text-gray-700 mb-2">Filter Proyek</label>
-                                    <select name="project_id" class="w-full border-gray-300 rounded-md shadow-sm">
+                                    <label class="block text-xs sm:text-sm font-medium text-gray-700 mb-2">Filter Proyek</label>
+                                    <select name="project_id" class="form-select w-full text-sm">
                                         <option value="">Semua Proyek</option>
                                         @foreach($projects as $project)
                                             <option value="{{ $project->id }}">{{ $project->code }} - {{ $project->name }}</option>
@@ -333,46 +333,46 @@
                                     </select>
                                 </div>
 
-                                <div class="grid grid-cols-2 gap-4">
+                                <div class="grid grid-cols-1 sm:grid-cols-2 gap-3 sm:gap-4">
                                     <div>
-                                        <label class="block text-sm font-medium text-gray-700 mb-2">Dari Tanggal</label>
-                                        <input type="date" name="date_from" class="w-full border-gray-300 rounded-md shadow-sm">
+                                        <label class="block text-xs sm:text-sm font-medium text-gray-700 mb-2">Dari Tanggal</label>
+                                        <input type="date" name="date_from" class="form-input w-full text-sm">
                                     </div>
                                     <div>
-                                        <label class="block text-sm font-medium text-gray-700 mb-2">Sampai Tanggal</label>
-                                        <input type="date" name="date_to" class="w-full border-gray-300 rounded-md shadow-sm">
+                                        <label class="block text-xs sm:text-sm font-medium text-gray-700 mb-2">Sampai Tanggal</label>
+                                        <input type="date" name="date_to" class="form-input w-full text-sm">
                                     </div>
                                 </div>
 
-                                <button type="submit" class="w-full bg-orange-600 hover:bg-orange-700 text-white font-bold py-2 px-4 rounded">
+                                <button type="submit" class="w-full bg-orange-600 hover:bg-orange-700 text-white font-bold py-2 px-3 sm:px-4 rounded text-sm sm:text-base">
                                     <i class="fas fa-download mr-2"></i>Export Timeline
                                 </button>
                             </form>
 
-                            <div class="mt-4 pt-4 border-t border-orange-200">
-                                <a href="{{ route('excel.template', 'timelines') }}" class="w-full inline-block text-center bg-orange-100 hover:bg-orange-200 text-orange-800 font-bold py-2 px-4 rounded">
+                            <div class="mt-3 sm:mt-4 pt-3 sm:pt-4 border-t border-orange-200">
+                                <a href="{{ route('excel.template', 'timelines') }}" class="w-full inline-block text-center bg-orange-100 hover:bg-orange-200 text-orange-800 font-bold py-2 px-3 sm:px-4 rounded text-sm sm:text-base">
                                     <i class="fas fa-file-download mr-2"></i>Download Template
                                 </a>
                             </div>
                         </div>
 
                         <!-- Import Section -->
-                        <div class="bg-green-50 p-6 rounded-lg">
-                            <h3 class="text-lg font-semibold text-green-800 mb-4">
+                        <div class="bg-green-50 p-4 sm:p-6 rounded-lg">
+                            <h3 class="text-base sm:text-lg font-semibold text-green-800 mb-3 sm:mb-4">
                                 <i class="fas fa-upload mr-2"></i>Import Data Timeline
                             </h3>
-                            <form action="{{ route('excel.import', 'timelines') }}" method="POST" enctype="multipart/form-data" class="space-y-4">
+                            <form action="{{ route('excel.import', 'timelines') }}" method="POST" enctype="multipart/form-data" class="space-y-3 sm:space-y-4">
                                 @csrf
                                 <div>
-                                    <label class="block text-sm font-medium text-gray-700 mb-2">File Excel</label>
-                                    <input type="file" name="file" accept=".xlsx,.xls,.csv" required 
-                                           class="w-full border-gray-300 rounded-md shadow-sm">
+                                    <label class="block text-xs sm:text-sm font-medium text-gray-700 mb-2">File Excel</label>
+                                    <input type="file" name="file" accept=".xlsx,.xls,.csv" required
+                                           class="form-input w-full text-sm">
                                     <p class="text-xs text-gray-500 mt-1">Format: .xlsx, .xls, .csv (Max: 10MB)</p>
                                 </div>
 
-                                <div class="bg-green-100 p-4 rounded">
-                                    <h4 class="font-semibold text-green-800 mb-2">Petunjuk Import:</h4>
-                                    <ul class="text-sm text-green-700 space-y-1">
+                                <div class="bg-green-100 p-3 sm:p-4 rounded">
+                                    <h4 class="font-semibold text-green-800 mb-2 text-sm sm:text-base">Petunjuk Import:</h4>
+                                    <ul class="text-xs sm:text-sm text-green-700 space-y-1">
                                         <li>• Kode proyek harus sudah ada di sistem</li>
                                         <li>• Milestone wajib diisi</li>
                                         <li>• Format tanggal: YYYY-MM-DD</li>
@@ -380,7 +380,7 @@
                                     </ul>
                                 </div>
 
-                                <button type="submit" class="w-full bg-green-600 hover:bg-green-700 text-white font-bold py-2 px-4 rounded">
+                                <button type="submit" class="w-full bg-green-600 hover:bg-green-700 text-white font-bold py-2 px-3 sm:px-4 rounded text-sm sm:text-base">
                                     <i class="fas fa-upload mr-2"></i>Import Timeline
                                 </button>
                             </form>

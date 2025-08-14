@@ -3,82 +3,84 @@
 @section('title', 'Kelola Jadwal Termin - ' . $project->name)
 
 @section('content')
-<div class="container mx-auto px-4 py-6">
+<div class="container mx-auto px-4 py-6 sm:py-8">
     <!-- Header -->
-    <div class="flex items-center justify-between mb-6">
-        <div>
-            <h1 class="text-3xl font-bold text-slate-800">Kelola Jadwal Termin</h1>
-            <p class="text-slate-600 mt-1">{{ $project->name }} ({{ $project->code }})</p>
+    <div class="flex flex-col sm:flex-row sm:items-center sm:justify-between mb-4 sm:mb-6 space-y-4 sm:space-y-0">
+        <div class="min-w-0 flex-1">
+            <h1 class="text-xl sm:text-2xl lg:text-3xl font-bold text-slate-800">Kelola Jadwal Termin</h1>
+            <p class="text-slate-600 mt-1 text-sm sm:text-base break-words">{{ $project->name }} ({{ $project->code }})</p>
         </div>
-        <div class="flex space-x-3">
-            <a href="{{ route('projects.show', $project) }}" 
-               class="bg-slate-600 hover:bg-slate-700 text-white px-4 py-2 rounded-lg font-medium transition-colors duration-200 flex items-center">
-                <svg class="w-5 h-5 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+        <div class="flex">
+            <a href="{{ route('projects.show', $project) }}"
+               class="bg-slate-600 hover:bg-slate-700 text-white px-3 sm:px-4 py-2 rounded-lg font-medium transition-colors duration-200 flex items-center justify-center text-sm sm:text-base">
+                <svg class="w-4 h-4 sm:w-5 sm:h-5 mr-1 sm:mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 19l-7-7m0 0l7-7m-7 7h18"/>
                 </svg>
-                Kembali ke Proyek
+                <span class="hidden sm:inline">Kembali ke Proyek</span>
+                <span class="sm:hidden">Kembali</span>
             </a>
         </div>
     </div>
 
     <!-- Project Summary -->
-    <div class="bg-white rounded-lg shadow-sm border border-slate-200 p-6 mb-6">
-        <h2 class="text-lg font-semibold text-slate-800 mb-4">Ringkasan Proyek</h2>
+    <div class="bg-white rounded-lg shadow-sm border border-slate-200 p-4 sm:p-6 mb-4 sm:mb-6">
+        <h2 class="text-base sm:text-lg font-semibold text-slate-800 mb-4">Ringkasan Proyek</h2>
         
-        <div class="grid grid-cols-1 md:grid-cols-3 gap-6">
+        <div class="grid grid-cols-1 sm:grid-cols-3 gap-4 sm:gap-6">
             <div>
-                <label class="block text-sm font-medium text-slate-700 mb-1">Total Nilai Proyek</label>
-                <p class="text-2xl font-bold text-slate-900">Rp {{ number_format($project->total_value, 0, ',', '.') }}</p>
+                <label class="block text-xs sm:text-sm font-medium text-slate-700 mb-1">Total Nilai Proyek</label>
+                <p class="text-lg sm:text-2xl font-bold text-slate-900">Rp {{ number_format($project->total_value, 0, ',', '.') }}</p>
             </div>
             <div>
-                <label class="block text-sm font-medium text-slate-700 mb-1">Sudah Ditagih</label>
-                <p class="text-2xl font-bold text-green-600">Rp {{ number_format($project->billings->sum('total_amount'), 0, ',', '.') }}</p>
+                <label class="block text-xs sm:text-sm font-medium text-slate-700 mb-1">Sudah Ditagih</label>
+                <p class="text-lg sm:text-2xl font-bold text-green-600">Rp {{ number_format($project->billings->sum('total_amount'), 0, ',', '.') }}</p>
             </div>
             <div>
-                <label class="block text-sm font-medium text-slate-700 mb-1">Sisa Tagihan</label>
-                <p class="text-2xl font-bold text-orange-600">Rp {{ number_format($project->total_value - $project->billings->sum('total_amount'), 0, ',', '.') }}</p>
+                <label class="block text-xs sm:text-sm font-medium text-slate-700 mb-1">Sisa Tagihan</label>
+                <p class="text-lg sm:text-2xl font-bold text-orange-600">Rp {{ number_format($project->total_value - $project->billings->sum('total_amount'), 0, ',', '.') }}</p>
             </div>
         </div>
     </div>
 
     <!-- Current Termin Schedules -->
     @if($project->paymentSchedules->count() > 0)
-        <div class="bg-white rounded-lg shadow-sm border border-slate-200 p-6 mb-6">
-            <div class="flex items-center justify-between mb-4">
-                <h2 class="text-lg font-semibold text-slate-800">Jadwal Termin Saat Ini</h2>
-                <div class="text-sm text-slate-600">
+        <div class="bg-white rounded-lg shadow-sm border border-slate-200 p-4 sm:p-6 mb-4 sm:mb-6">
+            <div class="flex flex-col sm:flex-row sm:items-center sm:justify-between mb-4 space-y-2 sm:space-y-0">
+                <h2 class="text-base sm:text-lg font-semibold text-slate-800">Jadwal Termin Saat Ini</h2>
+                <div class="text-xs sm:text-sm text-slate-600">
                     Total: {{ $project->paymentSchedules->sum('percentage') }}%
                 </div>
             </div>
             
-            <div class="overflow-x-auto">
+            <!-- Desktop Table View -->
+            <div class="hidden sm:block overflow-x-auto">
                 <table class="min-w-full divide-y divide-slate-200">
                     <thead class="bg-slate-50">
                         <tr>
-                            <th class="px-6 py-3 text-left text-xs font-medium text-slate-500 uppercase tracking-wider">Termin</th>
-                            <th class="px-6 py-3 text-left text-xs font-medium text-slate-500 uppercase tracking-wider">Deskripsi</th>
-                            <th class="px-6 py-3 text-left text-xs font-medium text-slate-500 uppercase tracking-wider">Persentase</th>
-                            <th class="px-6 py-3 text-left text-xs font-medium text-slate-500 uppercase tracking-wider">Nilai</th>
-                            <th class="px-6 py-3 text-left text-xs font-medium text-slate-500 uppercase tracking-wider">Status</th>
-                            <th class="px-6 py-3 text-left text-xs font-medium text-slate-500 uppercase tracking-wider">Aksi</th>
+                            <th class="px-4 sm:px-6 py-3 text-left text-xs font-medium text-slate-500 uppercase tracking-wider">Termin</th>
+                            <th class="px-4 sm:px-6 py-3 text-left text-xs font-medium text-slate-500 uppercase tracking-wider">Deskripsi</th>
+                            <th class="px-4 sm:px-6 py-3 text-left text-xs font-medium text-slate-500 uppercase tracking-wider">Persentase</th>
+                            <th class="px-4 sm:px-6 py-3 text-left text-xs font-medium text-slate-500 uppercase tracking-wider">Nilai</th>
+                            <th class="px-4 sm:px-6 py-3 text-left text-xs font-medium text-slate-500 uppercase tracking-wider">Status</th>
+                            <th class="px-4 sm:px-6 py-3 text-left text-xs font-medium text-slate-500 uppercase tracking-wider">Aksi</th>
                         </tr>
                     </thead>
                     <tbody class="bg-white divide-y divide-slate-200">
                         @foreach($project->paymentSchedules->sortBy('termin_number') as $schedule)
                             <tr class="hover:bg-slate-50">
-                                <td class="px-6 py-4 whitespace-nowrap">
+                                <td class="px-4 sm:px-6 py-4 whitespace-nowrap">
                                     <div class="text-sm font-medium text-slate-900">Termin {{ $schedule->termin_number }}</div>
                                 </td>
-                                <td class="px-6 py-4">
+                                <td class="px-4 sm:px-6 py-4">
                                     <div class="text-sm text-slate-900">{{ $schedule->description }}</div>
                                 </td>
-                                <td class="px-6 py-4 whitespace-nowrap">
+                                <td class="px-4 sm:px-6 py-4 whitespace-nowrap">
                                     <div class="text-sm text-slate-900">{{ $schedule->percentage }}%</div>
                                 </td>
-                                <td class="px-6 py-4 whitespace-nowrap">
+                                <td class="px-4 sm:px-6 py-4 whitespace-nowrap">
                                     <div class="text-sm text-slate-900">Rp {{ number_format($schedule->calculateAmount($project), 0, ',', '.') }}</div>
                                 </td>
-                                <td class="px-6 py-4 whitespace-nowrap">
+                                <td class="px-4 sm:px-6 py-4 whitespace-nowrap">
                                     @if($schedule->billings->where('status', 'paid')->count() > 0)
                                         <span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-green-100 text-green-800">
                                             <svg class="w-3 h-3 mr-1" fill="currentColor" viewBox="0 0 20 20">
@@ -102,12 +104,12 @@
                                         </span>
                                     @endif
                                 </td>
-                                <td class="px-6 py-4 whitespace-nowrap text-sm font-medium">
+                                <td class="px-4 sm:px-6 py-4 whitespace-nowrap text-sm font-medium">
                                     @if($schedule->billings->count() === 0)
-                                        <a href="{{ route('project-billings.create', ['project' => $project->id, 'schedule' => $schedule->id]) }}" 
+                                        <a href="{{ route('project-billings.create', ['project' => $project->id, 'schedule' => $schedule->id]) }}"
                                            class="text-blue-600 hover:text-blue-900 mr-3">Buat Tagihan</a>
                                     @else
-                                        <a href="{{ route('project-billings.show', $schedule->billings->first()) }}" 
+                                        <a href="{{ route('project-billings.show', $schedule->billings->first()) }}"
                                            class="text-green-600 hover:text-green-900 mr-3">Lihat Tagihan</a>
                                     @endif
                                 </td>
@@ -115,6 +117,56 @@
                         @endforeach
                     </tbody>
                 </table>
+            </div>
+
+            <!-- Mobile Card View -->
+            <div class="sm:hidden space-y-3">
+                @foreach($project->paymentSchedules->sortBy('termin_number') as $schedule)
+                    <div class="border border-slate-200 rounded-lg p-3">
+                        <div class="flex justify-between items-start mb-2">
+                            <div class="font-medium text-slate-900 text-sm">Termin {{ $schedule->termin_number }}</div>
+                            <div class="text-sm font-medium text-slate-900">{{ $schedule->percentage }}%</div>
+                        </div>
+                        
+                        <div class="text-xs text-slate-600 mb-2 break-words">{{ $schedule->description }}</div>
+                        
+                        <div class="flex justify-between items-center mb-2">
+                            <div class="text-sm font-medium text-slate-900">Rp {{ number_format($schedule->calculateAmount($project), 0, ',', '.') }}</div>
+                            @if($schedule->billings->where('status', 'paid')->count() > 0)
+                                <span class="inline-flex items-center px-2 py-0.5 rounded-full text-xs font-medium bg-green-100 text-green-800">
+                                    <svg class="w-3 h-3 mr-1" fill="currentColor" viewBox="0 0 20 20">
+                                        <path fill-rule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z" clip-rule="evenodd"/>
+                                    </svg>
+                                    Lunas
+                                </span>
+                            @elseif($schedule->billings->count() > 0)
+                                <span class="inline-flex items-center px-2 py-0.5 rounded-full text-xs font-medium bg-blue-100 text-blue-800">
+                                    <svg class="w-3 h-3 mr-1" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 19l9 2-9-18-9 18 9-2zm0 0v-8"/>
+                                    </svg>
+                                    Tertagih
+                                </span>
+                            @else
+                                <span class="inline-flex items-center px-2 py-0.5 rounded-full text-xs font-medium bg-slate-100 text-slate-800">
+                                    <svg class="w-3 h-3 mr-1" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z"/>
+                                    </svg>
+                                    Belum Ditagih
+                                </span>
+                            @endif
+                        </div>
+                        
+                        <div class="pt-2 border-t border-slate-100">
+                            @if($schedule->billings->count() === 0)
+                                <a href="{{ route('project-billings.create', ['project' => $project->id, 'schedule' => $schedule->id]) }}"
+                                   class="text-blue-600 hover:text-blue-900 text-sm font-medium">Buat Tagihan</a>
+                            @else
+                                <a href="{{ route('project-billings.show', $schedule->billings->first()) }}"
+                                   class="text-green-600 hover:text-green-900 text-sm font-medium">Lihat Tagihan</a>
+                            @endif
+                        </div>
+                    </div>
+                @endforeach
             </div>
 
             @if($project->paymentSchedules->sum('percentage') != 100)
@@ -139,8 +191,8 @@
     @endif
 
     <!-- Create New Termin Schedule Form -->
-    <div class="bg-white rounded-lg shadow-sm border border-slate-200 p-6">
-        <h2 class="text-lg font-semibold text-slate-800 mb-4">
+    <div class="bg-white rounded-lg shadow-sm border border-slate-200 p-4 sm:p-6">
+        <h2 class="text-base sm:text-lg font-semibold text-slate-800 mb-4">
             @if($project->paymentSchedules->count() === 0)
                 Buat Jadwal Termin Baru
             @else
@@ -154,85 +206,85 @@
             <div id="termin-schedules">
                 @if(old('schedules'))
                     @foreach(old('schedules') as $index => $schedule)
-                        <div class="termin-item border border-slate-200 rounded-lg p-4 mb-4">
+                        <div class="termin-item border border-slate-200 rounded-lg p-3 sm:p-4 mb-4">
                             <div class="flex items-center justify-between mb-4">
-                                <h3 class="text-md font-medium text-slate-800">Termin {{ $index + 1 }}</h3>
+                                <h3 class="text-sm sm:text-base font-medium text-slate-800">Termin {{ $index + 1 }}</h3>
                                 @if($index > 0)
                                     <button type="button" class="remove-termin text-red-600 hover:text-red-800">
-                                        <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                        <svg class="w-4 h-4 sm:w-5 sm:h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16"/>
                                         </svg>
                                     </button>
                                 @endif
                             </div>
                             
-                            <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                            <div class="grid grid-cols-1 sm:grid-cols-2 gap-3 sm:gap-4">
                                 <div>
-                                    <label class="block text-sm font-medium text-slate-700 mb-2">
+                                    <label class="block text-xs sm:text-sm font-medium text-slate-700 mb-2">
                                         Persentase <span class="text-red-500">*</span>
                                     </label>
                                     <div class="relative">
                                         <input type="number" name="schedules[{{ $index }}][percentage]" required min="1" max="100" step="0.01"
                                                value="{{ $schedule['percentage'] ?? '' }}"
-                                               class="w-full px-3 py-2 pr-8 border border-slate-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent percentage-input">
-                                        <span class="absolute right-3 top-2 text-slate-500">%</span>
+                                               class="w-full px-3 py-2 pr-8 border border-slate-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent text-sm sm:text-base percentage-input">
+                                        <span class="absolute right-3 top-2 text-slate-500 text-sm">%</span>
                                     </div>
                                 </div>
                                 
                                 <div>
-                                    <label class="block text-sm font-medium text-slate-700 mb-2">Nilai Estimasi</label>
+                                    <label class="block text-xs sm:text-sm font-medium text-slate-700 mb-2">Nilai Estimasi</label>
                                     <div class="relative">
-                                        <span class="absolute left-3 top-2 text-slate-500">Rp</span>
+                                        <span class="absolute left-3 top-2 text-slate-500 text-sm">Rp</span>
                                         <input type="text" readonly
-                                               class="w-full pl-10 pr-3 py-2 border border-slate-300 rounded-md bg-slate-50 estimated-amount">
+                                               class="w-full pl-10 pr-3 py-2 border border-slate-300 rounded-md bg-slate-50 text-sm sm:text-base estimated-amount">
                                     </div>
                                 </div>
                             </div>
                             
                             <div class="mt-4">
-                                <label class="block text-sm font-medium text-slate-700 mb-2">
+                                <label class="block text-xs sm:text-sm font-medium text-slate-700 mb-2">
                                     Deskripsi <span class="text-red-500">*</span>
                                 </label>
                                 <textarea name="schedules[{{ $index }}][description]" required rows="2"
-                                          class="w-full px-3 py-2 border border-slate-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                                          class="w-full px-3 py-2 border border-slate-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent text-sm sm:text-base"
                                           placeholder="Deskripsi untuk termin ini...">{{ $schedule['description'] ?? '' }}</textarea>
                             </div>
                         </div>
                     @endforeach
                 @else
-                    <div class="termin-item border border-slate-200 rounded-lg p-4 mb-4">
+                    <div class="termin-item border border-slate-200 rounded-lg p-3 sm:p-4 mb-4">
                         <div class="flex items-center justify-between mb-4">
-                            <h3 class="text-md font-medium text-slate-800">Termin 1</h3>
+                            <h3 class="text-sm sm:text-base font-medium text-slate-800">Termin 1</h3>
                         </div>
                         
-                        <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                        <div class="grid grid-cols-1 sm:grid-cols-2 gap-3 sm:gap-4">
                             <div>
-                                <label class="block text-sm font-medium text-slate-700 mb-2">
+                                <label class="block text-xs sm:text-sm font-medium text-slate-700 mb-2">
                                     Persentase <span class="text-red-500">*</span>
                                 </label>
                                 <div class="relative">
                                     <input type="number" name="schedules[0][percentage]" required min="1" max="100" step="0.01"
-                                           class="w-full px-3 py-2 pr-8 border border-slate-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent percentage-input">
-                                    <span class="absolute right-3 top-2 text-slate-500">%</span>
+                                           class="w-full px-3 py-2 pr-8 border border-slate-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent text-sm sm:text-base percentage-input">
+                                    <span class="absolute right-3 top-2 text-slate-500 text-sm">%</span>
                                 </div>
                             </div>
                             
                             <div>
-                                <label class="block text-sm font-medium text-slate-700 mb-2">Nilai Estimasi</label>
+                                <label class="block text-xs sm:text-sm font-medium text-slate-700 mb-2">Nilai Estimasi</label>
                                 <div class="relative">
-                                    <span class="absolute left-3 top-2 text-slate-500">Rp</span>
+                                    <span class="absolute left-3 top-2 text-slate-500 text-sm">Rp</span>
                                     <input type="text" readonly
-                                           class="w-full pl-10 pr-3 py-2 border border-slate-300 rounded-md bg-slate-50 estimated-amount">
+                                           class="w-full pl-10 pr-3 py-2 border border-slate-300 rounded-md bg-slate-50 text-sm sm:text-base estimated-amount">
                                 </div>
                             </div>
                         </div>
                         
                         <div class="mt-4">
-                            <label class="block text-sm font-medium text-slate-700 mb-2">
+                            <label class="block text-xs sm:text-sm font-medium text-slate-700 mb-2">
                                 Deskripsi <span class="text-red-500">*</span>
                             </label>
                             <textarea name="schedules[0][description]" required rows="2"
-                                      class="w-full px-3 py-2 border border-slate-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                                      class="w-full px-3 py-2 border border-slate-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent text-sm sm:text-base"
                                       placeholder="Deskripsi untuk termin ini..."></textarea>
                         </div>
                     </div>
@@ -240,14 +292,14 @@
             </div>
 
             <!-- Summary -->
-            <div class="bg-slate-50 rounded-lg p-4 mb-6">
+            <div class="bg-slate-50 rounded-lg p-3 sm:p-4 mb-4 sm:mb-6">
                 <div class="flex justify-between items-center mb-2">
-                    <span class="text-sm font-medium text-slate-700">Total Persentase:</span>
-                    <span id="total-percentage" class="text-lg font-bold text-slate-900">0%</span>
+                    <span class="text-xs sm:text-sm font-medium text-slate-700">Total Persentase:</span>
+                    <span id="total-percentage" class="text-base sm:text-lg font-bold text-slate-900">0%</span>
                 </div>
                 <div class="flex justify-between items-center">
-                    <span class="text-sm font-medium text-slate-700">Total Nilai Estimasi:</span>
-                    <span id="total-estimated" class="text-lg font-bold text-slate-900">Rp 0</span>
+                    <span class="text-xs sm:text-sm font-medium text-slate-700">Total Nilai Estimasi:</span>
+                    <span id="total-estimated" class="text-base sm:text-lg font-bold text-slate-900">Rp 0</span>
                 </div>
                 <div class="mt-2 text-xs text-slate-500">
                     Persentase yang sudah ada: {{ $project->paymentSchedules->sum('percentage') }}%
@@ -255,22 +307,22 @@
             </div>
 
             <!-- Action Buttons -->
-            <div class="flex justify-between items-center">
-                <button type="button" id="add-termin" 
-                        class="bg-green-600 hover:bg-green-700 text-white px-4 py-2 rounded-lg font-medium transition-colors duration-200 flex items-center">
-                    <svg class="w-5 h-5 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <div class="flex flex-col sm:flex-row sm:justify-between sm:items-center space-y-3 sm:space-y-0">
+                <button type="button" id="add-termin"
+                        class="bg-green-600 hover:bg-green-700 text-white px-3 sm:px-4 py-2 rounded-lg font-medium transition-colors duration-200 flex items-center justify-center text-sm sm:text-base order-2 sm:order-1">
+                    <svg class="w-4 h-4 sm:w-5 sm:h-5 mr-1 sm:mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4"/>
                     </svg>
                     Tambah Termin
                 </button>
                 
-                <div class="flex space-x-3">
-                    <a href="{{ route('projects.show', $project) }}" 
-                       class="px-6 py-2 border border-slate-300 text-slate-700 bg-white hover:bg-slate-50 rounded-lg font-medium transition-colors duration-200">
+                <div class="flex flex-col sm:flex-row space-y-2 sm:space-y-0 sm:space-x-3 order-1 sm:order-2">
+                    <a href="{{ route('projects.show', $project) }}"
+                       class="px-4 sm:px-6 py-2 border border-slate-300 text-slate-700 bg-white hover:bg-slate-50 rounded-lg font-medium transition-colors duration-200 text-center text-sm sm:text-base">
                         Batal
                     </a>
-                    <button type="submit" 
-                            class="px-6 py-2 bg-blue-600 hover:bg-blue-700 text-white rounded-lg font-medium transition-colors duration-200">
+                    <button type="submit"
+                            class="px-4 sm:px-6 py-2 bg-blue-600 hover:bg-blue-700 text-white rounded-lg font-medium transition-colors duration-200 text-sm sm:text-base">
                         Simpan Jadwal Termin
                     </button>
                 </div>
