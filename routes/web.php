@@ -233,10 +233,6 @@ Route::middleware('auth')->group(function () {
         Route::get('/api/employees/{employee}/unreleased-salaries', [SalaryReleaseController::class, 'getUnreleasedSalaries'])->name('api.employees.unreleased-salaries');
         Route::get('/api/employees/{employee}/salary-releases', [SalaryReleaseController::class, 'getEmployeeSalaryReleases'])->name('api.employees.salary-releases');
         
-        // Salary Status API endpoints
-        Route::get('/api/employees/salary-status-summary', [EmployeeController::class, 'getSalaryStatusSummary'])->name('api.employees.salary-status-summary');
-        Route::get('/api/employees/salary-status-detail', [EmployeeController::class, 'getSalaryStatusDetail'])->name('api.employees.salary-status-detail');
-        Route::get('/api/employees/salary-calendar', [EmployeeController::class, 'getSalaryCalendar'])->name('api.employees.salary-calendar');
         
         // Redirect old routes to employee management
         Route::get('/daily-salaries', function() {

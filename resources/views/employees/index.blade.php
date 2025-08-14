@@ -5,11 +5,6 @@
                 {{ __('Manajemen Karyawan') }}
             </h2>
             <div class="flex space-x-2">
-                <button id="salary-status-btn"
-                        type="button"
-                        class="bg-purple-500 hover:bg-purple-700 text-white font-bold py-2 px-4 rounded">
-                    <i class="fas fa-chart-pie mr-2"></i>Status Gaji
-                </button>
                 <a href="{{ route('finance.employees.export') }}"
                    class="bg-green-500 hover:bg-green-700 text-white font-bold py-2 px-4 rounded">
                     <i class="fas fa-download mr-2"></i>Export
@@ -288,16 +283,32 @@
         </div>
     </div>
 
-    <!-- Salary Status Modal -->
-    <div id="salary-status-modal" class="hidden fixed inset-0 bg-gray-600 bg-opacity-50 overflow-y-auto h-full w-full z-50">
-        <div class="relative top-20 mx-auto p-5 border w-11/12 md:w-3/4 lg:w-2/3 xl:w-1/2 shadow-lg rounded-md bg-white">
-            <div id="modal-content">
-                <!-- Modal content will be loaded here -->
-            </div>
-        </div>
-    </div>
-
     @push('scripts')
-    @include('employees.salary-status-script')
+    <script>
+        // Auto-submit form on select change
+        document.addEventListener('DOMContentLoaded', function() {
+            const statusSelect = document.getElementById('status');
+            const deptSelect = document.getElementById('department');
+            const typeSelect = document.getElementById('employment_type');
+            
+            if (statusSelect) {
+                statusSelect.addEventListener('change', function() {
+                    this.form.submit();
+                });
+            }
+            
+            if (deptSelect) {
+                deptSelect.addEventListener('change', function() {
+                    this.form.submit();
+                });
+            }
+            
+            if (typeSelect) {
+                typeSelect.addEventListener('change', function() {
+                    this.form.submit();
+                });
+            }
+        });
+    </script>
     @endpush
 </x-app-layout>
