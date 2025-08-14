@@ -3,36 +3,37 @@
 @section('title', 'Buat Penagihan Proyek')
 
 @section('content')
-<div class="container mx-auto px-4 py-6">
+<div class="container mx-auto px-4 py-4 sm:py-6">
     <!-- Header -->
-    <div class="flex items-center justify-between mb-6">
+    <div class="flex flex-col sm:flex-row sm:items-center sm:justify-between mb-4 sm:mb-6 space-y-4 sm:space-y-0">
         <div>
-            <h1 class="text-3xl font-bold text-slate-800">Buat Penagihan Proyek</h1>
-            <p class="text-slate-600 mt-1">Buat penagihan termin/cicilan untuk proyek</p>
+            <h1 class="text-2xl sm:text-3xl font-bold text-slate-800">Buat Penagihan Proyek</h1>
+            <p class="text-sm sm:text-base text-slate-600 mt-1">Buat penagihan termin/cicilan untuk proyek</p>
         </div>
-        <a href="{{ route('project-billings.index') }}" 
-           class="bg-slate-600 hover:bg-slate-700 text-white px-4 py-2 rounded-lg font-medium transition-colors duration-200 flex items-center">
-            <svg class="w-5 h-5 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+        <a href="{{ route('project-billings.index') }}"
+           class="bg-slate-600 hover:bg-slate-700 text-white px-4 py-2 rounded-lg font-medium transition-colors duration-200 flex items-center justify-center text-sm sm:text-base">
+            <svg class="w-4 h-4 sm:w-5 sm:h-5 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 19l-7-7m0 0l7-7m-7 7h18"/>
             </svg>
-            Kembali
+            <span class="hidden sm:inline">Kembali</span>
+            <span class="sm:hidden">Kembali</span>
         </a>
     </div>
 
-    <form action="{{ route('project-billings.store') }}" method="POST" class="space-y-6" id="billing-form">
+    <form action="{{ route('project-billings.store') }}" method="POST" class="space-y-4 sm:space-y-6" id="billing-form">
         @csrf
         
         <!-- Project Selection -->
-        <div class="bg-white rounded-lg shadow-sm border border-slate-200 p-6">
-            <h2 class="text-lg font-semibold text-slate-800 mb-4">Informasi Proyek</h2>
+        <div class="bg-white rounded-lg shadow-sm border border-slate-200 p-4 sm:p-6">
+            <h2 class="text-base sm:text-lg font-semibold text-slate-800 mb-3 sm:mb-4">Informasi Proyek</h2>
             
-            <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+            <div class="grid grid-cols-1 sm:grid-cols-2 gap-4 sm:gap-6">
                 <div>
                     <label for="project_id" class="block text-sm font-medium text-slate-700 mb-2">
                         Pilih Proyek <span class="text-red-500">*</span>
                     </label>
                     <select name="project_id" id="project_id" required
-                            class="w-full px-3 py-2 border border-slate-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent @error('project_id') border-red-500 @enderror">
+                            class="w-full px-3 py-2 text-sm sm:text-base border border-slate-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent @error('project_id') border-red-500 @enderror">
                         <option value="">Pilih Proyek...</option>
                         @foreach($projects as $project)
                             <option value="{{ $project->id }}" 
@@ -53,7 +54,7 @@
                         Tipe Pembayaran <span class="text-red-500">*</span>
                     </label>
                     <select name="payment_type" id="payment_type" required
-                            class="w-full px-3 py-2 border border-slate-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent @error('payment_type') border-red-500 @enderror">
+                            class="w-full px-3 py-2 text-sm sm:text-base border border-slate-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent @error('payment_type') border-red-500 @enderror">
                         <option value="termin" selected>Pembayaran Termin (Cicilan)</option>
                     </select>
                     <p class="text-xs text-slate-500 mt-1">Pembayaran per proyek selalu menggunakan sistem termin/cicilan</p>
@@ -64,9 +65,9 @@
             </div>
 
             <!-- Project Info Display -->
-            <div id="project-info" class="mt-4 p-4 bg-slate-50 rounded-lg hidden">
-                <h3 class="font-medium text-slate-800 mb-2">Informasi Nilai Proyek</h3>
-                <div class="grid grid-cols-1 md:grid-cols-3 gap-4 text-sm">
+            <div id="project-info" class="mt-4 p-3 sm:p-4 bg-slate-50 rounded-lg hidden">
+                <h3 class="text-sm sm:text-base font-medium text-slate-800 mb-2">Informasi Nilai Proyek</h3>
+                <div class="grid grid-cols-1 sm:grid-cols-3 gap-3 sm:gap-4 text-xs sm:text-sm">
                     <div>
                         <span class="text-slate-600">Nilai Jasa:</span>
                         <span id="display-nilai-jasa" class="font-medium text-slate-900 ml-2">-</span>
@@ -84,17 +85,17 @@
         </div>
 
         <!-- Termin Information -->
-        <div class="bg-white rounded-lg shadow-sm border border-slate-200 p-6">
-            <h2 class="text-lg font-semibold text-slate-800 mb-4">Informasi Termin</h2>
+        <div class="bg-white rounded-lg shadow-sm border border-slate-200 p-4 sm:p-6">
+            <h2 class="text-base sm:text-lg font-semibold text-slate-800 mb-3 sm:mb-4">Informasi Termin</h2>
             
-            <div class="grid grid-cols-1 md:grid-cols-3 gap-6">
+            <div class="grid grid-cols-1 sm:grid-cols-3 gap-4 sm:gap-6">
                 <div>
                     <label for="termin_number" class="block text-sm font-medium text-slate-700 mb-2">
                         Termin Ke- <span class="text-red-500">*</span>
                     </label>
                     <input type="number" name="termin_number" id="termin_number" min="1" required
                            value="{{ old('termin_number', 1) }}"
-                           class="w-full px-3 py-2 border border-slate-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent @error('termin_number') border-red-500 @enderror">
+                           class="w-full px-3 py-2 text-sm sm:text-base border border-slate-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent @error('termin_number') border-red-500 @enderror">
                     <p class="text-xs text-slate-500 mt-1">Nomor urut termin ini</p>
                     @error('termin_number')
                         <p class="mt-1 text-sm text-red-600">{{ $message }}</p>
@@ -107,7 +108,7 @@
                     </label>
                     <input type="number" name="total_termin" id="total_termin" min="1" required
                            value="{{ old('total_termin', 1) }}"
-                           class="w-full px-3 py-2 border border-slate-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent @error('total_termin') border-red-500 @enderror">
+                           class="w-full px-3 py-2 text-sm sm:text-base border border-slate-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent @error('total_termin') border-red-500 @enderror">
                     <p class="text-xs text-slate-500 mt-1">Total jumlah termin keseluruhan</p>
                     @error('total_termin')
                         <p class="mt-1 text-sm text-red-600">{{ $message }}</p>
@@ -138,17 +139,17 @@
         </div>
 
         <!-- Billing Details -->
-        <div class="bg-white rounded-lg shadow-sm border border-slate-200 p-6">
-            <h2 class="text-lg font-semibold text-slate-800 mb-4">Detail Penagihan</h2>
+        <div class="bg-white rounded-lg shadow-sm border border-slate-200 p-4 sm:p-6">
+            <h2 class="text-base sm:text-lg font-semibold text-slate-800 mb-3 sm:mb-4">Detail Penagihan</h2>
             
-            <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+            <div class="grid grid-cols-1 sm:grid-cols-2 gap-4 sm:gap-6">
                 <div>
                     <label for="invoice_number" class="block text-sm font-medium text-slate-700 mb-2">
                         Nomor Invoice <span class="text-red-500">*</span>
                     </label>
                     <input type="text" name="invoice_number" id="invoice_number" required
                            value="{{ old('invoice_number') }}"
-                           class="w-full px-3 py-2 border border-slate-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent @error('invoice_number') border-red-500 @enderror"
+                           class="w-full px-3 py-2 text-sm sm:text-base border border-slate-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent @error('invoice_number') border-red-500 @enderror"
                            placeholder="Contoh: INV-2025-001">
                     @error('invoice_number')
                         <p class="mt-1 text-sm text-red-600">{{ $message }}</p>
@@ -161,7 +162,7 @@
                     </label>
                     <input type="date" name="billing_date" id="billing_date" required
                            value="{{ old('billing_date', date('Y-m-d')) }}"
-                           class="w-full px-3 py-2 border border-slate-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent @error('billing_date') border-red-500 @enderror">
+                           class="w-full px-3 py-2 text-sm sm:text-base border border-slate-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent @error('billing_date') border-red-500 @enderror">
                     @error('billing_date')
                         <p class="mt-1 text-sm text-red-600">{{ $message }}</p>
                     @enderror
@@ -173,7 +174,7 @@
                         Status <span class="text-red-500">*</span>
                     </label>
                     <select name="status" id="status" required
-                            class="w-full px-3 py-2 border border-slate-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent @error('status') border-red-500 @enderror">
+                            class="w-full px-3 py-2 text-sm sm:text-base border border-slate-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent @error('status') border-red-500 @enderror">
                         <option value="draft" {{ old('status', 'draft') == 'draft' ? 'selected' : '' }}>Draft</option>
                         <option value="sent" {{ old('status') == 'sent' ? 'selected' : '' }}>Terkirim</option>
                     </select>
@@ -185,17 +186,17 @@
         </div>
 
         <!-- Amount Configuration -->
-        <div class="bg-white rounded-lg shadow-sm border border-slate-200 p-6">
-            <h2 class="text-lg font-semibold text-slate-800 mb-4">Konfigurasi Nilai</h2>
+        <div class="bg-white rounded-lg shadow-sm border border-slate-200 p-4 sm:p-6">
+            <h2 class="text-base sm:text-lg font-semibold text-slate-800 mb-3 sm:mb-4">Konfigurasi Nilai</h2>
             
-            <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+            <div class="grid grid-cols-1 sm:grid-cols-2 gap-4 sm:gap-6">
                 <div>
                     <label for="nilai_jasa_display" class="block text-sm font-medium text-slate-700 mb-2">
                         Nilai Jasa <span class="text-red-500">*</span>
                     </label>
                     <input type="text" id="nilai_jasa_display"
                            value="{{ old('nilai_jasa') ? number_format(old('nilai_jasa'), 0, ',', '.') : '' }}"
-                           class="w-full px-3 py-2 border border-slate-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent @error('nilai_jasa') border-red-500 @enderror"
+                           class="w-full px-3 py-2 text-sm sm:text-base border border-slate-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent @error('nilai_jasa') border-red-500 @enderror"
                            placeholder="5.000.000">
                     <input type="hidden" name="nilai_jasa" id="nilai_jasa" value="{{ old('nilai_jasa', 0) }}">
                     @error('nilai_jasa')
@@ -209,7 +210,7 @@
                     </label>
                     <input type="text" id="nilai_material_display"
                            value="{{ old('nilai_material') ? number_format(old('nilai_material'), 0, ',', '.') : '' }}"
-                           class="w-full px-3 py-2 border border-slate-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent @error('nilai_material') border-red-500 @enderror"
+                           class="w-full px-3 py-2 text-sm sm:text-base border border-slate-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent @error('nilai_material') border-red-500 @enderror"
                            placeholder="0">
                     <input type="hidden" name="nilai_material" id="nilai_material" value="{{ old('nilai_material', 0) }}">
                     @error('nilai_material')
@@ -219,14 +220,14 @@
             </div>
 
             <!-- PPN Configuration -->
-            <div class="grid grid-cols-1 md:grid-cols-2 gap-6 mt-6">
+            <div class="grid grid-cols-1 sm:grid-cols-2 gap-4 sm:gap-6 mt-4 sm:mt-6">
                 <div>
                     <label for="ppn_rate" class="block text-sm font-medium text-slate-700 mb-2">
                         PPN (%) <span class="text-red-500">*</span>
                     </label>
                     <input type="number" name="ppn_rate" id="ppn_rate" required min="0" max="100" step="0.01"
                            value="{{ old('ppn_rate', '11') }}"
-                           class="w-full px-3 py-2 border border-slate-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent @error('ppn_rate') border-red-500 @enderror">
+                           class="w-full px-3 py-2 text-sm sm:text-base border border-slate-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent @error('ppn_rate') border-red-500 @enderror">
                     @error('ppn_rate')
                         <p class="mt-1 text-sm text-red-600">{{ $message }}</p>
                     @enderror
@@ -237,7 +238,7 @@
                         Metode Perhitungan PPN <span class="text-red-500">*</span>
                     </label>
                     <select name="ppn_calculation" id="ppn_calculation" required
-                            class="w-full px-3 py-2 border border-slate-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent @error('ppn_calculation') border-red-500 @enderror">
+                            class="w-full px-3 py-2 text-sm sm:text-base border border-slate-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent @error('ppn_calculation') border-red-500 @enderror">
                         <option value="normal" {{ old('ppn_calculation', 'normal') == 'normal' ? 'selected' : '' }}>Normal</option>
                         <option value="round_up" {{ old('ppn_calculation') == 'round_up' ? 'selected' : '' }}>Pembulatan Ke Atas</option>
                         <option value="round_down" {{ old('ppn_calculation') == 'round_down' ? 'selected' : '' }}>Pembulatan Ke Bawah</option>
@@ -249,20 +250,20 @@
             </div>
 
             <!-- Total Amount Display -->
-            <div class="mt-6 p-4 bg-slate-50 rounded-lg">
+            <div class="mt-4 sm:mt-6 p-3 sm:p-4 bg-slate-50 rounded-lg">
                 <div class="space-y-2">
                     <div class="flex justify-between items-center">
-                        <span class="text-sm text-slate-600">Subtotal:</span>
-                        <span id="subtotal-display" class="font-medium text-slate-900">Rp 0</span>
+                        <span class="text-xs sm:text-sm text-slate-600">Subtotal:</span>
+                        <span id="subtotal-display" class="text-sm sm:text-base font-medium text-slate-900">Rp 0</span>
                     </div>
                     <div class="flex justify-between items-center">
-                        <span class="text-sm text-slate-600">PPN:</span>
-                        <span id="ppn-display" class="font-medium text-slate-900">Rp 0</span>
+                        <span class="text-xs sm:text-sm text-slate-600">PPN:</span>
+                        <span id="ppn-display" class="text-sm sm:text-base font-medium text-slate-900">Rp 0</span>
                     </div>
                     <hr class="border-slate-300">
                     <div class="flex justify-between items-center">
-                        <span class="text-lg font-medium text-slate-700">Total Nilai:</span>
-                        <span id="total-display" class="text-2xl font-bold text-slate-900">Rp 0</span>
+                        <span class="text-base sm:text-lg font-medium text-slate-700">Total Nilai:</span>
+                        <span id="total-display" class="text-lg sm:text-2xl font-bold text-slate-900">Rp 0</span>
                     </div>
                 </div>
                 
@@ -274,15 +275,15 @@
         </div>
 
         <!-- Description -->
-        <div class="bg-white rounded-lg shadow-sm border border-slate-200 p-6">
-            <h2 class="text-lg font-semibold text-slate-800 mb-4">Deskripsi</h2>
+        <div class="bg-white rounded-lg shadow-sm border border-slate-200 p-4 sm:p-6">
+            <h2 class="text-base sm:text-lg font-semibold text-slate-800 mb-3 sm:mb-4">Deskripsi</h2>
             
             <div>
                 <label for="description" class="block text-sm font-medium text-slate-700 mb-2">
                     Deskripsi Penagihan
                 </label>
                 <textarea name="description" id="description" rows="4"
-                          class="w-full px-3 py-2 border border-slate-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent @error('description') border-red-500 @enderror"
+                          class="w-full px-3 py-2 text-sm sm:text-base border border-slate-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent @error('description') border-red-500 @enderror"
                           placeholder="Masukkan deskripsi atau catatan untuk penagihan ini...">{{ old('description') }}</textarea>
                 @error('description')
                     <p class="mt-1 text-sm text-red-600">{{ $message }}</p>
@@ -291,13 +292,13 @@
         </div>
 
         <!-- Action Buttons -->
-        <div class="flex justify-end space-x-4">
-            <a href="{{ route('project-billings.index') }}" 
-               class="px-6 py-2 border border-slate-300 text-slate-700 bg-white hover:bg-slate-50 rounded-lg font-medium transition-colors duration-200">
+        <div class="flex flex-col sm:flex-row sm:justify-end space-y-3 sm:space-y-0 sm:space-x-4">
+            <a href="{{ route('project-billings.index') }}"
+               class="px-4 sm:px-6 py-2 border border-slate-300 text-slate-700 bg-white hover:bg-slate-50 rounded-lg font-medium transition-colors duration-200 text-center text-sm sm:text-base">
                 Batal
             </a>
-            <button type="submit" 
-                    class="px-6 py-2 bg-blue-600 hover:bg-blue-700 text-white rounded-lg font-medium transition-colors duration-200">
+            <button type="submit"
+                    class="px-4 sm:px-6 py-2 bg-blue-600 hover:bg-blue-700 text-white rounded-lg font-medium transition-colors duration-200 text-sm sm:text-base">
                 Simpan Penagihan
             </button>
         </div>

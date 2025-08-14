@@ -1,24 +1,25 @@
 @extends('layouts.app')
 
 @section('content')
-<div class="container mx-auto px-4 py-8">
-    <div class="flex justify-between items-center mb-6">
-        <h1 class="text-3xl font-bold text-gray-800">Edit Proyek</h1>
-        <a href="{{ route('projects.show', $project) }}" class="bg-gray-600 hover:bg-gray-700 text-white font-bold py-2 px-4 rounded">
-            Kembali ke Proyek
+<div class="container mx-auto px-4 py-6 sm:py-8">
+    <div class="flex flex-col sm:flex-row sm:justify-between sm:items-center mb-4 sm:mb-6 space-y-4 sm:space-y-0">
+        <h1 class="text-2xl sm:text-3xl font-bold text-gray-800">Edit Proyek</h1>
+        <a href="{{ route('projects.show', $project) }}" class="bg-gray-600 hover:bg-gray-700 text-white font-bold py-2 px-4 rounded text-center text-sm sm:text-base">
+            <span class="hidden sm:inline">Kembali ke Proyek</span>
+            <span class="sm:hidden">Kembali</span>
         </a>
     </div>
 
-    <div class="bg-white rounded-lg shadow-md p-6">
+    <div class="bg-white rounded-lg shadow-md p-4 sm:p-6">
         <form action="{{ route('projects.update', $project) }}" method="POST">
             @csrf
             @method('PUT')
             
-            <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+            <div class="grid grid-cols-1 sm:grid-cols-2 gap-4 sm:gap-6">
                 <div>
                     <label class="block text-sm font-medium text-gray-700 mb-2">Nama Proyek *</label>
                     <input type="text" name="name" value="{{ old('name', $project->name) }}" required
-                           class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500">
+                           class="w-full px-3 py-2 text-sm sm:text-base border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500">
                     @error('name')
                         <p class="mt-1 text-sm text-red-600">{{ $message }}</p>
                     @enderror
@@ -26,7 +27,7 @@
                 
                 <div>
                     <label class="block text-sm font-medium text-gray-700 mb-2">Kode Proyek</label>
-                    <div class="w-full px-3 py-2 border border-gray-300 rounded-md bg-gray-50 text-gray-700 font-mono">
+                    <div class="w-full px-3 py-2 text-sm sm:text-base border border-gray-300 rounded-md bg-gray-50 text-gray-700 font-mono">
                         {{ $project->code }}
                     </div>
                     <p class="mt-1 text-xs text-gray-500">Kode proyek tidak dapat diubah</p>
@@ -34,7 +35,7 @@
                 
                 <div>
                     <label class="block text-sm font-medium text-gray-700 mb-2">Tipe Proyek *</label>
-                    <select name="type" required class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500">
+                    <select name="type" required class="w-full px-3 py-2 text-sm sm:text-base border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500">
                         <option value="">Pilih Tipe</option>
                         @foreach($types as $key => $label)
                             <option value="{{ $key }}" {{ old('type', $project->type) == $key ? 'selected' : '' }}>
@@ -52,7 +53,7 @@
                     <label class="block text-sm font-medium text-gray-700 mb-2">Nilai Jasa Plan (Rp)</label>
                     <input type="text" name="planned_service_value_display" id="planned_service_value_display" 
                            value="{{ old('planned_service_value', $project->planned_service_value) ? number_format(old('planned_service_value', $project->planned_service_value), 0, ',', '.') : '' }}"
-                           class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
+                           class="w-full px-3 py-2 text-sm sm:text-base border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
                            placeholder="0">
                     <input type="hidden" name="planned_service_value" id="planned_service_value" value="{{ old('planned_service_value', $project->planned_service_value) }}">
                     @error('planned_service_value')
@@ -64,7 +65,7 @@
                     <label class="block text-sm font-medium text-gray-700 mb-2">Nilai Material Plan (Rp)</label>
                     <input type="text" name="planned_material_value_display" id="planned_material_value_display" 
                            value="{{ old('planned_material_value', $project->planned_material_value) ? number_format(old('planned_material_value', $project->planned_material_value), 0, ',', '.') : '' }}"
-                           class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
+                           class="w-full px-3 py-2 text-sm sm:text-base border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
                            placeholder="0">
                     <input type="hidden" name="planned_material_value" id="planned_material_value" value="{{ old('planned_material_value', $project->planned_material_value) }}">
                     @error('planned_material_value')
@@ -76,7 +77,7 @@
                     <label class="block text-sm font-medium text-gray-700 mb-2">Total Nilai Plan (Rp)</label>
                     <input type="text" name="planned_total_value_display" id="planned_total_value_display" 
                            value="{{ old('planned_total_value', $project->planned_total_value) ? number_format(old('planned_total_value', $project->planned_total_value), 0, ',', '.') : '' }}"
-                           class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 bg-gray-50"
+                           class="w-full px-3 py-2 text-sm sm:text-base border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 bg-gray-50"
                            placeholder="0" readonly>
                     <input type="hidden" name="planned_total_value" id="planned_total_value" value="{{ old('planned_total_value', $project->planned_total_value) }}">
                     <p class="mt-1 text-xs text-gray-500">Otomatis dihitung dari nilai jasa + material</p>
@@ -87,7 +88,7 @@
                 
                 <div>
                     <label class="block text-sm font-medium text-gray-700 mb-2">Status *</label>
-                    <select name="status" required class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500">
+                    <select name="status" required class="w-full px-3 py-2 text-sm sm:text-base border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500">
                         <option value="">Pilih Status</option>
                         @foreach($statuses as $key => $label)
                             <option value="{{ $key }}" {{ old('status', $project->status) == $key ? 'selected' : '' }}>
@@ -102,7 +103,7 @@
                 
                 <div>
                     <label class="block text-sm font-medium text-gray-700 mb-2">Prioritas *</label>
-                    <select name="priority" required class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500">
+                    <select name="priority" required class="w-full px-3 py-2 text-sm sm:text-base border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500">
                         <option value="">Pilih Prioritas</option>
                         @foreach($priorities as $key => $label)
                             <option value="{{ $key }}" {{ old('priority', $project->priority) == $key ? 'selected' : '' }}>
@@ -118,7 +119,7 @@
                 <div>
                     <label class="block text-sm font-medium text-gray-700 mb-2">Tanggal Mulai *</label>
                     <input type="date" name="start_date" id="start_date" value="{{ old('start_date', $project->start_date ? $project->start_date->format('Y-m-d') : '') }}" required
-                           class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500">
+                           class="w-full px-3 py-2 text-sm sm:text-base border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500">
                     @error('start_date')
                         <p class="mt-1 text-sm text-red-600">{{ $message }}</p>
                     @enderror
@@ -127,7 +128,7 @@
                 <div>
                     <label class="block text-sm font-medium text-gray-700 mb-2">Tanggal Selesai</label>
                     <input type="date" name="end_date" id="end_date" value="{{ old('end_date', $project->end_date ? $project->end_date->format('Y-m-d') : '') }}"
-                           class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500">
+                           class="w-full px-3 py-2 text-sm sm:text-base border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500">
                     <div id="duration_info" class="mt-1 text-xs text-gray-500"></div>
                     @error('end_date')
                         <p class="mt-1 text-sm text-red-600">{{ $message }}</p>
@@ -138,7 +139,7 @@
                     <label class="block text-sm font-medium text-gray-700 mb-2">Lokasi</label>
                     <div class="relative">
                         <input type="text" name="location" id="location_input" value="{{ old('location', $project->location) }}"
-                               class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
+                               class="w-full px-3 py-2 text-sm sm:text-base border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
                                placeholder="Ketik untuk mencari lokasi yang sudah ada..."
                                autocomplete="off">
                         <div id="location_suggestions" class="absolute z-10 w-full bg-white border border-gray-300 rounded-md shadow-lg mt-1 hidden max-h-60 overflow-y-auto">
@@ -155,7 +156,7 @@
                     <label class="block text-sm font-medium text-gray-700 mb-2">Client</label>
                     <div class="relative">
                         <input type="text" name="client" id="client_input" value="{{ old('client', $project->client) }}"
-                               class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
+                               class="w-full px-3 py-2 text-sm sm:text-base border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
                                placeholder="Ketik untuk mencari client yang sudah ada..."
                                autocomplete="off">
                         <div id="client_suggestions" class="absolute z-10 w-full bg-white border border-gray-300 rounded-md shadow-lg mt-1 hidden max-h-60 overflow-y-auto">
@@ -170,14 +171,14 @@
             </div>
             
             <!-- Nilai Akhir Proyek Section -->
-            <div class="mt-8 border-t pt-6">
-                <h3 class="text-lg font-semibold text-gray-800 mb-4">Nilai Akhir Proyek</h3>
-                <div class="grid grid-cols-1 md:grid-cols-3 gap-6">
+            <div class="mt-6 sm:mt-8 border-t pt-4 sm:pt-6">
+                <h3 class="text-base sm:text-lg font-semibold text-gray-800 mb-3 sm:mb-4">Nilai Akhir Proyek</h3>
+                <div class="grid grid-cols-1 sm:grid-cols-3 gap-4 sm:gap-6">
                     <div>
                         <label class="block text-sm font-medium text-gray-700 mb-2">Nilai Jasa Akhir (Rp)</label>
                         <input type="text" name="final_service_value_display" id="final_service_value_display" 
                                value="{{ old('final_service_value', $project->final_service_value) ? number_format(old('final_service_value', $project->final_service_value), 0, ',', '.') : '' }}"
-                               class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
+                               class="w-full px-3 py-2 text-sm sm:text-base border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
                                placeholder="0">
                         <input type="hidden" name="final_service_value" id="final_service_value" value="{{ old('final_service_value', $project->final_service_value) }}">
                         @error('final_service_value')
@@ -189,7 +190,7 @@
                         <label class="block text-sm font-medium text-gray-700 mb-2">Nilai Material Akhir (Rp)</label>
                         <input type="text" name="final_material_value_display" id="final_material_value_display" 
                                value="{{ old('final_material_value', $project->final_material_value) ? number_format(old('final_material_value', $project->final_material_value), 0, ',', '.') : '' }}"
-                               class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
+                               class="w-full px-3 py-2 text-sm sm:text-base border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
                                placeholder="0">
                         <input type="hidden" name="final_material_value" id="final_material_value" value="{{ old('final_material_value', $project->final_material_value) }}">
                         @error('final_material_value')
@@ -201,7 +202,7 @@
                         <label class="block text-sm font-medium text-gray-700 mb-2">Total Nilai Akhir (Rp)</label>
                         <input type="text" name="final_total_value_display" id="final_total_value_display" 
                                value="{{ old('final_total_value', $project->final_total_value) ? number_format(old('final_total_value', $project->final_total_value), 0, ',', '.') : '' }}"
-                               class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 bg-gray-50"
+                               class="w-full px-3 py-2 text-sm sm:text-base border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 bg-gray-50"
                                placeholder="0" readonly>
                         <input type="hidden" name="final_total_value" id="final_total_value" value="{{ old('final_total_value', $project->final_total_value) }}">
                         <p class="mt-1 text-xs text-gray-500">Otomatis dihitung dari nilai jasa + material akhir</p>
@@ -215,7 +216,7 @@
             <div class="mt-6">
                 <label class="block text-sm font-medium text-gray-700 mb-2">Deskripsi</label>
                 <textarea name="description" rows="4" 
-                          class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500">{{ old('description', $project->description) }}</textarea>
+                          class="w-full px-3 py-2 text-sm sm:text-base border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500">{{ old('description', $project->description) }}</textarea>
                 @error('description')
                     <p class="mt-1 text-sm text-red-600">{{ $message }}</p>
                 @enderror
@@ -224,33 +225,34 @@
             <div class="mt-6">
                 <label class="block text-sm font-medium text-gray-700 mb-2">Catatan</label>
                 <textarea name="notes" rows="3" 
-                          class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500">{{ old('notes', $project->notes) }}</textarea>
+                          class="w-full px-3 py-2 text-sm sm:text-base border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500">{{ old('notes', $project->notes) }}</textarea>
                 @error('notes')
                     <p class="mt-1 text-sm text-red-600">{{ $message }}</p>
                 @enderror
             </div>
             
-            <div class="mt-8 flex justify-between">
+            <div class="mt-6 sm:mt-8 flex flex-col sm:flex-row sm:justify-between space-y-4 sm:space-y-0">
                 <!-- Delete Button (Only for Direktur) -->
                 @can('delete', $project)
-                <div>
-                    <button type="button" onclick="showDeleteConfirmation()" class="bg-red-600 hover:bg-red-700 text-white font-bold py-2 px-4 rounded inline-flex items-center">
+                <div class="order-2 sm:order-1">
+                    <button type="button" onclick="showDeleteConfirmation()" class="w-full sm:w-auto bg-red-600 hover:bg-red-700 text-white font-bold py-2 px-4 rounded inline-flex items-center justify-center text-sm sm:text-base">
                         <svg class="w-4 h-4 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16"></path>
                         </svg>
-                        Hapus Proyek
+                        <span class="hidden sm:inline">Hapus Proyek</span>
+                        <span class="sm:hidden">Hapus</span>
                     </button>
                 </div>
                 @else
-                <div></div>
+                <div class="order-2 sm:order-1"></div>
                 @endcan
                 
                 <!-- Action Buttons -->
-                <div class="flex space-x-2">
-                    <a href="{{ route('projects.show', $project) }}" class="bg-gray-300 hover:bg-gray-400 text-gray-800 font-bold py-2 px-4 rounded">
+                <div class="order-1 sm:order-2 flex flex-col sm:flex-row space-y-2 sm:space-y-0 sm:space-x-2">
+                    <a href="{{ route('projects.show', $project) }}" class="bg-gray-300 hover:bg-gray-400 text-gray-800 font-bold py-2 px-4 rounded text-center text-sm sm:text-base">
                         Batal
                     </a>
-                    <button type="submit" class="bg-blue-600 hover:bg-blue-700 text-white font-bold py-2 px-4 rounded">
+                    <button type="submit" class="bg-blue-600 hover:bg-blue-700 text-white font-bold py-2 px-4 rounded text-sm sm:text-base">
                         Update Proyek
                     </button>
                 </div>
