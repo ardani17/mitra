@@ -1,16 +1,16 @@
 <x-app-layout>
     <x-slot name="header">
-        <div class="flex justify-between items-center">
-            <h2 class="font-semibold text-xl text-gray-800 leading-tight">
+        <div class="flex flex-col sm:flex-row sm:justify-between sm:items-center space-y-3 sm:space-y-0">
+            <h2 class="font-semibold text-lg sm:text-xl text-gray-800 leading-tight">
                 {{ __('Detail Karyawan') }}
             </h2>
-            <div class="flex space-x-2">
-                <a href="{{ route('finance.employees.edit', $employee) }}" 
-                   class="bg-yellow-500 hover:bg-yellow-700 text-white font-bold py-2 px-4 rounded">
+            <div class="flex flex-col sm:flex-row space-y-2 sm:space-y-0 sm:space-x-2">
+                <a href="{{ route('finance.employees.edit', $employee) }}"
+                   class="bg-yellow-500 hover:bg-yellow-700 text-white font-bold py-2 px-3 sm:px-4 rounded text-sm sm:text-base text-center">
                     <i class="fas fa-edit mr-2"></i>Edit
                 </a>
-                <a href="{{ route('finance.employees.index') }}" 
-                   class="bg-gray-500 hover:bg-gray-700 text-white font-bold py-2 px-4 rounded">
+                <a href="{{ route('finance.employees.index') }}"
+                   class="bg-gray-500 hover:bg-gray-700 text-white font-bold py-2 px-3 sm:px-4 rounded text-sm sm:text-base text-center">
                     <i class="fas fa-arrow-left mr-2"></i>Kembali
                 </a>
             </div>
@@ -21,29 +21,29 @@
         <div class="max-w-7xl mx-auto sm:px-6 lg:px-8">
             <!-- Employee Profile Card -->
             <div class="bg-white overflow-hidden shadow-sm sm:rounded-lg mb-6">
-                <div class="p-6">
-                    <div class="flex items-center space-x-6">
-                        <div class="flex-shrink-0">
-                            <img class="h-24 w-24 rounded-full object-cover" 
-                                 src="{{ $employee->avatar_url }}" 
+                <div class="p-4 sm:p-6">
+                    <div class="flex flex-col sm:flex-row sm:items-center space-y-4 sm:space-y-0 sm:space-x-6">
+                        <div class="flex-shrink-0 text-center sm:text-left">
+                            <img class="h-20 w-20 sm:h-24 sm:w-24 rounded-full object-cover mx-auto sm:mx-0"
+                                 src="{{ $employee->avatar_url }}"
                                  alt="{{ $employee->name }}">
                         </div>
                         <div class="flex-1">
-                            <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
-                                <div>
-                                    <h3 class="text-2xl font-bold text-gray-900">{{ $employee->name }}</h3>
-                                    <p class="text-gray-600">{{ $employee->employee_code }}</p>
-                                    <p class="text-sm text-gray-500">{{ $employee->position }} - {{ $employee->department }}</p>
+                            <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
+                                <div class="text-center sm:text-left">
+                                    <h3 class="text-xl sm:text-2xl font-bold text-gray-900">{{ $employee->name }}</h3>
+                                    <p class="text-sm sm:text-base text-gray-600">{{ $employee->employee_code }}</p>
+                                    <p class="text-xs sm:text-sm text-gray-500">{{ $employee->position }} - {{ $employee->department }}</p>
                                 </div>
-                                <div>
-                                    <p class="text-sm text-gray-500">Gaji Harian</p>
-                                    <p class="text-xl font-semibold text-green-600">{{ $employee->formatted_daily_rate }}</p>
-                                    <p class="text-sm text-gray-500">{{ ucfirst($employee->employment_type) }} - {!! $employee->status_badge !!}</p>
+                                <div class="text-center sm:text-left">
+                                    <p class="text-xs sm:text-sm text-gray-500">Gaji Harian</p>
+                                    <p class="text-lg sm:text-xl font-semibold text-green-600">{{ $employee->formatted_daily_rate }}</p>
+                                    <p class="text-xs sm:text-sm text-gray-500">{{ ucfirst($employee->employment_type) }} - {!! $employee->status_badge !!}</p>
                                 </div>
-                                <div>
-                                    <p class="text-sm text-gray-500">Kontak</p>
-                                    <p class="text-sm text-gray-900">{{ $employee->email ?: '-' }}</p>
-                                    <p class="text-sm text-gray-900">{{ $employee->phone ?: '-' }}</p>
+                                <div class="text-center sm:text-left">
+                                    <p class="text-xs sm:text-sm text-gray-500">Kontak</p>
+                                    <p class="text-xs sm:text-sm text-gray-900">{{ $employee->email ?: '-' }}</p>
+                                    <p class="text-xs sm:text-sm text-gray-900">{{ $employee->phone ?: '-' }}</p>
                                 </div>
                             </div>
                         </div>
@@ -53,44 +53,46 @@
 
             <!-- Month Navigation -->
             <div class="bg-white overflow-hidden shadow-sm sm:rounded-lg mb-6">
-                <div class="p-4 bg-gray-50 border-b border-gray-200">
-                    <div class="flex justify-between items-center">
-                        <div class="flex items-center space-x-4">
+                <div class="p-3 sm:p-4 bg-gray-50 border-b border-gray-200">
+                    <div class="flex flex-col lg:flex-row lg:justify-between lg:items-center space-y-4 lg:space-y-0">
+                        <div class="flex flex-col sm:flex-row sm:items-center space-y-3 sm:space-y-0 sm:space-x-4">
                             <!-- Custom Month/Year Selector -->
-                            <div class="flex items-center space-x-2">
-                                <label class="text-sm font-medium text-gray-700">Pilih Bulan:</label>
-                                <select id="month-selector" class="rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500">
-                                    @foreach($monthOptions as $monthNum => $monthName)
-                                        <option value="{{ $monthNum }}" {{ $monthNum == $month ? 'selected' : '' }}>
-                                            {{ $monthName }}
-                                        </option>
-                                    @endforeach
-                                </select>
-                                <select id="year-selector" class="rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500">
-                                    @foreach($yearOptions as $yearOption)
-                                        <option value="{{ $yearOption }}" {{ $yearOption == $year ? 'selected' : '' }}>
-                                            {{ $yearOption }}
-                                        </option>
-                                    @endforeach
-                                </select>
-                                <button onclick="goToSelectedDate()" class="bg-indigo-500 hover:bg-indigo-700 text-white font-bold py-2 px-3 rounded text-sm">
-                                    <i class="fas fa-arrow-right"></i> Lihat
-                                </button>
+                            <div class="flex flex-col sm:flex-row sm:items-center space-y-2 sm:space-y-0 sm:space-x-2">
+                                <label class="text-xs sm:text-sm font-medium text-gray-700">Pilih Bulan:</label>
+                                <div class="flex space-x-2">
+                                    <select id="month-selector" class="text-xs sm:text-sm rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500">
+                                        @foreach($monthOptions as $monthNum => $monthName)
+                                            <option value="{{ $monthNum }}" {{ $monthNum == $month ? 'selected' : '' }}>
+                                                {{ $monthName }}
+                                            </option>
+                                        @endforeach
+                                    </select>
+                                    <select id="year-selector" class="text-xs sm:text-sm rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500">
+                                        @foreach($yearOptions as $yearOption)
+                                            <option value="{{ $yearOption }}" {{ $yearOption == $year ? 'selected' : '' }}>
+                                                {{ $yearOption }}
+                                            </option>
+                                        @endforeach
+                                    </select>
+                                    <button onclick="goToSelectedDate()" class="bg-indigo-500 hover:bg-indigo-700 text-white font-bold py-2 px-2 sm:px-3 rounded text-xs sm:text-sm">
+                                        <i class="fas fa-arrow-right"></i> <span class="hidden sm:inline">Lihat</span>
+                                    </button>
+                                </div>
                             </div>
                         </div>
-                        <div class="flex space-x-2">
+                        <div class="grid grid-cols-2 sm:flex sm:flex-wrap gap-2">
                             <a href="{{ route('finance.employees.custom-off-days.index', $employee) }}"
-                               class="bg-indigo-500 hover:bg-indigo-700 text-white font-bold py-2 px-4 rounded text-sm">
-                                <i class="fas fa-calendar-times mr-2"></i>Hari Libur
+                               class="bg-indigo-500 hover:bg-indigo-700 text-white font-bold py-2 px-2 sm:px-4 rounded text-xs sm:text-sm text-center">
+                                <i class="fas fa-calendar-times mr-1 sm:mr-2"></i><span class="hidden sm:inline">Hari </span>Libur
                             </a>
-                            <button onclick="exportSalaryData()" class="bg-green-500 hover:bg-green-700 text-white font-bold py-2 px-4 rounded text-sm">
-                                <i class="fas fa-download mr-2"></i>Export
+                            <button onclick="exportSalaryData()" class="bg-green-500 hover:bg-green-700 text-white font-bold py-2 px-2 sm:px-4 rounded text-xs sm:text-sm">
+                                <i class="fas fa-download mr-1 sm:mr-2"></i>Export
                             </button>
-                            <button onclick="showSalaryReleaseModal()" class="bg-purple-500 hover:bg-purple-700 text-white font-bold py-2 px-4 rounded text-sm">
-                                <i class="fas fa-paper-plane mr-2"></i>Rilis Gaji
+                            <button onclick="showSalaryReleaseModal()" class="bg-purple-500 hover:bg-purple-700 text-white font-bold py-2 px-2 sm:px-4 rounded text-xs sm:text-sm">
+                                <i class="fas fa-paper-plane mr-1 sm:mr-2"></i><span class="hidden sm:inline">Rilis </span>Gaji
                             </button>
-                            <button onclick="addDailySalary()" class="bg-blue-500 hover:bg-blue-700 text-white font-bold py-2 px-4 rounded text-sm">
-                                <i class="fas fa-plus mr-2"></i>Tambah Gaji
+                            <button onclick="addDailySalary()" class="bg-blue-500 hover:bg-blue-700 text-white font-bold py-2 px-2 sm:px-4 rounded text-xs sm:text-sm">
+                                <i class="fas fa-plus mr-1 sm:mr-2"></i><span class="hidden sm:inline">Tambah </span>Gaji
                             </button>
                         </div>
                     </div>
@@ -98,68 +100,68 @@
             </div>
 
             <!-- Monthly Statistics -->
-            <div class="grid grid-cols-1 md:grid-cols-4 gap-6 mb-6">
+            <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 sm:gap-6 mb-6">
                 <div class="bg-white overflow-hidden shadow-sm sm:rounded-lg">
-                    <div class="p-6">
+                    <div class="p-4 sm:p-6">
                         <div class="flex items-center">
                             <div class="flex-shrink-0">
-                                <div class="w-8 h-8 bg-blue-100 rounded-full flex items-center justify-center">
-                                    <i class="fas fa-calendar-check text-blue-600"></i>
+                                <div class="w-6 h-6 sm:w-8 sm:h-8 bg-blue-100 rounded-full flex items-center justify-center">
+                                    <i class="fas fa-calendar-check text-blue-600 text-xs sm:text-sm"></i>
                                 </div>
                             </div>
-                            <div class="ml-4">
-                                <p class="text-sm font-medium text-gray-500">Hari Kerja</p>
-                                <p class="text-2xl font-semibold text-gray-900">{{ $monthlyStats['total_work_days'] }}</p>
+                            <div class="ml-3 sm:ml-4">
+                                <p class="text-xs sm:text-sm font-medium text-gray-500">Hari Kerja</p>
+                                <p class="text-lg sm:text-2xl font-semibold text-gray-900">{{ $monthlyStats['total_work_days'] }}</p>
                             </div>
                         </div>
                     </div>
                 </div>
 
                 <div class="bg-white overflow-hidden shadow-sm sm:rounded-lg">
-                    <div class="p-6">
+                    <div class="p-4 sm:p-6">
                         <div class="flex items-center">
                             <div class="flex-shrink-0">
-                                <div class="w-8 h-8 bg-green-100 rounded-full flex items-center justify-center">
-                                    <i class="fas fa-money-bill-wave text-green-600"></i>
+                                <div class="w-6 h-6 sm:w-8 sm:h-8 bg-green-100 rounded-full flex items-center justify-center">
+                                    <i class="fas fa-money-bill-wave text-green-600 text-xs sm:text-sm"></i>
                                 </div>
                             </div>
-                            <div class="ml-4">
-                                <p class="text-sm font-medium text-gray-500">Total Pendapatan</p>
-                                <p class="text-2xl font-semibold text-gray-900">Rp {{ number_format($monthlyStats['total_earnings'], 0, ',', '.') }}</p>
+                            <div class="ml-3 sm:ml-4">
+                                <p class="text-xs sm:text-sm font-medium text-gray-500">Total Pendapatan</p>
+                                <p class="text-sm sm:text-2xl font-semibold text-gray-900">Rp {{ number_format($monthlyStats['total_earnings'], 0, ',', '.') }}</p>
                             </div>
                         </div>
                     </div>
                 </div>
 
                 <div class="bg-white overflow-hidden shadow-sm sm:rounded-lg">
-                    <div class="p-6">
+                    <div class="p-4 sm:p-6">
                         <div class="flex items-center">
                             <div class="flex-shrink-0">
-                                <div class="w-8 h-8 bg-yellow-100 rounded-full flex items-center justify-center">
-                                    <i class="fas fa-chart-line text-yellow-600"></i>
+                                <div class="w-6 h-6 sm:w-8 sm:h-8 bg-yellow-100 rounded-full flex items-center justify-center">
+                                    <i class="fas fa-chart-line text-yellow-600 text-xs sm:text-sm"></i>
                                 </div>
                             </div>
-                            <div class="ml-4">
-                                <p class="text-sm font-medium text-gray-500">Rata-rata Harian</p>
-                                <p class="text-2xl font-semibold text-gray-900">Rp {{ number_format($monthlyStats['average_daily'], 0, ',', '.') }}</p>
+                            <div class="ml-3 sm:ml-4">
+                                <p class="text-xs sm:text-sm font-medium text-gray-500">Rata-rata Harian</p>
+                                <p class="text-sm sm:text-2xl font-semibold text-gray-900">Rp {{ number_format($monthlyStats['average_daily'], 0, ',', '.') }}</p>
                             </div>
                         </div>
                     </div>
                 </div>
 
                 <div class="bg-white overflow-hidden shadow-sm sm:rounded-lg">
-                    <div class="p-6">
+                    <div class="p-4 sm:p-6">
                         <div class="flex items-center">
                             <div class="flex-shrink-0">
-                                <div class="w-8 h-8 bg-purple-100 rounded-full flex items-center justify-center">
-                                    <i class="fas fa-user-check text-purple-600"></i>
+                                <div class="w-6 h-6 sm:w-8 sm:h-8 bg-purple-100 rounded-full flex items-center justify-center">
+                                    <i class="fas fa-user-check text-purple-600 text-xs sm:text-sm"></i>
                                 </div>
                             </div>
-                            <div class="ml-4">
-                                <p class="text-sm font-medium text-gray-500">Kehadiran</p>
-                                <p class="text-lg font-semibold text-gray-900">
-                                    <span class="text-green-600">{{ $monthlyStats['present_days'] }}</span> / 
-                                    <span class="text-yellow-600">{{ $monthlyStats['late_days'] }}</span> / 
+                            <div class="ml-3 sm:ml-4">
+                                <p class="text-xs sm:text-sm font-medium text-gray-500">Kehadiran</p>
+                                <p class="text-sm sm:text-lg font-semibold text-gray-900">
+                                    <span class="text-green-600">{{ $monthlyStats['present_days'] }}</span> /
+                                    <span class="text-yellow-600">{{ $monthlyStats['late_days'] }}</span> /
                                     <span class="text-red-600">{{ $monthlyStats['absent_days'] }}</span>
                                 </p>
                                 <p class="text-xs text-gray-500">Hadir / Telat / Libur</p>
@@ -171,12 +173,13 @@
 
             <!-- Salary Calendar -->
             <div class="bg-white overflow-hidden shadow-sm sm:rounded-lg">
-                <div class="p-6">
-                    <h3 class="text-lg font-medium text-gray-900 mb-4">
+                <div class="p-4 sm:p-6">
+                    <h3 class="text-base sm:text-lg font-medium text-gray-900 mb-4">
                         Kalender Gaji - {{ $currentMonthName }} {{ $year }}
                     </h3>
                     
-                    <div class="overflow-x-auto">
+                    <!-- Desktop Table View -->
+                    <div class="hidden lg:block overflow-x-auto">
                         <table class="min-w-full divide-y divide-gray-200">
                             <thead class="bg-gray-50">
                                 <tr>
@@ -284,16 +287,98 @@
                             </tbody>
                         </table>
                     </div>
+
+                    <!-- Mobile Card View -->
+                    <div class="lg:hidden space-y-4">
+                        @foreach($monthlyCalendar as $dayData)
+                            <div class="bg-gray-50 rounded-lg p-4 {{ $dayData['is_weekend'] ? 'border-l-4 border-gray-400' : 'border-l-4 border-blue-400' }}">
+                                <div class="flex justify-between items-start mb-3">
+                                    <div>
+                                        <h4 class="text-sm font-semibold text-gray-900">
+                                            {{ $dayData['day_number'] }} - {{ $dayData['day_name'] }}
+                                        </h4>
+                                        <div class="mt-1">
+                                            @if($dayData['salary'])
+                                                {!! $dayData['salary']->attendance_status_badge !!}
+                                            @else
+                                                <span class="text-gray-400 text-xs">Belum ada data</span>
+                                            @endif
+                                        </div>
+                                    </div>
+                                    <div class="flex space-x-1">
+                                        @if($dayData['salary'])
+                                            <button onclick="editDailySalary({{ $dayData['salary']->id }})"
+                                                    class="text-yellow-600 hover:text-yellow-900 p-1" title="Edit">
+                                                <i class="fas fa-edit text-xs"></i>
+                                            </button>
+                                            <button onclick="deleteDailySalary({{ $dayData['salary']->id }})"
+                                                    class="text-red-600 hover:text-red-900 p-1" title="Hapus">
+                                                <i class="fas fa-trash text-xs"></i>
+                                            </button>
+                                        @else
+                                            <button onclick="addDailySalaryForDate('{{ $dayData['date']->format('Y-m-d') }}')"
+                                                    class="text-blue-600 hover:text-blue-900 p-1" title="Tambah Gaji">
+                                                <i class="fas fa-plus text-xs"></i>
+                                            </button>
+                                        @endif
+                                    </div>
+                                </div>
+                                
+                                @if($dayData['salary'])
+                                    <div class="grid grid-cols-2 gap-3 text-xs">
+                                        <div>
+                                            <span class="text-gray-500">Gaji Pokok:</span>
+                                            <span class="font-medium text-gray-900 block">{{ $dayData['salary']->formatted_basic_salary }}</span>
+                                        </div>
+                                        <div>
+                                            <span class="text-gray-500">Uang Makan:</span>
+                                            <span class="font-medium text-gray-900 block">{{ $dayData['salary']->formatted_meal_allowance }}</span>
+                                        </div>
+                                        <div>
+                                            <span class="text-gray-500">Uang Absen:</span>
+                                            <span class="font-medium {{ $dayData['salary']->attendance_bonus >= 0 ? 'text-green-600' : 'text-red-600' }} block">{{ $dayData['salary']->formatted_attendance_bonus }}</span>
+                                        </div>
+                                        <div>
+                                            <span class="text-gray-500">Uang Pulsa:</span>
+                                            <span class="font-medium text-gray-900 block">{{ $dayData['salary']->formatted_phone_allowance }}</span>
+                                        </div>
+                                        <div>
+                                            <span class="text-gray-500">Lembur:</span>
+                                            <span class="font-medium text-gray-900 block">{{ $dayData['salary']->formatted_overtime_amount }}</span>
+                                        </div>
+                                        <div>
+                                            <span class="text-gray-500">Potongan:</span>
+                                            <span class="font-medium text-red-600 block">{{ $dayData['salary']->formatted_deductions }}</span>
+                                        </div>
+                                    </div>
+                                    <div class="mt-3 pt-3 border-t border-gray-200">
+                                        <div class="flex justify-between items-center">
+                                            <span class="text-sm font-medium text-gray-700">Total:</span>
+                                            <span class="text-sm font-bold text-gray-900">{{ $dayData['salary']->formatted_total_amount_new }}</span>
+                                        </div>
+                                    </div>
+                                @else
+                                    <div class="text-center py-4">
+                                        <p class="text-xs text-gray-500">Belum ada data gaji untuk hari ini</p>
+                                        <button onclick="addDailySalaryForDate('{{ $dayData['date']->format('Y-m-d') }}')"
+                                                class="mt-2 text-blue-600 hover:text-blue-900 text-xs">
+                                            <i class="fas fa-plus mr-1"></i>Tambah Gaji
+                                        </button>
+                                    </div>
+                                @endif
+                            </div>
+                        @endforeach
+                    </div>
                 </div>
             </div>
 
             <!-- Salary Releases Section -->
             <div class="bg-white overflow-hidden shadow-sm sm:rounded-lg mt-6">
-                <div class="p-6">
-                    <div class="flex justify-between items-center mb-4">
-                        <h3 class="text-lg font-medium text-gray-900">Rilis Gaji</h3>
-                        <button onclick="showSalaryReleaseModal()" class="bg-purple-500 hover:bg-purple-700 text-white font-bold py-2 px-4 rounded text-sm">
-                            <i class="fas fa-plus mr-2"></i>Buat Rilis Gaji
+                <div class="p-4 sm:p-6">
+                    <div class="flex flex-col sm:flex-row sm:justify-between sm:items-center mb-4 space-y-3 sm:space-y-0">
+                        <h3 class="text-base sm:text-lg font-medium text-gray-900">Rilis Gaji</h3>
+                        <button onclick="showSalaryReleaseModal()" class="bg-purple-500 hover:bg-purple-700 text-white font-bold py-2 px-3 sm:px-4 rounded text-xs sm:text-sm">
+                            <i class="fas fa-plus mr-1 sm:mr-2"></i>Buat Rilis Gaji
                         </button>
                     </div>
                     
@@ -310,10 +395,10 @@
 
     <!-- Daily Salary Modal -->
     <div id="dailySalaryModal" class="fixed inset-0 bg-gray-600 bg-opacity-50 overflow-y-auto h-full w-full hidden z-50">
-        <div class="relative top-20 mx-auto p-5 border w-96 shadow-lg rounded-md bg-white">
+        <div class="relative top-4 sm:top-20 mx-auto p-4 sm:p-5 border w-full max-w-md sm:w-96 shadow-lg rounded-md bg-white m-4">
             <div class="mt-3">
                 <div class="flex justify-between items-center mb-4">
-                    <h3 class="text-lg font-medium text-gray-900" id="modalTitle">Tambah Gaji Harian</h3>
+                    <h3 class="text-base sm:text-lg font-medium text-gray-900" id="modalTitle">Tambah Gaji Harian</h3>
                     <button onclick="closeDailySalaryModal()" class="text-gray-400 hover:text-gray-600">
                         <i class="fas fa-times"></i>
                     </button>
@@ -323,15 +408,15 @@
                     <input type="hidden" id="employeeId" name="employee_id" value="{{ $employee->id }}">
                     
                     <div class="mb-4">
-                        <label for="workDate" class="block text-sm font-medium text-gray-700">Tanggal Kerja</label>
+                        <label for="workDate" class="block text-xs sm:text-sm font-medium text-gray-700">Tanggal Kerja</label>
                         <input type="date" id="workDate" name="work_date" required
-                               class="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500">
+                               class="mt-1 block w-full text-xs sm:text-sm rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500">
                     </div>
                     
                     <div class="mb-4">
-                        <label for="attendanceStatus" class="block text-sm font-medium text-gray-700">Status Kehadiran</label>
+                        <label for="attendanceStatus" class="block text-xs sm:text-sm font-medium text-gray-700">Status Kehadiran</label>
                         <select id="attendanceStatus" name="attendance_status" required
-                                class="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500">
+                                class="mt-1 block w-full text-xs sm:text-sm rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500">
                             <option value="present">Hadir</option>
                             <option value="late">Telat</option>
                             <option value="absent">Libur</option>
@@ -339,93 +424,93 @@
                     </div>
                     
                     <div class="mb-4">
-                        <label for="basicSalary" class="block text-sm font-medium text-gray-700">Gaji Pokok</label>
+                        <label for="basicSalary" class="block text-xs sm:text-sm font-medium text-gray-700">Gaji Pokok</label>
                         <div class="mt-1 relative rounded-md shadow-sm">
                             <div class="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
-                                <span class="text-gray-500 sm:text-sm">Rp</span>
+                                <span class="text-gray-500 text-xs sm:text-sm">Rp</span>
                             </div>
                             <input type="text" id="basicSalary" name="basic_salary" min="0" required
                                    value="{{ number_format($employee->daily_rate, 0, ',', '.') }}"
-                                   class="pl-12 block w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500">
+                                   class="pl-10 sm:pl-12 block w-full text-xs sm:text-sm rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500">
                         </div>
                     </div>
                     
                     <div class="mb-4">
-                        <label for="mealAllowance" class="block text-sm font-medium text-gray-700">Uang Makan</label>
+                        <label for="mealAllowance" class="block text-xs sm:text-sm font-medium text-gray-700">Uang Makan</label>
                         <div class="mt-1 relative rounded-md shadow-sm">
                             <div class="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
-                                <span class="text-gray-500 sm:text-sm">Rp</span>
+                                <span class="text-gray-500 text-xs sm:text-sm">Rp</span>
                             </div>
                             <input type="text" id="mealAllowance" name="meal_allowance" min="0"
                                    value="10.000"
-                                   class="pl-12 block w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500">
+                                   class="pl-10 sm:pl-12 block w-full text-xs sm:text-sm rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500">
                         </div>
                     </div>
                     
                     <div class="mb-4">
-                        <label for="attendanceBonus" class="block text-sm font-medium text-gray-700">Uang Absen</label>
+                        <label for="attendanceBonus" class="block text-xs sm:text-sm font-medium text-gray-700">Uang Absen</label>
                         <div class="mt-1 relative rounded-md shadow-sm">
                             <div class="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
-                                <span class="text-gray-500 sm:text-sm">Rp</span>
+                                <span class="text-gray-500 text-xs sm:text-sm">Rp</span>
                             </div>
                             <input type="text" id="attendanceBonus" name="attendance_bonus"
                                    value="20.000"
-                                   class="pl-12 block w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500">
+                                   class="pl-10 sm:pl-12 block w-full text-xs sm:text-sm rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500">
                         </div>
-                        <p class="mt-1 text-sm text-gray-500">Bonus kehadiran (positif) atau potongan keterlambatan (negatif)</p>
+                        <p class="mt-1 text-xs sm:text-sm text-gray-500">Bonus kehadiran (positif) atau potongan keterlambatan (negatif)</p>
                     </div>
                     
                     <div class="mb-4">
-                        <label for="phoneAllowance" class="block text-sm font-medium text-gray-700">Uang Pulsa</label>
+                        <label for="phoneAllowance" class="block text-xs sm:text-sm font-medium text-gray-700">Uang Pulsa</label>
                         <div class="mt-1 relative rounded-md shadow-sm">
                             <div class="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
-                                <span class="text-gray-500 sm:text-sm">Rp</span>
+                                <span class="text-gray-500 text-xs sm:text-sm">Rp</span>
                             </div>
                             <input type="text" id="phoneAllowance" name="phone_allowance" min="0"
                                    value="5.000"
-                                   class="pl-12 block w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500">
+                                   class="pl-10 sm:pl-12 block w-full text-xs sm:text-sm rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500">
                         </div>
                     </div>
                     
                     <div class="mb-4">
-                        <label for="overtimeAmount" class="block text-sm font-medium text-gray-700">Lembur (Rupiah)</label>
+                        <label for="overtimeAmount" class="block text-xs sm:text-sm font-medium text-gray-700">Lembur (Rupiah)</label>
                         <div class="mt-1 relative rounded-md shadow-sm">
                             <div class="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
-                                <span class="text-gray-500 sm:text-sm">Rp</span>
+                                <span class="text-gray-500 text-xs sm:text-sm">Rp</span>
                             </div>
                             <input type="text" id="overtimeAmount" name="overtime_amount" min="0"
                                    value="0"
-                                   class="pl-12 block w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500">
+                                   class="pl-10 sm:pl-12 block w-full text-xs sm:text-sm rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500">
                         </div>
-                        <p class="mt-1 text-sm text-gray-500">Input manual jumlah lembur dalam rupiah</p>
+                        <p class="mt-1 text-xs sm:text-sm text-gray-500">Input manual jumlah lembur dalam rupiah</p>
                     </div>
                     
                     <div class="mb-4">
-                        <label for="deductions" class="block text-sm font-medium text-gray-700">Potongan</label>
+                        <label for="deductions" class="block text-xs sm:text-sm font-medium text-gray-700">Potongan</label>
                         <div class="mt-1 relative rounded-md shadow-sm">
                             <div class="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
-                                <span class="text-gray-500 sm:text-sm">Rp</span>
+                                <span class="text-gray-500 text-xs sm:text-sm">Rp</span>
                             </div>
                             <input type="text" id="deductions" name="deductions" min="0"
                                    value="0"
-                                   class="pl-12 block w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500">
+                                   class="pl-10 sm:pl-12 block w-full text-xs sm:text-sm rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500">
                         </div>
-                        <p class="mt-1 text-sm text-gray-500">Potongan gaji (BPJS, pinjaman, dll)</p>
+                        <p class="mt-1 text-xs sm:text-sm text-gray-500">Potongan gaji (BPJS, pinjaman, dll)</p>
                     </div>
                     
                     <div class="mb-4">
-                        <label for="notes" class="block text-sm font-medium text-gray-700">Catatan</label>
+                        <label for="notes" class="block text-xs sm:text-sm font-medium text-gray-700">Catatan</label>
                         <textarea id="notes" name="notes" rows="3"
-                                  class="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500"></textarea>
+                                  class="mt-1 block w-full text-xs sm:text-sm rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500"></textarea>
                     </div>
                     
-                    <div class="flex justify-end space-x-2">
+                    <div class="flex flex-col sm:flex-row sm:justify-end space-y-2 sm:space-y-0 sm:space-x-2">
                         <button type="button" onclick="closeDailySalaryModal()"
-                                class="bg-gray-300 hover:bg-gray-400 text-gray-800 font-bold py-2 px-4 rounded">
+                                class="bg-gray-300 hover:bg-gray-400 text-gray-800 font-bold py-2 px-3 sm:px-4 rounded text-xs sm:text-sm">
                             Batal
                         </button>
                         <button type="submit"
-                                class="bg-blue-500 hover:bg-blue-700 text-white font-bold py-2 px-4 rounded">
+                                class="bg-blue-500 hover:bg-blue-700 text-white font-bold py-2 px-3 sm:px-4 rounded text-xs sm:text-sm">
                             Simpan
                         </button>
                     </div>
@@ -436,10 +521,10 @@
 
     <!-- Salary Release Modal -->
     <div id="salaryReleaseModal" class="fixed inset-0 bg-gray-600 bg-opacity-50 overflow-y-auto h-full w-full hidden z-50">
-        <div class="relative top-20 mx-auto p-5 border w-96 shadow-lg rounded-md bg-white">
+        <div class="relative top-4 sm:top-20 mx-auto p-4 sm:p-5 border w-full max-w-md sm:w-96 shadow-lg rounded-md bg-white m-4">
             <div class="mt-3">
                 <div class="flex justify-between items-center mb-4">
-                    <h3 class="text-lg font-medium text-gray-900">Buat Rilis Gaji</h3>
+                    <h3 class="text-base sm:text-lg font-medium text-gray-900">Buat Rilis Gaji</h3>
                     <button onclick="closeSalaryReleaseModal()" class="text-gray-400 hover:text-gray-600">
                         <i class="fas fa-times"></i>
                     </button>
@@ -448,27 +533,27 @@
                     <input type="hidden" name="employee_id" value="{{ $employee->id }}">
                     
                     <div class="mb-4">
-                        <label for="periodStart" class="block text-sm font-medium text-gray-700">Periode Mulai</label>
+                        <label for="periodStart" class="block text-xs sm:text-sm font-medium text-gray-700">Periode Mulai</label>
                         <input type="date" id="periodStart" name="period_start" required
-                               class="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500">
+                               class="mt-1 block w-full text-xs sm:text-sm rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500">
                     </div>
                     
                     <div class="mb-4">
-                        <label for="periodEnd" class="block text-sm font-medium text-gray-700">Periode Selesai</label>
+                        <label for="periodEnd" class="block text-xs sm:text-sm font-medium text-gray-700">Periode Selesai</label>
                         <input type="date" id="periodEnd" name="period_end" required
-                               class="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500">
+                               class="mt-1 block w-full text-xs sm:text-sm rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500">
                     </div>
                     
                     <div class="mb-4">
-                        <label for="releaseDeductions" class="block text-sm font-medium text-gray-700">Potongan</label>
+                        <label for="releaseDeductions" class="block text-xs sm:text-sm font-medium text-gray-700">Potongan</label>
                         <input type="number" id="releaseDeductions" name="deductions" step="0.01" min="0"
-                               class="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500">
+                               class="mt-1 block w-full text-xs sm:text-sm rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500">
                     </div>
                     
                     <div class="mb-4">
-                        <label for="releaseNotes" class="block text-sm font-medium text-gray-700">Catatan</label>
+                        <label for="releaseNotes" class="block text-xs sm:text-sm font-medium text-gray-700">Catatan</label>
                         <textarea id="releaseNotes" name="notes" rows="3"
-                                  class="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500"></textarea>
+                                  class="mt-1 block w-full text-xs sm:text-sm rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500"></textarea>
                     </div>
                     
                     <div id="salaryPreview" class="mb-4 p-3 bg-gray-50 rounded hidden">
@@ -476,17 +561,17 @@
                         <div id="previewContent"></div>
                     </div>
                     
-                    <div class="flex justify-end space-x-2">
+                    <div class="flex flex-col sm:flex-row sm:justify-end space-y-2 sm:space-y-0 sm:space-x-2">
                         <button type="button" onclick="closeSalaryReleaseModal()"
-                                class="bg-gray-300 hover:bg-gray-400 text-gray-800 font-bold py-2 px-4 rounded">
+                                class="bg-gray-300 hover:bg-gray-400 text-gray-800 font-bold py-2 px-3 sm:px-4 rounded text-xs sm:text-sm">
                             Batal
                         </button>
                         <button type="button" onclick="previewSalaryRelease()"
-                                class="bg-yellow-500 hover:bg-yellow-700 text-white font-bold py-2 px-4 rounded">
+                                class="bg-yellow-500 hover:bg-yellow-700 text-white font-bold py-2 px-3 sm:px-4 rounded text-xs sm:text-sm">
                             Preview
                         </button>
                         <button type="submit"
-                                class="bg-purple-500 hover:bg-purple-700 text-white font-bold py-2 px-4 rounded">
+                                class="bg-purple-500 hover:bg-purple-700 text-white font-bold py-2 px-3 sm:px-4 rounded text-xs sm:text-sm">
                             Buat Rilis
                         </button>
                     </div>
