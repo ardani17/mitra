@@ -312,9 +312,14 @@ class ProjectBillingController extends Controller
     {
         Gate::authorize('create', ProjectBilling::class);
 
-        $project->load(['paymentSchedules' => function ($query) {
-            $query->orderBy('termin_number');
-        }]);
+        $project->load([
+            'paymentSchedules' => function ($query) {
+                $query->orderBy('termin_number');
+            },
+            'billings' => function ($query) {
+                $query->orderBy('created_at', 'desc');
+            }
+        ]);
 
         return view('project-billings.manage-schedule', compact('project'));
     }
