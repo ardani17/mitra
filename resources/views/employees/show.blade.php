@@ -79,6 +79,10 @@
                             </div>
                         </div>
                         <div class="flex space-x-2">
+                            <a href="{{ route('finance.employees.custom-off-days.index', $employee) }}"
+                               class="bg-indigo-500 hover:bg-indigo-700 text-white font-bold py-2 px-4 rounded text-sm">
+                                <i class="fas fa-calendar-times mr-2"></i>Hari Libur
+                            </a>
                             <button onclick="exportSalaryData()" class="bg-green-500 hover:bg-green-700 text-white font-bold py-2 px-4 rounded text-sm">
                                 <i class="fas fa-download mr-2"></i>Export
                             </button>

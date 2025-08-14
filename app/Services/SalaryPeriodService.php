@@ -5,6 +5,8 @@ namespace App\Services;
 use App\Models\Employee;
 use App\Models\DailySalary;
 use App\Models\Setting;
+use App\Models\EmployeeCustomOffDay;
+use App\Models\EmployeeWorkSchedule;
 use Carbon\Carbon;
 use Illuminate\Support\Collection;
 
@@ -78,17 +80,13 @@ class SalaryPeriodService
     }
     
     /**
-     * Calculate working days in period (exclude weekends)
+     * Calculate working days in period (total days without weekend deduction)
+     * New formula: Total days in period = working days base
+     * Individual off days will be deducted per employee
      */
     public function getWorkingDaysInPeriod($startDate, $endDate): int
     {
-        $workingDays = 0;
-        for ($date = $startDate->copy(); $date <= $endDate; $date->addDay()) {
-            if (!$date->isWeekend()) {
-                $workingDays++;
-            }
-        }
-        return $workingDays;
+        return $startDate->diffInDays($endDate) + 1;
     }
     
     /**
@@ -97,18 +95,22 @@ class SalaryPeriodService
     public function getEmployeeSalaryStatus($employeeId, $period = null): array
     {
         $period = $period ?: $this->getCurrentPeriod();
+        $employee = Employee::find($employeeId);
         
         $inputDays = DailySalary::where('employee_id', $employeeId)
             ->whereBetween('work_date', [$period['start'], $period['end']])
             ->where('status', 'confirmed')
             ->count();
-            
-        $percentage = $period['working_days'] > 0 ? ($inputDays / $period['working_days']) * 100 : 0;
+        
+        // PERUBAHAN: Gunakan perhitungan per employee
+        $workingDays = $employee ? $employee->getWorkingDaysInPeriod($period['start'], $period['end']) : $period['working_days'];
+        $percentage = $workingDays > 0 ? ($inputDays / $workingDays) * 100 : 0;
         
         return [
             'employee_id' => $employeeId,
+            'employee' => $employee,
             'period' => $period,
-            'working_days' => $period['working_days'],
+            'working_days' => $workingDays, // Sekarang per employee
             'input_days' => $inputDays,
             'percentage' => round($percentage, 1),
             'status' => $this->determineSalaryStatus($percentage),
@@ -137,7 +139,10 @@ class SalaryPeriodService
         foreach ($employees as $employee) {
             $salary = $salaryData->get($employee->id);
             $inputDays = $salary ? $salary->input_days : 0;
-            $percentage = $period['working_days'] > 0 ? ($inputDays / $period['working_days']) * 100 : 0;
+            
+            // PERUBAHAN: Gunakan perhitungan per employee
+            $workingDays = $employee->getWorkingDaysInPeriod($period['start'], $period['end']);
+            $percentage = $workingDays > 0 ? ($inputDays / $workingDays) * 100 : 0;
             
             $statuses->push([
                 'employee' => $employee,
@@ -145,11 +150,14 @@ class SalaryPeriodService
                 'name' => $employee->name,
                 'employee_code' => $employee->employee_code,
                 'period' => $period,
-                'working_days' => $period['working_days'],
+                'working_days' => $workingDays, // Sekarang per employee
                 'input_days' => $inputDays,
                 'percentage' => round($percentage, 1),
                 'status' => $this->determineSalaryStatus($percentage),
-                'last_input_date' => $salary ? $salary->last_input_date : null
+                'last_input_date' => $salary ? $salary->last_input_date : null,
+                'off_days_count' => $employee->customOffDays()
+                    ->whereBetween('off_date', [$period['start'], $period['end']])
+                    ->count()
             ]);
         }
         
@@ -307,5 +315,70 @@ class SalaryPeriodService
         $prevMonth = $currentPeriod['start']->copy()->subDay();
         
         return $this->getCurrentPeriod($prevMonth);
+    }
+    
+    /**
+     * Get working days for specific employee (backward compatibility method)
+     */
+    public function getWorkingDaysForEmployee($employeeId, $startDate, $endDate): int
+    {
+        $employee = Employee::find($employeeId);
+        
+        if (!$employee) {
+            return $this->getWorkingDaysInPeriod($startDate, $endDate);
+        }
+        
+        return $employee->getWorkingDaysInPeriod($startDate, $endDate);
+    }
+    
+    /**
+     * Get employees with custom off days
+     */
+    public function getEmployeesWithCustomOffDays($period = null): Collection
+    {
+        $period = $period ?: $this->getCurrentPeriod();
+        
+        return Employee::active()
+            ->whereHas('customOffDays', function($query) use ($period) {
+                $query->whereBetween('off_date', [$period['start'], $period['end']]);
+            })
+            ->with(['customOffDays' => function($query) use ($period) {
+                $query->whereBetween('off_date', [$period['start'], $period['end']])
+                      ->orderBy('off_date');
+            }])
+            ->get();
+    }
+    
+    /**
+     * Get summary of off days usage
+     */
+    public function getOffDaysSummary($period = null): array
+    {
+        $period = $period ?: $this->getCurrentPeriod();
+        $employees = Employee::active()->get();
+        
+        $summary = [
+            'total_employees' => $employees->count(),
+            'employees_with_off_days' => 0,
+            'total_off_days' => 0,
+            'average_off_days_per_employee' => 0
+        ];
+        
+        foreach ($employees as $employee) {
+            $offDaysCount = $employee->customOffDays()
+                ->whereBetween('off_date', [$period['start'], $period['end']])
+                ->count();
+            
+            if ($offDaysCount > 0) {
+                $summary['employees_with_off_days']++;
+                $summary['total_off_days'] += $offDaysCount;
+            }
+        }
+        
+        if ($summary['employees_with_off_days'] > 0) {
+            $summary['average_off_days_per_employee'] = round($summary['total_off_days'] / $summary['employees_with_off_days'], 1);
+        }
+        
+        return $summary;
     }
 }

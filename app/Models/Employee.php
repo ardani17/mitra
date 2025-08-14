@@ -61,6 +61,11 @@ class Employee extends Model
         return $this->hasMany(SalaryRelease::class);
     }
 
+    public function customOffDays()
+    {
+        return $this->hasMany(EmployeeCustomOffDay::class);
+    }
+
     // Scopes
     public function scopeActive($query)
     {
@@ -207,5 +212,80 @@ class Employee extends Model
         $attendanceScore = min(($totalDays / $expectedDays) * 100, 100);
         
         return round($attendanceScore, 1);
+    }
+
+    /**
+     * Get working days for this employee in a specific period
+     * New formula: Total days - employee's off days = working days
+     * (No weekend deduction since we now have salary period system)
+     */
+    public function getWorkingDaysInPeriod($startDate, $endDate)
+    {
+        $startDate = \Carbon\Carbon::parse($startDate);
+        $endDate = \Carbon\Carbon::parse($endDate);
+        
+        $totalDays = $startDate->diffInDays($endDate) + 1;
+        
+        // Get employee's off days for this period
+        $offDays = $this->customOffDays()
+            ->whereBetween('off_date', [$startDate->format('Y-m-d'), $endDate->format('Y-m-d')])
+            ->count();
+        
+        $workingDays = $totalDays - $offDays;
+        
+        return max(0, $workingDays);
+    }
+
+    /**
+     * Count weekends in a date range
+     */
+    private function countWeekends($startDate, $endDate)
+    {
+        $weekends = 0;
+        $current = $startDate->copy();
+        
+        while ($current->lte($endDate)) {
+            if ($current->isWeekend()) {
+                $weekends++;
+            }
+            $current->addDay();
+        }
+        
+        return $weekends;
+    }
+
+    /**
+     * Get employee's off days for a specific period
+     */
+    public function getOffDaysInPeriod($startDate, $endDate)
+    {
+        return $this->customOffDays()
+            ->whereBetween('off_date', [$startDate, $endDate])
+            ->orderBy('off_date')
+            ->get();
+    }
+
+    /**
+     * Check if a specific date is an off day for this employee
+     */
+    public function isOffDay($date)
+    {
+        return $this->customOffDays()
+            ->where('off_date', \Carbon\Carbon::parse($date)->format('Y-m-d'))
+            ->exists();
+    }
+
+    /**
+     * Get total off days count for this employee
+     */
+    public function getTotalOffDays($startDate = null, $endDate = null)
+    {
+        $query = $this->customOffDays();
+        
+        if ($startDate && $endDate) {
+            $query->whereBetween('off_date', [$startDate, $endDate]);
+        }
+        
+        return $query->count();
     }
 }

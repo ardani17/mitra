@@ -15,6 +15,8 @@ use App\Http\Controllers\UserController;
 use App\Http\Controllers\CashflowController;
 use App\Http\Controllers\FinanceDashboardController;
 use App\Http\Controllers\EmployeeController;
+use App\Http\Controllers\EmployeeWorkScheduleController;
+use App\Http\Controllers\EmployeeCustomOffDayController;
 use App\Http\Controllers\DailySalaryController;
 use App\Http\Controllers\SalaryReleaseController;
 use Illuminate\Support\Facades\Route;
@@ -215,6 +217,19 @@ Route::middleware('auth')->group(function () {
         Route::get('/employees/{employee}/documents', [EmployeeController::class, 'documents'])->name('employees.documents');
         Route::post('/employees/{employee}/documents', [EmployeeController::class, 'uploadDocument'])->name('employees.documents.upload');
         Route::delete('/employees/{employee}/documents/{document}', [EmployeeController::class, 'deleteDocument'])->name('employees.documents.delete');
+        
+        // Employee Off Days Management (Simplified - no work schedules)
+        Route::get('/employees/{employee}/custom-off-days', [EmployeeCustomOffDayController::class, 'index'])->name('employees.custom-off-days.index');
+        Route::get('/employees/{employee}/custom-off-days/create', [EmployeeCustomOffDayController::class, 'create'])->name('employees.custom-off-days.create');
+        Route::post('/employees/{employee}/custom-off-days', [EmployeeCustomOffDayController::class, 'store'])->name('employees.custom-off-days.store');
+        Route::get('/employees/{employee}/custom-off-days/{customOffDay}', [EmployeeCustomOffDayController::class, 'show'])->name('employees.custom-off-days.show');
+        Route::get('/employees/{employee}/custom-off-days/{customOffDay}/edit', [EmployeeCustomOffDayController::class, 'edit'])->name('employees.custom-off-days.edit');
+        Route::put('/employees/{employee}/custom-off-days/{customOffDay}', [EmployeeCustomOffDayController::class, 'update'])->name('employees.custom-off-days.update');
+        Route::delete('/employees/{employee}/custom-off-days/{customOffDay}', [EmployeeCustomOffDayController::class, 'destroy'])->name('employees.custom-off-days.destroy');
+        Route::get('/employees/{employee}/custom-off-days-calendar', [EmployeeCustomOffDayController::class, 'calendar'])->name('employees.custom-off-days.calendar');
+        Route::post('/employees/{employee}/custom-off-days/quick-add', [EmployeeCustomOffDayController::class, 'quickAdd'])->name('employees.custom-off-days.quick-add');
+        Route::post('/employees/{employee}/custom-off-days/quick-remove', [EmployeeCustomOffDayController::class, 'quickRemove'])->name('employees.custom-off-days.quick-remove');
+        Route::delete('/employees/{employee}/custom-off-days-bulk', [EmployeeCustomOffDayController::class, 'bulkDelete'])->name('employees.custom-off-days.bulk-delete');
         
         // Employee Daily Salary Management (moved from separate menu)
         Route::post('/employees/{employee}/daily-salaries', [DailySalaryController::class, 'store'])->name('employees.daily-salaries.store');
