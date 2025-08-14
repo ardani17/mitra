@@ -4,31 +4,33 @@
 
 @section('content')
 <div class="container mx-auto px-4 py-6 sm:py-8">
-    <!-- Simple Header -->
+    <!-- Header -->
     <div class="flex flex-col sm:flex-row sm:justify-between sm:items-center mb-4 sm:mb-6 space-y-4 sm:space-y-0">
-        <div>
+        <div class="min-w-0 flex-1">
             <h1 class="text-2xl sm:text-3xl font-bold text-gray-800">Jurnal Cashflow</h1>
-            <p class="text-sm sm:text-base text-gray-600 mt-1">Kelola dan pantau arus kas perusahaan</p>
+            <p class="text-gray-600 mt-1 text-sm sm:text-base">Kelola dan pantau arus kas perusahaan</p>
         </div>
         <div class="flex flex-col sm:flex-row space-y-2 sm:space-y-0 sm:space-x-3">
             <a href="{{ route('finance.cashflow.export') }}"
-               class="bg-gray-600 hover:bg-gray-700 text-white font-bold py-2 px-4 rounded text-sm text-center">
+               class="bg-gray-600 hover:bg-gray-700 text-white font-bold py-2 px-3 sm:px-4 rounded text-center text-sm sm:text-base">
                 <svg class="w-4 h-4 mr-2 inline" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 10v6m0 0l-3-3m3 3l3-3m2 8H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"/>
                 </svg>
-                Export
+                <span class="hidden sm:inline">Export Data</span>
+                <span class="sm:hidden">Export</span>
             </a>
             <a href="{{ route('finance.cashflow.create') }}"
-               class="bg-blue-600 hover:bg-blue-700 text-white font-bold py-2 px-4 rounded text-sm text-center">
+               class="bg-blue-600 hover:bg-blue-700 text-white font-bold py-2 px-3 sm:px-4 rounded text-center text-sm sm:text-base">
                 <svg class="w-4 h-4 mr-2 inline" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4"/>
                 </svg>
-                Tambah Transaksi
+                <span class="hidden sm:inline">Tambah Transaksi</span>
+                <span class="sm:hidden">Tambah</span>
             </a>
         </div>
     </div>
 
-    <!-- Simple Summary Cards -->
+    <!-- Summary Cards -->
     <div class="grid grid-cols-1 sm:grid-cols-3 gap-3 sm:gap-6 mb-6">
         <div class="bg-white rounded-lg shadow-md p-3 sm:p-6">
             <div class="flex items-center">
@@ -81,7 +83,7 @@
         </div>
     </div>
 
-    <!-- Simple Filter Section -->
+    <!-- Filter Section -->
     <div class="bg-white rounded-lg shadow-md p-4 sm:p-6 mb-4 sm:mb-6">
         <h3 class="text-lg font-semibold text-gray-800 mb-4">Filter Transaksi</h3>
         <form method="GET" action="{{ route('finance.cashflow.index') }}">
@@ -103,15 +105,15 @@
             
             <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-6 gap-3 sm:gap-4">
                 <div>
-                    <label for="search" class="block text-xs sm:text-sm font-medium text-gray-700 mb-1 sm:mb-2">Pencarian</label>
+                    <label for="search" class="block text-sm font-medium text-gray-700 mb-2">Pencarian</label>
                     <input type="text" name="search" id="search" value="{{ request('search') }}"
                            placeholder="Cari deskripsi..."
-                           class="w-full px-2 sm:px-3 py-2 text-sm border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500">
+                           class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 text-sm sm:text-base">
                 </div>
 
                 <div>
-                    <label for="type" class="block text-xs sm:text-sm font-medium text-gray-700 mb-1 sm:mb-2">Tipe</label>
-                    <select name="type" id="type" class="w-full px-2 sm:px-3 py-2 text-sm border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500">
+                    <label for="type" class="block text-sm font-medium text-gray-700 mb-2">Tipe</label>
+                    <select name="type" id="type" class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 text-sm sm:text-base">
                         <option value="">Semua Tipe</option>
                         <option value="income" {{ request('type') === 'income' ? 'selected' : '' }}>Pemasukan</option>
                         <option value="expense" {{ request('type') === 'expense' ? 'selected' : '' }}>Pengeluaran</option>
@@ -119,8 +121,8 @@
                 </div>
 
                 <div>
-                    <label for="status" class="block text-xs sm:text-sm font-medium text-gray-700 mb-1 sm:mb-2">Status</label>
-                    <select name="status" id="status" class="w-full px-2 sm:px-3 py-2 text-sm border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500">
+                    <label for="status" class="block text-sm font-medium text-gray-700 mb-2">Status</label>
+                    <select name="status" id="status" class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 text-sm sm:text-base">
                         <option value="">Semua Status</option>
                         <option value="pending" {{ request('status') === 'pending' ? 'selected' : '' }}>Menunggu</option>
                         <option value="confirmed" {{ request('status') === 'confirmed' ? 'selected' : '' }}>Dikonfirmasi</option>
@@ -129,8 +131,8 @@
                 </div>
 
                 <div>
-                    <label for="category_id" class="block text-xs sm:text-sm font-medium text-gray-700 mb-1 sm:mb-2">Kategori</label>
-                    <select name="category_id" id="category_id" class="w-full px-2 sm:px-3 py-2 text-sm border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500">
+                    <label for="category_id" class="block text-sm font-medium text-gray-700 mb-2">Kategori</label>
+                    <select name="category_id" id="category_id" class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 text-sm sm:text-base">
                         <option value="">Semua Kategori</option>
                         @foreach($categories as $category)
                             <option value="{{ $category->id }}" {{ request('category_id') == $category->id ? 'selected' : '' }}>
@@ -141,8 +143,8 @@
                 </div>
 
                 <div>
-                    <label for="project_id" class="block text-xs sm:text-sm font-medium text-gray-700 mb-1 sm:mb-2">Proyek</label>
-                    <select name="project_id" id="project_id" class="w-full px-2 sm:px-3 py-2 text-sm border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500">
+                    <label for="project_id" class="block text-sm font-medium text-gray-700 mb-2">Proyek</label>
+                    <select name="project_id" id="project_id" class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 text-sm sm:text-base">
                         <option value="">Semua Proyek</option>
                         @foreach($projects as $project)
                             <option value="{{ $project->id }}" {{ request('project_id') == $project->id ? 'selected' : '' }}>
@@ -153,7 +155,7 @@
                 </div>
 
                 <div class="sm:flex sm:items-end">
-                    <button type="submit" class="w-full bg-blue-600 hover:bg-blue-700 text-white px-4 py-2 rounded text-sm">
+                    <button type="submit" class="w-full bg-blue-600 hover:bg-blue-700 text-white font-bold py-2 px-4 rounded text-sm sm:text-base">
                         Filter
                     </button>
                 </div>
@@ -161,19 +163,19 @@
 
             <div class="grid grid-cols-1 sm:grid-cols-3 gap-3 sm:gap-4 mt-4">
                 <div>
-                    <label for="start_date" class="block text-xs sm:text-sm font-medium text-gray-700 mb-1 sm:mb-2">Tanggal Mulai</label>
+                    <label for="start_date" class="block text-sm font-medium text-gray-700 mb-2">Tanggal Mulai</label>
                     <input type="date" name="start_date" id="start_date" value="{{ request('start_date') }}"
-                           class="w-full px-2 sm:px-3 py-2 text-sm border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500">
+                           class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 text-sm sm:text-base">
                 </div>
                 
                 <div>
-                    <label for="end_date" class="block text-xs sm:text-sm font-medium text-gray-700 mb-1 sm:mb-2">Tanggal Akhir</label>
+                    <label for="end_date" class="block text-sm font-medium text-gray-700 mb-2">Tanggal Akhir</label>
                     <input type="date" name="end_date" id="end_date" value="{{ request('end_date') }}"
-                           class="w-full px-2 sm:px-3 py-2 text-sm border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500">
+                           class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 text-sm sm:text-base">
                 </div>
 
                 <div class="sm:flex sm:items-end">
-                    <a href="{{ route('finance.cashflow.index') }}" class="w-full bg-gray-600 hover:bg-gray-700 text-white px-4 py-2 rounded text-sm text-center block">
+                    <a href="{{ route('finance.cashflow.index') }}" class="w-full bg-gray-300 hover:bg-gray-400 text-gray-800 font-bold py-2 px-4 rounded text-center text-sm sm:text-base block">
                         Reset
                     </a>
                 </div>
@@ -181,7 +183,7 @@
         </form>
     </div>
 
-    <!-- Simple Transactions Table -->
+    <!-- Transactions Table -->
     <div class="bg-white rounded-lg shadow-md overflow-hidden">
         <div class="px-6 py-4 border-b border-gray-200">
             <div class="flex items-center justify-between">
@@ -367,7 +369,7 @@
 
             <!-- Bulk Actions -->
             <div class="px-6 py-4 border-t border-gray-200 bg-gray-50" id="bulk-actions" style="display: none;">
-                <form method="POST" action="{{ route('finance.cashflow.bulk-action') }}" class="flex items-center space-x-4">
+                <form method="POST" action="{{ route('finance.cashflow.bulk-action') }}" class="flex flex-col sm:flex-row sm:items-center space-y-2 sm:space-y-0 sm:space-x-4">
                     @csrf
                     <input type="hidden" name="entries" id="selected-entries">
                     <span class="text-sm text-gray-600">Aksi untuk item terpilih:</span>
@@ -487,7 +489,7 @@ document.addEventListener('DOMContentLoaded', function() {
             if (submitBtn) {
                 const originalText = submitBtn.innerHTML;
                 submitBtn.innerHTML = `
-                    <svg class="w-5 h-5 mr-2 animate-spin" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <svg class="w-5 h-5 mr-2 animate-spin inline" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15"/>
                     </svg>
                     Memuat...

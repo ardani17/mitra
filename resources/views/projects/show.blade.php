@@ -516,71 +516,123 @@
 
             <!-- Tab Pengeluaran -->
             <div id="content-pengeluaran" class="tab-content hidden">
-                <div class="flex justify-between items-center mb-4">
+                <div class="flex flex-col sm:flex-row sm:justify-between sm:items-center mb-4 sm:mb-6 space-y-3 sm:space-y-0">
                     <h3 class="text-lg font-semibold text-gray-800">Pengeluaran Proyek</h3>
                     @can('create', App\Models\ProjectExpense::class)
-                    <a href="{{ route('expenses.create', ['project' => $project->id]) }}" class="bg-blue-600 hover:bg-blue-700 text-white font-bold py-2 px-4 rounded text-sm">
-                        Tambah Pengeluaran
+                    <a href="{{ route('expenses.create', ['project' => $project->id]) }}" class="bg-blue-600 hover:bg-blue-700 text-white font-bold py-2 px-4 rounded text-sm text-center">
+                        <span class="hidden sm:inline">Tambah Pengeluaran</span>
+                        <span class="sm:hidden">Tambah</span>
                     </a>
                     @endcan
                 </div>
                 
                 @if($project->expenses->count() > 0)
-                <div class="overflow-x-auto">
-                    <table class="min-w-full divide-y divide-gray-200">
-                        <thead class="bg-blue-600">
-                            <tr>
-                                <th class="px-6 py-3 text-left text-xs font-bold text-white uppercase tracking-wider">Tanggal</th>
-                                <th class="px-6 py-3 text-left text-xs font-bold text-white uppercase tracking-wider">Deskripsi</th>
-                                <th class="px-6 py-3 text-left text-xs font-bold text-white uppercase tracking-wider">Kategori</th>
-                                <th class="px-6 py-3 text-left text-xs font-bold text-white uppercase tracking-wider">Jumlah</th>
-                                <th class="px-6 py-3 text-left text-xs font-bold text-white uppercase tracking-wider">Status</th>
-                            </tr>
-                        </thead>
-                        <tbody class="bg-white divide-y divide-gray-200">
-                            @foreach($project->expenses->take(10) as $expense)
-                            <tr class="hover:bg-gray-50">
-                                <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-900">
-                                    {{ $expense->expense_date->format('d M Y') }}
-                                </td>
-                                <td class="px-6 py-4 text-sm text-gray-900">
-                                    {{ Str::limit($expense->description, 50) }}
-                                </td>
-                                <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
-                                    {{ ucfirst($expense->category) }}
-                                </td>
-                                <td class="px-6 py-4 whitespace-nowrap text-sm font-medium text-gray-900">
-                                    Rp {{ number_format($expense->amount, 0, ',', '.') }}
-                                </td>
-                                <td class="px-6 py-4 whitespace-nowrap">
-                                    <span class="inline-flex px-2 py-1 text-xs font-semibold rounded-full 
-                                          @if($expense->status == 'approved') bg-green-100 text-green-800
-                                          @elseif($expense->status == 'rejected') bg-red-100 text-red-800
-                                          @elseif($expense->status == 'submitted') bg-yellow-100 text-yellow-800
-                                          @else bg-gray-100 text-gray-800 @endif">
-                                        {{ ucfirst($expense->status) }}
-                                    </span>
-                                </td>
-                            </tr>
-                            @endforeach
-                        </tbody>
-                    </table>
+                <!-- Desktop Table View -->
+                <div class="hidden sm:block bg-white rounded-lg shadow overflow-hidden">
+                    <div class="overflow-x-auto">
+                        <table class="min-w-full divide-y divide-gray-200">
+                            <thead class="bg-blue-600">
+                                <tr>
+                                    <th class="px-6 py-3 text-left text-xs font-bold text-white uppercase tracking-wider">Tanggal</th>
+                                    <th class="px-6 py-3 text-left text-xs font-bold text-white uppercase tracking-wider">Deskripsi</th>
+                                    <th class="px-6 py-3 text-left text-xs font-bold text-white uppercase tracking-wider">Kategori</th>
+                                    <th class="px-6 py-3 text-left text-xs font-bold text-white uppercase tracking-wider">Jumlah</th>
+                                    <th class="px-6 py-3 text-left text-xs font-bold text-white uppercase tracking-wider">Status</th>
+                                </tr>
+                            </thead>
+                            <tbody class="bg-white divide-y divide-gray-200">
+                                @foreach($project->expenses->take(10) as $expense)
+                                <tr class="hover:bg-gray-50">
+                                    <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-900">
+                                        {{ $expense->expense_date->format('d M Y') }}
+                                    </td>
+                                    <td class="px-6 py-4 text-sm text-gray-900">
+                                        {{ Str::limit($expense->description, 50) }}
+                                    </td>
+                                    <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
+                                        {{ ucfirst($expense->category) }}
+                                    </td>
+                                    <td class="px-6 py-4 whitespace-nowrap text-sm font-medium text-gray-900">
+                                        Rp {{ number_format($expense->amount, 0, ',', '.') }}
+                                    </td>
+                                    <td class="px-6 py-4 whitespace-nowrap">
+                                        <span class="inline-flex px-2 py-1 text-xs font-semibold rounded-full
+                                              @if($expense->status == 'approved') bg-green-100 text-green-800
+                                              @elseif($expense->status == 'rejected') bg-red-100 text-red-800
+                                              @elseif($expense->status == 'submitted') bg-yellow-100 text-yellow-800
+                                              @else bg-gray-100 text-gray-800 @endif">
+                                            {{ ucfirst($expense->status) }}
+                                        </span>
+                                    </td>
+                                </tr>
+                                @endforeach
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+
+                <!-- Mobile Card View -->
+                <div class="block sm:hidden space-y-4">
+                    @foreach($project->expenses->take(10) as $expense)
+                    <div class="bg-white rounded-lg shadow-md p-4 border border-gray-200">
+                        <div class="flex justify-between items-start mb-3">
+                            <div class="flex-1">
+                                <h4 class="text-sm font-medium text-gray-900 mb-1">{{ Str::limit($expense->description, 40) }}</h4>
+                                <p class="text-xs text-gray-500">{{ $expense->expense_date->format('d M Y') }}</p>
+                            </div>
+                            <span class="inline-flex px-2 py-1 text-xs font-semibold rounded-full ml-2
+                                  @if($expense->status == 'approved') bg-green-100 text-green-800
+                                  @elseif($expense->status == 'rejected') bg-red-100 text-red-800
+                                  @elseif($expense->status == 'submitted') bg-yellow-100 text-yellow-800
+                                  @else bg-gray-100 text-gray-800 @endif">
+                                {{ ucfirst($expense->status) }}
+                            </span>
+                        </div>
+                        
+                        <div class="grid grid-cols-2 gap-3 text-sm">
+                            <div>
+                                <span class="text-gray-500">Kategori:</span>
+                                <p class="font-medium text-gray-900">{{ ucfirst($expense->category) }}</p>
+                            </div>
+                            <div>
+                                <span class="text-gray-500">Jumlah:</span>
+                                <p class="font-medium text-gray-900">Rp {{ number_format($expense->amount, 0, ',', '.') }}</p>
+                            </div>
+                        </div>
+                        
+                        @if(strlen($expense->description) > 40)
+                        <div class="mt-3 pt-3 border-t border-gray-100">
+                            <p class="text-xs text-gray-600">{{ $expense->description }}</p>
+                        </div>
+                        @endif
+                    </div>
+                    @endforeach
                 </div>
                 
                 @if($project->expenses->count() > 10)
-                <div class="mt-4 text-center">
-                    <a href="{{ route('expenses.index', ['project_id' => $project->id]) }}" class="text-blue-600 hover:text-blue-800 text-sm font-medium">
+                <div class="mt-4 sm:mt-6 text-center">
+                    <a href="{{ route('expenses.index', ['project_id' => $project->id]) }}" class="inline-flex items-center px-4 py-2 bg-blue-50 hover:bg-blue-100 text-blue-600 hover:text-blue-700 text-sm font-medium rounded-lg transition-colors">
+                        <svg class="w-4 h-4 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7"></path>
+                        </svg>
                         Lihat semua pengeluaran ({{ $project->expenses->count() }})
                     </a>
                 </div>
                 @endif
                 @else
-                <div class="text-center py-8">
+                <div class="text-center py-8 sm:py-12">
                     <svg class="mx-auto h-12 w-12 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8c-1.657 0-3 .895-3 2s1.343 2 3 2 3 .895 3 2-1.343 2-3 2m0-8c1.11 0 2.08.402 2.599 1M12 8V7m0 1v8m0 0v1m0-1c-1.11 0-2.08-.402-2.599-1"></path>
                     </svg>
                     <h3 class="mt-2 text-sm font-medium text-gray-900">Belum ada pengeluaran</h3>
                     <p class="mt-1 text-sm text-gray-500">Mulai dengan menambahkan pengeluaran proyek.</p>
+                    @can('create', App\Models\ProjectExpense::class)
+                    <div class="mt-4">
+                        <a href="{{ route('expenses.create', ['project' => $project->id]) }}" class="bg-blue-600 hover:bg-blue-700 text-white font-bold py-2 px-4 rounded text-sm">
+                            Tambah Pengeluaran Pertama
+                        </a>
+                    </div>
+                    @endcan
                 </div>
                 @endif
             </div>
@@ -636,28 +688,30 @@
 
             <!-- Tab Pembayaran -->
             <div id="content-pembayaran" class="tab-content hidden">
-                <div class="flex justify-between items-center mb-4">
+                <div class="flex flex-col sm:flex-row sm:justify-between sm:items-center mb-4 sm:mb-6 space-y-3 sm:space-y-0">
                     <h3 class="text-lg font-semibold text-gray-800">Jadwal Pembayaran Termin</h3>
                     @can('create', App\Models\ProjectBilling::class)
-                    <a href="{{ route('project-billings.manage-schedule', $project) }}" class="bg-blue-600 hover:bg-blue-700 text-white font-bold py-2 px-4 rounded text-sm">
-                        Kelola Jadwal Pembayaran
+                    <a href="{{ route('project-billings.manage-schedule', $project) }}" class="bg-blue-600 hover:bg-blue-700 text-white font-bold py-2 px-4 rounded text-sm text-center">
+                        <span class="hidden sm:inline">Kelola Jadwal Pembayaran</span>
+                        <span class="sm:hidden">Kelola Jadwal</span>
                     </a>
                     @endcan
                 </div>
 
                 <!-- Filter Jadwal Pembayaran -->
-                <div class="mb-4 flex flex-wrap gap-2">
-                    <select id="scheduleStatusFilter" class="border border-gray-300 rounded-md px-3 py-2 text-sm">
+                <div class="mb-4 sm:mb-6 flex flex-col sm:flex-row gap-3 sm:gap-2">
+                    <select id="scheduleStatusFilter" class="border border-gray-300 rounded-md px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500">
                         <option value="">Semua Status</option>
                         <option value="pending">Pending</option>
                         <option value="billed">Ditagih</option>
                         <option value="paid">Dibayar</option>
                         <option value="overdue">Terlambat</option>
                     </select>
-                    <input type="text" id="scheduleSearch" placeholder="Cari jadwal..." class="border border-gray-300 rounded-md px-3 py-2 text-sm flex-1">
+                    <input type="text" id="scheduleSearch" placeholder="Cari jadwal..." class="border border-gray-300 rounded-md px-3 py-2 text-sm flex-1 focus:outline-none focus:ring-2 focus:ring-blue-500">
                 </div>
                 
-                <div id="schedulesContainer" class="bg-white rounded-lg shadow overflow-hidden">
+                <!-- Desktop Table View -->
+                <div id="schedulesContainer" class="hidden sm:block bg-white rounded-lg shadow overflow-hidden">
                     <div class="overflow-x-auto">
                         <table class="min-w-full divide-y divide-gray-200">
                             <thead class="bg-gray-800">
@@ -686,8 +740,24 @@
                     </div>
                 </div>
 
+                <!-- Mobile Card View -->
+                <div id="schedulesContainerMobile" class="block sm:hidden">
+                    <div id="schedulesListMobile" class="space-y-4">
+                        <!-- Mobile cards will be populated by JavaScript -->
+                        <div class="bg-white rounded-lg shadow-md p-4 border border-gray-200">
+                            <div class="flex items-center justify-center py-8">
+                                <svg class="animate-spin h-5 w-5 text-blue-600 mr-2" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
+                                    <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle>
+                                    <path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
+                                </svg>
+                                <span class="text-sm text-gray-500">Memuat jadwal pembayaran...</span>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
                 <!-- Statistik Jadwal Pembayaran -->
-                <div class="mt-6 grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
+                <div class="mt-6 grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
                     <div class="bg-white rounded-lg shadow p-4 border-l-4 border-blue-500">
                         <h4 class="text-sm font-medium text-gray-500">Total Termin</h4>
                         <div class="mt-2 flex justify-between items-end">
@@ -1281,7 +1351,7 @@ function loadPaymentSchedules() {
     const status = document.getElementById('scheduleStatusFilter').value;
     const search = document.getElementById('scheduleSearch').value;
     
-    // Show loading state
+    // Show loading state for desktop
     document.getElementById('schedulesList').innerHTML = `
         <tr>
             <td colspan="6" class="px-6 py-4 text-center text-sm text-gray-500">
@@ -1292,6 +1362,19 @@ function loadPaymentSchedules() {
                 <p class="mt-2">Memuat jadwal pembayaran...</p>
             </td>
         </tr>
+    `;
+    
+    // Show loading state for mobile
+    document.getElementById('schedulesListMobile').innerHTML = `
+        <div class="bg-white rounded-lg shadow-md p-4 border border-gray-200">
+            <div class="flex items-center justify-center py-8">
+                <svg class="animate-spin h-5 w-5 text-blue-600 mr-2" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
+                    <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle>
+                    <path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
+                </svg>
+                <span class="text-sm text-gray-500">Memuat jadwal pembayaran...</span>
+            </div>
+        </div>
     `;
     
     // Fetch payment schedules
@@ -1308,6 +1391,8 @@ function loadPaymentSchedules() {
         })
         .catch(error => {
             console.error('Error fetching payment schedules:', error);
+            
+            // Show error state for desktop
             document.getElementById('schedulesList').innerHTML = `
                 <tr>
                     <td colspan="6" class="px-6 py-4 text-center text-sm text-red-500">
@@ -1318,14 +1403,26 @@ function loadPaymentSchedules() {
                     </td>
                 </tr>
             `;
+            
+            // Show error state for mobile
+            document.getElementById('schedulesListMobile').innerHTML = `
+                <div class="bg-white rounded-lg shadow-md p-4 border border-gray-200 text-center">
+                    <svg class="h-6 w-6 text-red-500 mx-auto" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4m0 4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"></path>
+                    </svg>
+                    <p class="mt-2 text-sm text-red-500">Gagal memuat jadwal pembayaran. Silakan coba lagi.</p>
+                </div>
+            `;
         });
 }
 
-// Display payment schedules in the table
+// Display payment schedules in the table and mobile cards
 function displayPaymentSchedules(schedules) {
     const schedulesList = document.getElementById('schedulesList');
+    const schedulesListMobile = document.getElementById('schedulesListMobile');
     
     if (schedules.length === 0) {
+        // Desktop empty state
         schedulesList.innerHTML = `
             <tr>
                 <td colspan="6" class="px-6 py-4 text-center text-sm text-gray-500">
@@ -1337,10 +1434,22 @@ function displayPaymentSchedules(schedules) {
                 </td>
             </tr>
         `;
+        
+        // Mobile empty state
+        schedulesListMobile.innerHTML = `
+            <div class="bg-white rounded-lg shadow-md p-6 border border-gray-200 text-center">
+                <svg class="mx-auto h-12 w-12 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"></path>
+                </svg>
+                <h3 class="mt-2 text-sm font-medium text-gray-900">Belum ada jadwal pembayaran</h3>
+                <p class="mt-1 text-sm text-gray-500">Mulai dengan menambahkan jadwal pembayaran termin.</p>
+            </div>
+        `;
         return;
     }
     
-    let html = '';
+    let desktopHtml = '';
+    let mobileHtml = '';
     
     schedules.forEach(schedule => {
         const dueDate = new Date(schedule.due_date);
@@ -1378,7 +1487,8 @@ function displayPaymentSchedules(schedules) {
                 statusLabel = schedule.status;
         }
         
-        html += `
+        // Desktop table row
+        desktopHtml += `
             <tr class="hover:bg-gray-50">
                 <td class="px-6 py-4 whitespace-nowrap text-sm font-medium text-gray-900">
                     ${schedule.termin_name}
@@ -1416,9 +1526,54 @@ function displayPaymentSchedules(schedules) {
                 </td>
             </tr>
         `;
+        
+        // Mobile card
+        mobileHtml += `
+            <div class="bg-white rounded-lg shadow-md p-4 border border-gray-200">
+                <div class="flex justify-between items-start mb-3">
+                    <div class="flex-1">
+                        <h4 class="text-sm font-medium text-gray-900 mb-1">${schedule.termin_name}</h4>
+                        <p class="text-xs text-gray-500">Jatuh tempo: ${formattedDueDate}</p>
+                    </div>
+                    <span class="inline-flex px-2 py-1 text-xs font-semibold rounded-full ml-2 ${statusClass}">
+                        ${statusLabel}
+                    </span>
+                </div>
+                
+                <div class="grid grid-cols-2 gap-3 text-sm mb-3">
+                    <div>
+                        <span class="text-gray-500">Persentase:</span>
+                        <p class="font-medium text-gray-900">${schedule.percentage}%</p>
+                    </div>
+                    <div>
+                        <span class="text-gray-500">Jumlah:</span>
+                        <p class="font-medium text-gray-900">Rp ${formatNumber(schedule.amount)}</p>
+                    </div>
+                </div>
+                
+                <div class="flex justify-end space-x-2 pt-3 border-t border-gray-100">
+                    <button onclick="viewScheduleDetails(${schedule.id})" class="inline-flex items-center px-3 py-1 bg-blue-50 hover:bg-blue-100 text-blue-600 hover:text-blue-700 text-xs font-medium rounded transition-colors" title="Lihat Detail">
+                        <svg class="w-3 h-3 mr-1" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z"></path>
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z"></path>
+                        </svg>
+                        Detail
+                    </button>
+                    ${schedule.status === 'pending' ? `
+                        <button onclick="createBillingFromSchedule(${schedule.id})" class="inline-flex items-center px-3 py-1 bg-green-50 hover:bg-green-100 text-green-600 hover:text-green-700 text-xs font-medium rounded transition-colors" title="Buat Tagihan">
+                            <svg class="w-3 h-3 mr-1" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2"></path>
+                            </svg>
+                            Tagih
+                        </button>
+                    ` : ''}
+                </div>
+            </div>
+        `;
     });
     
-    schedulesList.innerHTML = html;
+    schedulesList.innerHTML = desktopHtml;
+    schedulesListMobile.innerHTML = mobileHtml;
 }
 
 // Load payment schedule statistics
