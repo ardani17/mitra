@@ -1521,7 +1521,14 @@ function loadPaymentSchedules() {
     `;
     
     // Fetch payment schedules
-    fetch(`/api/projects/${projectId}/schedules?status=${status}&search=${search}`)
+    fetch(`/api/projects/${projectId}/schedules?status=${status}&search=${search}`, {
+        method: 'GET',
+        headers: {
+            'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]').getAttribute('content'),
+            'Content-Type': 'application/json',
+            'Accept': 'application/json'
+        }
+    })
         .then(response => {
             if (!response.ok) {
                 throw new Error('Network response was not ok');
@@ -1786,7 +1793,14 @@ function loadProjectBillings() {
     if (search) queryParams.append('search', search);
     
     // Fetch project billings
-    fetch(`/api/projects/${projectId}/billings?${queryParams.toString()}`)
+    fetch(`/api/projects/${projectId}/billings?${queryParams.toString()}`, {
+        method: 'GET',
+        headers: {
+            'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]').getAttribute('content'),
+            'Content-Type': 'application/json',
+            'Accept': 'application/json'
+        }
+    })
         .then(response => {
             if (!response.ok) {
                 throw new Error('Network response was not ok');

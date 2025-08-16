@@ -830,7 +830,7 @@ class ProjectBillingController extends Controller
             ], 403);
         }
         
-        $billings = $project->projectBillings()
+        $billings = $project->billings()
             ->with('paymentSchedule')
             ->orderBy('billing_date', 'desc')
             ->get();
