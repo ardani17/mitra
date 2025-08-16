@@ -51,6 +51,22 @@ class ProjectBilling extends Model
         'is_final_termin' => 'boolean'
     ];
 
+    /**
+     * Accessor for amount (alias for total_amount)
+     */
+    public function getAmountAttribute()
+    {
+        return $this->total_amount;
+    }
+
+    /**
+     * Mutator for amount (alias for total_amount)
+     */
+    public function setAmountAttribute($value)
+    {
+        $this->attributes['total_amount'] = $value;
+    }
+
     public function project(): BelongsTo
     {
         return $this->belongsTo(Project::class);

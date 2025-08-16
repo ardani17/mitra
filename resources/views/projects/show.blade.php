@@ -337,6 +337,7 @@
                     <option value="timeline">Timeline</option>
                     <option value="pengeluaran">Pengeluaran</option>
                     <option value="pembayaran">Jadwal Pembayaran</option>
+                    <option value="tagihan">Tagihan Proyek</option>
                     <option value="aktivitas">Aktivitas</option>
                     <option value="dokumen">Dokumen</option>
                 </select>
@@ -355,6 +356,9 @@
                 </button>
                 <button onclick="showTab('pembayaran')" id="tab-pembayaran" class="tab-button border-transparent text-gray-500 hover:text-gray-700 hover:border-gray-300 whitespace-nowrap py-3 sm:py-4 px-1 border-b-2 font-medium text-xs sm:text-sm">
                     Jadwal Pembayaran
+                </button>
+                <button onclick="showTab('tagihan')" id="tab-tagihan" class="tab-button border-transparent text-gray-500 hover:text-gray-700 hover:border-gray-300 whitespace-nowrap py-3 sm:py-4 px-1 border-b-2 font-medium text-xs sm:text-sm">
+                    Tagihan Proyek
                 </button>
                 <button onclick="showTab('aktivitas')" id="tab-aktivitas" class="tab-button border-transparent text-gray-500 hover:text-gray-700 hover:border-gray-300 whitespace-nowrap py-3 sm:py-4 px-1 border-b-2 font-medium text-xs sm:text-sm">
                     Aktivitas
@@ -784,6 +788,114 @@
                         <div class="mt-2 flex justify-between items-end">
                             <p class="text-2xl font-bold text-gray-800" id="overdueTermin">0</p>
                             <p class="text-sm text-gray-500" id="overdueAmount">Rp 0</p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Tab Tagihan Proyek -->
+            <div id="content-tagihan" class="tab-content hidden">
+                <div class="flex flex-col sm:flex-row sm:justify-between sm:items-center mb-4 sm:mb-6 space-y-3 sm:space-y-0">
+                    <h3 class="text-lg font-semibold text-gray-800">Tagihan Proyek</h3>
+                    @can('create', App\Models\ProjectBilling::class)
+                    <a href="{{ route('project-billings.create', ['project_id' => $project->id]) }}" class="bg-blue-600 hover:bg-blue-700 text-white font-bold py-2 px-4 rounded text-sm text-center">
+                        <span class="hidden sm:inline">Buat Tagihan Baru</span>
+                        <span class="sm:hidden">Buat Tagihan</span>
+                    </a>
+                    @endcan
+                </div>
+
+                <!-- Filter Tagihan Proyek -->
+                <div class="mb-4 sm:mb-6 flex flex-col sm:flex-row gap-3 sm:gap-2">
+                    <select id="billingStatusFilter" class="border border-gray-300 rounded-md px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500">
+                        <option value="">Semua Status</option>
+                        <option value="draft">Draft</option>
+                        <option value="sent">Terkirim</option>
+                        <option value="paid">Lunas</option>
+                        <option value="overdue">Terlambat</option>
+                    </select>
+                    <select id="billingTypeFilter" class="border border-gray-300 rounded-md px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500">
+                        <option value="">Semua Tipe</option>
+                        <option value="termin">Termin</option>
+                        <option value="full">Pembayaran Penuh</option>
+                    </select>
+                    <input type="text" id="billingSearch" placeholder="Cari tagihan..." class="border border-gray-300 rounded-md px-3 py-2 text-sm flex-1 focus:outline-none focus:ring-2 focus:ring-blue-500">
+                </div>
+                
+                <!-- Desktop Table View -->
+                <div id="billingsContainer" class="hidden sm:block bg-white rounded-lg shadow overflow-hidden">
+                    <div class="overflow-x-auto">
+                        <table class="min-w-full divide-y divide-gray-200">
+                            <thead class="bg-gray-800">
+                                <tr>
+                                    <th class="px-6 py-3 text-left text-xs font-bold text-white uppercase tracking-wider">No. Invoice</th>
+                                    <th class="px-6 py-3 text-left text-xs font-bold text-white uppercase tracking-wider">Tanggal</th>
+                                    <th class="px-6 py-3 text-left text-xs font-bold text-white uppercase tracking-wider">Tipe</th>
+                                    <th class="px-6 py-3 text-left text-xs font-bold text-white uppercase tracking-wider">Jumlah</th>
+                                    <th class="px-6 py-3 text-left text-xs font-bold text-white uppercase tracking-wider">Status</th>
+                                    <th class="px-6 py-3 text-left text-xs font-bold text-white uppercase tracking-wider">Aksi</th>
+                                </tr>
+                            </thead>
+                            <tbody id="billingsList" class="bg-white divide-y divide-gray-200">
+                                <!-- Tagihan akan dimuat melalui AJAX -->
+                                <tr>
+                                    <td colspan="6" class="px-6 py-4 text-center text-sm text-gray-500">
+                                        <svg class="animate-spin h-5 w-5 text-blue-600 mx-auto" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
+                                            <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle>
+                                            <path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
+                                        </svg>
+                                        <p class="mt-2">Memuat tagihan proyek...</p>
+                                    </td>
+                                </tr>
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+
+                <!-- Mobile Card View -->
+                <div id="billingsContainerMobile" class="block sm:hidden">
+                    <div id="billingsListMobile" class="space-y-4">
+                        <!-- Mobile cards will be populated by JavaScript -->
+                        <div class="bg-white rounded-lg shadow-md p-4 border border-gray-200">
+                            <div class="flex items-center justify-center py-8">
+                                <svg class="animate-spin h-5 w-5 text-blue-600 mr-2" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
+                                    <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle>
+                                    <path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
+                                </svg>
+                                <span class="text-sm text-gray-500">Memuat tagihan proyek...</span>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Statistik Tagihan Proyek -->
+                <div class="mt-6 grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
+                    <div class="bg-white rounded-lg shadow p-4 border-l-4 border-blue-500">
+                        <h4 class="text-sm font-medium text-gray-500">Total Tagihan</h4>
+                        <div class="mt-2 flex justify-between items-end">
+                            <p class="text-2xl font-bold text-gray-800" id="totalBillings">0</p>
+                            <p class="text-sm text-gray-500" id="totalBillingAmount">Rp 0</p>
+                        </div>
+                    </div>
+                    <div class="bg-white rounded-lg shadow p-4 border-l-4 border-yellow-500">
+                        <h4 class="text-sm font-medium text-gray-500">Draft/Terkirim</h4>
+                        <div class="mt-2 flex justify-between items-end">
+                            <p class="text-2xl font-bold text-gray-800" id="pendingBillings">0</p>
+                            <p class="text-sm text-gray-500" id="pendingBillingAmount">Rp 0</p>
+                        </div>
+                    </div>
+                    <div class="bg-white rounded-lg shadow p-4 border-l-4 border-green-500">
+                        <h4 class="text-sm font-medium text-gray-500">Lunas</h4>
+                        <div class="mt-2 flex justify-between items-end">
+                            <p class="text-2xl font-bold text-gray-800" id="paidBillings">0</p>
+                            <p class="text-sm text-gray-500" id="paidBillingAmount">Rp 0</p>
+                        </div>
+                    </div>
+                    <div class="bg-white rounded-lg shadow p-4 border-l-4 border-red-500">
+                        <h4 class="text-sm font-medium text-gray-500">Terlambat</h4>
+                        <div class="mt-2 flex justify-between items-end">
+                            <p class="text-2xl font-bold text-gray-800" id="overdueBillings">0</p>
+                            <p class="text-sm text-gray-500" id="overdueBillingAmount">Rp 0</p>
                         </div>
                     </div>
                 </div>
@@ -1330,6 +1442,37 @@ document.addEventListener('DOMContentLoaded', function() {
     if (scheduleSearch) {
         scheduleSearch.addEventListener('input', debounce(loadPaymentSchedules, 500));
     }
+
+    // Load project billings when tab is clicked
+    const tagihanTab = document.getElementById('tab-tagihan');
+    if (tagihanTab) {
+        tagihanTab.addEventListener('click', function() {
+            loadProjectBillings();
+        });
+    }
+    
+    // Load project billings if tab is active on page load
+    if (window.location.hash === '#tagihan') {
+        showTab('tagihan');
+        loadProjectBillings();
+    }
+    
+    // Add event listeners for billing filters
+    const billingStatusFilter = document.getElementById('billingStatusFilter');
+    const billingTypeFilter = document.getElementById('billingTypeFilter');
+    const billingSearch = document.getElementById('billingSearch');
+    
+    if (billingStatusFilter) {
+        billingStatusFilter.addEventListener('change', loadProjectBillings);
+    }
+    
+    if (billingTypeFilter) {
+        billingTypeFilter.addEventListener('change', loadProjectBillings);
+    }
+    
+    if (billingSearch) {
+        billingSearch.addEventListener('input', debounce(loadProjectBillings, 500));
+    }
 });
 
 // Debounce function to limit API calls during search
@@ -1601,6 +1744,372 @@ function createBillingFromSchedule(scheduleId) {
         // Redirect to project billing create page
         window.location.href = `{{ route('project-billings.create') }}?project_id={{ $project->id }}&schedule_id=${scheduleId}`;
     }
+}
+
+// Load project billings from API
+function loadProjectBillings() {
+    const projectId = {{ $project->id }};
+    const status = document.getElementById('billingStatusFilter').value;
+    const type = document.getElementById('billingTypeFilter').value;
+    const search = document.getElementById('billingSearch').value;
+    
+    // Show loading state for desktop
+    document.getElementById('billingsList').innerHTML = `
+        <tr>
+            <td colspan="6" class="px-6 py-4 text-center text-sm text-gray-500">
+                <svg class="animate-spin h-5 w-5 text-blue-600 mx-auto" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
+                    <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle>
+                    <path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
+                </svg>
+                <p class="mt-2">Memuat tagihan proyek...</p>
+            </td>
+        </tr>
+    `;
+    
+    // Show loading state for mobile
+    document.getElementById('billingsListMobile').innerHTML = `
+        <div class="bg-white rounded-lg shadow-md p-4 border border-gray-200">
+            <div class="flex items-center justify-center py-8">
+                <svg class="animate-spin h-5 w-5 text-blue-600 mr-2" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
+                    <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle>
+                    <path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
+                </svg>
+                <span class="text-sm text-gray-500">Memuat tagihan proyek...</span>
+            </div>
+        </div>
+    `;
+    
+    // Build query parameters
+    let queryParams = new URLSearchParams();
+    if (status) queryParams.append('status', status);
+    if (type) queryParams.append('payment_type', type);
+    if (search) queryParams.append('search', search);
+    
+    // Fetch project billings
+    fetch(`/api/projects/${projectId}/billings?${queryParams.toString()}`)
+        .then(response => {
+            if (!response.ok) {
+                throw new Error('Network response was not ok');
+            }
+            return response.json();
+        })
+        .then(data => {
+            displayProjectBillings(data.data || data);
+            loadProjectBillingStats(projectId);
+        })
+        .catch(error => {
+            console.error('Error fetching project billings:', error);
+            
+            // Show error state for desktop
+            document.getElementById('billingsList').innerHTML = `
+                <tr>
+                    <td colspan="6" class="px-6 py-4 text-center text-sm text-red-500">
+                        <svg class="h-6 w-6 text-red-500 mx-auto" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4m0 4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"></path>
+                        </svg>
+                        <p class="mt-2">Gagal memuat tagihan proyek. Silakan coba lagi.</p>
+                    </td>
+                </tr>
+            `;
+            
+            // Show error state for mobile
+            document.getElementById('billingsListMobile').innerHTML = `
+                <div class="bg-white rounded-lg shadow-md p-4 border border-gray-200 text-center">
+                    <svg class="h-6 w-6 text-red-500 mx-auto" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4m0 4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"></path>
+                    </svg>
+                    <p class="mt-2 text-sm text-red-500">Gagal memuat tagihan proyek. Silakan coba lagi.</p>
+                </div>
+            `;
+        });
+}
+
+// Display project billings in the table and mobile cards
+function displayProjectBillings(billings) {
+    const billingsList = document.getElementById('billingsList');
+    const billingsListMobile = document.getElementById('billingsListMobile');
+    
+    if (billings.length === 0) {
+        // Desktop empty state
+        billingsList.innerHTML = `
+            <tr>
+                <td colspan="6" class="px-6 py-4 text-center text-sm text-gray-500">
+                    <svg class="h-12 w-12 text-gray-400 mx-auto" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"></path>
+                    </svg>
+                    <h3 class="mt-2 text-sm font-medium text-gray-900">Belum ada tagihan</h3>
+                    <p class="mt-1 text-sm text-gray-500">Mulai dengan membuat tagihan proyek.</p>
+                </td>
+            </tr>
+        `;
+        
+        // Mobile empty state
+        billingsListMobile.innerHTML = `
+            <div class="bg-white rounded-lg shadow-md p-6 border border-gray-200 text-center">
+                <svg class="mx-auto h-12 w-12 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"></path>
+                </svg>
+                <h3 class="mt-2 text-sm font-medium text-gray-900">Belum ada tagihan</h3>
+                <p class="mt-1 text-sm text-gray-500">Mulai dengan membuat tagihan proyek.</p>
+            </div>
+        `;
+        return;
+    }
+    
+    let desktopHtml = '';
+    let mobileHtml = '';
+    
+    billings.forEach(billing => {
+        const billingDate = new Date(billing.billing_date);
+        const formattedBillingDate = billingDate.toLocaleDateString('id-ID', {
+            day: '2-digit',
+            month: 'short',
+            year: 'numeric'
+        });
+        
+        // Determine status class and label
+        let statusClass = '';
+        let statusLabel = '';
+        
+        switch (billing.status) {
+            case 'draft':
+                statusClass = 'bg-gray-100 text-gray-800';
+                statusLabel = 'Draft';
+                break;
+            case 'sent':
+                statusClass = 'bg-blue-100 text-blue-800';
+                statusLabel = 'Terkirim';
+                break;
+            case 'paid':
+                statusClass = 'bg-green-100 text-green-800';
+                statusLabel = 'Lunas';
+                break;
+            case 'overdue':
+                statusClass = 'bg-red-100 text-red-800';
+                statusLabel = 'Terlambat';
+                break;
+            default:
+                statusClass = 'bg-gray-100 text-gray-800';
+                statusLabel = billing.status;
+        }
+        
+        // Payment type label
+        const typeLabel = billing.payment_type === 'termin' ? 'Termin' : 'Pembayaran Penuh';
+        
+        // Desktop table row
+        desktopHtml += `
+            <tr class="hover:bg-gray-50">
+                <td class="px-6 py-4 whitespace-nowrap text-sm font-medium text-gray-900">
+                    ${billing.invoice_number}
+                </td>
+                <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
+                    ${formattedBillingDate}
+                </td>
+                <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
+                    ${typeLabel}
+                </td>
+                <td class="px-6 py-4 whitespace-nowrap text-sm font-medium text-gray-900">
+                    Rp ${formatNumber(billing.total_amount)}
+                </td>
+                <td class="px-6 py-4 whitespace-nowrap">
+                    <span class="inline-flex px-2 py-1 text-xs font-semibold rounded-full ${statusClass}">
+                        ${statusLabel}
+                    </span>
+                </td>
+                <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
+                    <div class="flex space-x-2">
+                        <button onclick="viewBillingDetails(${billing.id})" class="text-blue-600 hover:text-blue-900" title="Lihat Detail">
+                            <svg class="h-5 w-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z"></path>
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z"></path>
+                            </svg>
+                        </button>
+                        ${(billing.status !== 'paid' || {{ auth()->user()->hasRole('direktur') ? 'true' : 'false' }}) ? `
+                            <button onclick="editBilling(${billing.id})" class="text-green-600 hover:text-green-900" title="Edit Tagihan">
+                                <svg class="h-5 w-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z"></path>
+                                </svg>
+                            </button>
+                            <button onclick="deleteBilling(${billing.id}, '${billing.invoice_number}')" class="text-red-600 hover:text-red-900" title="Hapus Tagihan">
+                                <svg class="h-5 w-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16"></path>
+                                </svg>
+                            </button>
+                        ` : ''}
+                    </div>
+                </td>
+            </tr>
+        `;
+        
+        // Mobile card
+        mobileHtml += `
+            <div class="bg-white rounded-lg shadow-md p-4 border border-gray-200">
+                <div class="flex justify-between items-start mb-3">
+                    <div class="flex-1">
+                        <h4 class="text-sm font-medium text-gray-900 mb-1">${billing.invoice_number}</h4>
+                        <p class="text-xs text-gray-500">Tanggal: ${formattedBillingDate}</p>
+                    </div>
+                    <span class="inline-flex px-2 py-1 text-xs font-semibold rounded-full ml-2 ${statusClass}">
+                        ${statusLabel}
+                    </span>
+                </div>
+                
+                <div class="grid grid-cols-2 gap-3 text-sm mb-3">
+                    <div>
+                        <span class="text-gray-500">Tipe:</span>
+                        <p class="font-medium text-gray-900">${typeLabel}</p>
+                    </div>
+                    <div>
+                        <span class="text-gray-500">Jumlah:</span>
+                        <p class="font-medium text-gray-900">Rp ${formatNumber(billing.total_amount)}</p>
+                    </div>
+                </div>
+                
+                <div class="flex justify-end space-x-2 pt-3 border-t border-gray-100">
+                    <button onclick="viewBillingDetails(${billing.id})" class="inline-flex items-center px-3 py-1 bg-blue-50 hover:bg-blue-100 text-blue-600 hover:text-blue-700 text-xs font-medium rounded transition-colors" title="Lihat Detail">
+                        <svg class="w-3 h-3 mr-1" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z"></path>
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z"></path>
+                        </svg>
+                        Detail
+                    </button>
+                    ${billing.status !== 'paid' ? `
+                        <button onclick="editBilling(${billing.id})" class="inline-flex items-center px-3 py-1 bg-green-50 hover:bg-green-100 text-green-600 hover:text-green-700 text-xs font-medium rounded transition-colors" title="Edit Tagihan">
+                            <svg class="w-3 h-3 mr-1" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z"></path>
+                            </svg>
+                            Edit
+                        </button>
+                        <button onclick="deleteBilling(${billing.id}, '${billing.invoice_number}')" class="inline-flex items-center px-3 py-1 bg-red-50 hover:bg-red-100 text-red-600 hover:text-red-700 text-xs font-medium rounded transition-colors" title="Hapus Tagihan">
+                            <svg class="w-3 h-3 mr-1" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16"></path>
+                            </svg>
+                            Hapus
+                        </button>
+                    ` : ''}
+                </div>
+            </div>
+        `;
+    });
+    
+    billingsList.innerHTML = desktopHtml;
+    billingsListMobile.innerHTML = mobileHtml;
+}
+
+// Load project billing statistics
+function loadProjectBillingStats(projectId) {
+    // For now, show placeholder data since we need to calculate from the loaded data
+    document.getElementById('totalBillings').textContent = '0';
+    document.getElementById('pendingBillings').textContent = '0';
+    document.getElementById('paidBillings').textContent = '0';
+    document.getElementById('overdueBillings').textContent = '0';
+    
+    document.getElementById('totalBillingAmount').textContent = 'Rp 0';
+    document.getElementById('pendingBillingAmount').textContent = 'Rp 0';
+    document.getElementById('paidBillingAmount').textContent = 'Rp 0';
+    document.getElementById('overdueBillingAmount').textContent = 'Rp 0';
+}
+
+// View billing details
+function viewBillingDetails(billingId) {
+    window.location.href = `/project-billings/${billingId}`;
+}
+
+// Edit billing
+function editBilling(billingId) {
+    window.location.href = `/project-billings/${billingId}/edit`;
+}
+
+// Delete billing
+function deleteBilling(billingId, invoiceNumber) {
+    // Check if user is direktur (you may need to pass this from PHP)
+    const isDirektur = {{ auth()->user()->hasRole('direktur') ? 'true' : 'false' }};
+    
+    // First, get billing details to check status
+    fetch(`/project-billings/${billingId}`)
+        .then(response => response.text())
+        .then(html => {
+            const isPaidBilling = html.includes('Lunas') || html.includes('paid');
+            
+            let confirmMessage = `Apakah Anda yakin ingin menghapus tagihan "${invoiceNumber}"? Tindakan ini tidak dapat dibatalkan dan akan menghapus entri cashflow terkait.`;
+            
+            if (isPaidBilling && isDirektur) {
+                confirmMessage = `PERHATIAN: Tagihan "${invoiceNumber}" sudah berstatus LUNAS!\n\n` +
+                                `Menghapus tagihan yang sudah lunas dapat mempengaruhi laporan keuangan dan cashflow.\n\n` +
+                                `Apakah Anda BENAR-BENAR yakin ingin menghapus tagihan ini?`;
+                
+                if (!confirm(confirmMessage)) {
+                    return;
+                }
+                
+                // Second confirmation for paid billings
+                if (!confirm(`Konfirmasi kedua: Anda akan menghapus tagihan LUNAS "${invoiceNumber}". Lanjutkan?`)) {
+                    return;
+                }
+            } else if (isPaidBilling && !isDirektur) {
+                alert('Penagihan yang sudah lunas hanya dapat dihapus oleh Direktur');
+                return;
+            } else {
+                if (!confirm(confirmMessage)) {
+                    return;
+                }
+            }
+            
+            // Prepare request body
+            const requestBody = (isPaidBilling && isDirektur) ? { force_delete: 'true' } : {};
+            
+            fetch(`/project-billings/${billingId}`, {
+                method: 'DELETE',
+                headers: {
+                    'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]').getAttribute('content'),
+                    'Content-Type': 'application/json'
+                },
+                body: JSON.stringify(requestBody)
+            })
+            .then(response => response.json())
+            .then(data => {
+                if (data.success) {
+                    alert('Tagihan berhasil dihapus');
+                    loadProjectBillings(); // Reload the billings list
+                } else {
+                    if (data.require_force) {
+                        alert('Konfirmasi khusus diperlukan. Silakan coba lagi.');
+                    } else {
+                        alert(data.message || 'Terjadi kesalahan saat menghapus tagihan');
+                    }
+                }
+            })
+            .catch(error => {
+                console.error('Error:', error);
+                alert('Terjadi kesalahan saat menghapus tagihan');
+            });
+        })
+        .catch(error => {
+            console.error('Error checking billing status:', error);
+            // Fallback to simple delete
+            if (confirm(`Apakah Anda yakin ingin menghapus tagihan "${invoiceNumber}"?`)) {
+                fetch(`/project-billings/${billingId}`, {
+                    method: 'DELETE',
+                    headers: {
+                        'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]').getAttribute('content'),
+                        'Content-Type': 'application/json'
+                    }
+                })
+                .then(response => response.json())
+                .then(data => {
+                    if (data.success) {
+                        alert('Tagihan berhasil dihapus');
+                        loadProjectBillings();
+                    } else {
+                        alert(data.message || 'Terjadi kesalahan saat menghapus tagihan');
+                    }
+                })
+                .catch(error => {
+                    console.error('Error:', error);
+                    alert('Terjadi kesalahan saat menghapus tagihan');
+                });
+            }
+        });
 }
 </script>
 @endsection

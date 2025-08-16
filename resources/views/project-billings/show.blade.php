@@ -11,14 +11,36 @@
             <p class="text-slate-600 mt-1 text-sm sm:text-base break-words">{{ $projectBilling->invoice_number }}</p>
         </div>
         <div class="flex flex-col sm:flex-row space-y-2 sm:space-y-0 sm:space-x-3">
-            @if($projectBilling->status !== 'paid')
+            @php
+                $user = auth()->user();
+                $isDirektur = $user->hasRole('direktur');
+                $canModifyPaid = $isDirektur && $projectBilling->status === 'paid';
+            @endphp
+            
+            @if($projectBilling->status !== 'paid' || $isDirektur)
                 <a href="{{ route('project-billings.edit', $projectBilling) }}"
                    class="bg-yellow-600 hover:bg-yellow-700 text-white px-3 sm:px-4 py-2 rounded-lg font-medium transition-colors duration-200 flex items-center justify-center text-sm sm:text-base">
                     <svg class="w-4 h-4 sm:w-5 sm:h-5 mr-1 sm:mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z"/>
                     </svg>
                     Edit
+                    @if($canModifyPaid)
+                        <span class="ml-1 text-xs">(Direktur)</span>
+                    @endif
                 </a>
+                
+                @can('delete', $projectBilling)
+                <button onclick="deleteBilling({{ $projectBilling->id }}, '{{ $projectBilling->invoice_number }}', {{ $canModifyPaid ? 'true' : 'false' }})"
+                        class="bg-red-600 hover:bg-red-700 text-white px-3 sm:px-4 py-2 rounded-lg font-medium transition-colors duration-200 flex items-center justify-center text-sm sm:text-base">
+                    <svg class="w-4 h-4 sm:w-5 sm:h-5 mr-1 sm:mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16"/>
+                    </svg>
+                    Hapus
+                    @if($canModifyPaid)
+                        <span class="ml-1 text-xs">(Direktur)</span>
+                    @endif
+                </button>
+                @endcan
             @endif
             <a href="{{ route('project-billings.index') }}"
                class="bg-slate-600 hover:bg-slate-700 text-white px-3 sm:px-4 py-2 rounded-lg font-medium transition-colors duration-200 flex items-center justify-center text-sm sm:text-base">
@@ -385,4 +407,83 @@
 }
 </style>
 @endpush
+
+<script>
+// Delete billing function
+function deleteBilling(billingId, invoiceNumber, isPaidBilling = false) {
+    let confirmMessage = `Apakah Anda yakin ingin menghapus tagihan "${invoiceNumber}"? Tindakan ini tidak dapat dibatalkan dan akan menghapus entri cashflow terkait.`;
+    
+    if (isPaidBilling) {
+        confirmMessage = `PERHATIAN: Tagihan "${invoiceNumber}" sudah berstatus LUNAS!\n\n` +
+                        `Menghapus tagihan yang sudah lunas dapat mempengaruhi laporan keuangan dan cashflow.\n\n` +
+                        `Apakah Anda BENAR-BENAR yakin ingin menghapus tagihan ini?`;
+        
+        if (!confirm(confirmMessage)) {
+            return;
+        }
+        
+        // Second confirmation for paid billings
+        if (!confirm(`Konfirmasi kedua: Anda akan menghapus tagihan LUNAS "${invoiceNumber}". Lanjutkan?`)) {
+            return;
+        }
+    } else {
+        if (!confirm(confirmMessage)) {
+            return;
+        }
+    }
+    
+    // Prepare request body - always send force_delete for paid billings
+    const requestBody = isPaidBilling ? JSON.stringify({ force_delete: 'true' }) : '{}';
+    
+    fetch(`/project-billings/${billingId}`, {
+        method: 'DELETE',
+        headers: {
+            'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]').getAttribute('content'),
+            'Content-Type': 'application/json',
+            'Accept': 'application/json',
+            'X-Requested-With': 'XMLHttpRequest'
+        },
+        body: requestBody
+    })
+    .then(response => {
+        // Log response for debugging
+        console.log('Response status:', response.status);
+        
+        // Check if response is ok first
+        if (response.ok) {
+            // Try to parse JSON
+            return response.json().then(data => {
+                console.log('Success response data:', data);
+                alert(data.message || 'Tagihan berhasil dihapus');
+                // Redirect to project billings index
+                window.location.href = '/project-billings';
+            }).catch(() => {
+                // If JSON parsing fails but response is ok, still redirect
+                alert('Tagihan berhasil dihapus');
+                window.location.href = '/project-billings';
+            });
+        } else {
+            // Handle error responses
+            return response.json().then(data => {
+                console.log('Error response data:', data);
+                
+                if (response.status === 403) {
+                    alert('Anda tidak memiliki izin untuk menghapus tagihan ini');
+                } else if (data.require_force) {
+                    alert('Konfirmasi khusus diperlukan. Silakan coba lagi.');
+                } else {
+                    alert(data.message || 'Terjadi kesalahan saat menghapus tagihan');
+                }
+            }).catch(() => {
+                // If JSON parsing fails on error response
+                alert('Terjadi kesalahan saat menghapus tagihan');
+            });
+        }
+    })
+    .catch(error => {
+        console.error('Network error:', error);
+        alert('Terjadi kesalahan. Silakan coba lagi.');
+    });
+}
+</script>
 @endsection

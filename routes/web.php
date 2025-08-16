@@ -109,6 +109,7 @@ Route::middleware('auth')->group(function () {
     Route::get('/projects/{project}/manage-schedule', [ProjectBillingController::class, 'manageSchedule'])->name('project-billings.manage-schedule');
     Route::post('/projects/{project}/store-schedule', [ProjectBillingController::class, 'storeSchedule'])->name('project-billings.store-schedule');
     Route::get('/api/projects/{project}/schedules', [ProjectBillingController::class, 'getProjectSchedules'])->name('api.project-billings.schedules');
+    Route::get('/api/projects/{project}/billings', [ProjectBillingController::class, 'getProjectBillings'])->name('api.project-billings.project-billings');
     
     // Termin Payment routes
     Route::post('/schedules/{schedule}/create-billing', [ProjectBillingController::class, 'createTerminPayment'])->name('project-billings.create-termin');

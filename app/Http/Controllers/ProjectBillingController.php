@@ -187,8 +187,16 @@ class ProjectBillingController extends Controller
     {
         Gate::authorize('update', $projectBilling);
 
+        // Allow directors to edit paid billings
         if ($projectBilling->status === 'paid') {
-            return back()->withErrors(['error' => 'Penagihan yang sudah lunas tidak dapat diedit']);
+            $user = auth()->user();
+            
+            if (!$user->hasRole('direktur')) {
+                return back()->withErrors(['error' => 'Penagihan yang sudah lunas hanya dapat diedit oleh Direktur']);
+            }
+            
+            // Add warning message for directors
+            session()->flash('warning', 'PERHATIAN: Anda sedang mengedit tagihan yang sudah LUNAS. Perubahan dapat mempengaruhi laporan keuangan.');
         }
 
         $projects = Project::orderBy('name')->get();
@@ -203,9 +211,16 @@ class ProjectBillingController extends Controller
     {
         Gate::authorize('update', $projectBilling);
 
-        // Allow status change to 'paid' but prevent other edits if already paid
-        if ($projectBilling->status === 'paid' && $request->input('status') !== 'paid') {
-            return back()->withErrors(['error' => 'Penagihan yang sudah lunas tidak dapat diedit']);
+        // Allow directors to edit paid billings
+        if ($projectBilling->status === 'paid') {
+            $user = auth()->user();
+            
+            if (!$user->hasRole('direktur')) {
+                // Non-directors can only change status from paid to paid (no actual change)
+                if ($request->input('status') !== 'paid') {
+                    return back()->withErrors(['error' => 'Penagihan yang sudah lunas hanya dapat diedit oleh Direktur']);
+                }
+            }
         }
 
         $validated = $request->validate([
@@ -273,12 +288,56 @@ class ProjectBillingController extends Controller
     /**
      * Remove the specified project billing
      */
-    public function destroy(ProjectBilling $projectBilling)
+    public function destroy(Request $request, ProjectBilling $projectBilling)
     {
-        Gate::authorize('delete', $projectBilling);
+        try {
+            Gate::authorize('delete', $projectBilling);
+        } catch (\Exception $e) {
+            if ($request->expectsJson() || $request->ajax()) {
+                return response()->json([
+                    'success' => false,
+                    'message' => 'Anda tidak memiliki izin untuk menghapus tagihan ini'
+                ], 403);
+            }
+            return back()->withErrors(['error' => 'Anda tidak memiliki izin untuk menghapus tagihan ini']);
+        }
 
+        // Allow directors to delete paid billings with extra confirmation
         if ($projectBilling->status === 'paid') {
-            return back()->withErrors(['error' => 'Penagihan yang sudah lunas tidak dapat dihapus']);
+            $user = auth()->user();
+            
+            // Check if user is direktur or has special permission
+            if (!$user->hasRole('direktur')) {
+                $errorMessage = 'Penagihan yang sudah lunas hanya dapat dihapus oleh Direktur';
+                
+                if ($request->expectsJson() || $request->ajax()) {
+                    return response()->json([
+                        'success' => false,
+                        'message' => $errorMessage
+                    ], 422);
+                }
+                
+                return back()->withErrors(['error' => $errorMessage]);
+            }
+            
+            // For directors, check for force_delete parameter
+            $forceDelete = $request->input('force_delete') === 'true' ||
+                          $request->input('force_delete') === true ||
+                          $request->has('force_delete');
+            
+            if (!$forceDelete) {
+                $errorMessage = 'Konfirmasi khusus diperlukan untuk menghapus tagihan yang sudah lunas';
+                
+                if ($request->expectsJson() || $request->ajax()) {
+                    return response()->json([
+                        'success' => false,
+                        'message' => $errorMessage,
+                        'require_force' => true
+                    ], 422);
+                }
+                
+                return back()->withErrors(['error' => $errorMessage]);
+            }
         }
 
         try {
@@ -292,16 +351,43 @@ class ProjectBillingController extends Controller
                 ]);
             }
 
+            // Store invoice number for response message
+            $invoiceNumber = $projectBilling->invoice_number;
+
+            // Delete the billing (Observer will handle cashflow cleanup)
             $projectBilling->delete();
 
             DB::commit();
 
+            $successMessage = "Penagihan {$invoiceNumber} berhasil dihapus";
+
+            if ($request->expectsJson() || $request->ajax()) {
+                return response()->json([
+                    'success' => true,
+                    'message' => $successMessage
+                ]);
+            }
+
             return redirect()->route('project-billings.index')
-                           ->with('success', 'Penagihan berhasil dihapus');
+                           ->with('success', $successMessage);
 
         } catch (\Exception $e) {
             DB::rollback();
-            return back()->withErrors(['error' => $e->getMessage()]);
+            
+            \Log::error('Error deleting project billing: ' . $e->getMessage());
+            \Log::error('Stack trace: ' . $e->getTraceAsString());
+            
+            $errorMessage = 'Terjadi kesalahan saat menghapus penagihan';
+            
+            if ($request->expectsJson() || $request->ajax()) {
+                return response()->json([
+                    'success' => false,
+                    'message' => $errorMessage,
+                    'debug' => config('app.debug') ? $e->getMessage() : null
+                ], 500);
+            }
+            
+            return back()->withErrors(['error' => $errorMessage]);
         }
     }
 
@@ -735,7 +821,14 @@ class ProjectBillingController extends Controller
      */
     public function getProjectBillings(Project $project)
     {
-        Gate::authorize('view', $project);
+        // Check if user can view the project
+        if (!auth()->check() || !auth()->user()->can('view', $project)) {
+            return response()->json([
+                'success' => false,
+                'message' => 'Unauthorized',
+                'data' => []
+            ], 403);
+        }
         
         $billings = $project->projectBillings()
             ->with('paymentSchedule')

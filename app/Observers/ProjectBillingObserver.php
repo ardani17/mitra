@@ -31,6 +31,7 @@ class ProjectBillingObserver
     public function deleted(ProjectBilling $projectBilling): void
     {
         $this->updateProjectBillingStatus($projectBilling);
+        $this->cleanupCashflowEntry($projectBilling);
     }
 
     /**
@@ -47,6 +48,7 @@ class ProjectBillingObserver
     public function forceDeleted(ProjectBilling $projectBilling): void
     {
         $this->updateProjectBillingStatus($projectBilling);
+        $this->cleanupCashflowEntry($projectBilling);
     }
 
     /**
@@ -94,6 +96,20 @@ class ProjectBillingObserver
         if ($projectBilling->wasChanged('status') && $projectBilling->getOriginal('status') === 'paid' && $projectBilling->status !== 'paid') {
             \Log::info("Billing {$projectBilling->id} status changed from paid, cancelling cashflow entry");
             $this->cancelCashflowEntry($projectBilling);
+        }
+        
+        // NEW: Handle amount changes for paid billings
+        if ($projectBilling->status === 'paid' && !$projectBilling->wasChanged('status')) {
+            // Check if any amount-related field changed
+            if ($projectBilling->wasChanged('total_amount') ||
+                $projectBilling->wasChanged('nilai_jasa') ||
+                $projectBilling->wasChanged('nilai_material') ||
+                $projectBilling->wasChanged('ppn_amount') ||
+                $projectBilling->wasChanged('subtotal')) {
+                
+                \Log::info("Billing {$projectBilling->id} amount changed while paid, updating cashflow entry");
+                $this->updateCashflowAmount($projectBilling);
+            }
         }
     }
 
@@ -193,6 +209,94 @@ class ProjectBillingObserver
             }
         } catch (\Exception $e) {
             \Log::error("Failed to cancel cashflow entry for billing {$projectBilling->id}: " . $e->getMessage());
+        }
+    }
+    
+    /**
+     * Update cashflow amount when billing amount changes
+     * NEW: Added to handle amount changes for paid billings
+     */
+    private function updateCashflowAmount(ProjectBilling $projectBilling): void
+    {
+        try {
+            $cashflowEntry = CashflowEntry::where('reference_type', 'billing')
+                ->where('reference_id', $projectBilling->id)
+                ->where('status', '!=', 'cancelled')
+                ->first();
+            
+            if ($cashflowEntry) {
+                $oldAmount = $cashflowEntry->amount;
+                $newAmount = $projectBilling->total_amount;
+                
+                // Only update if amount actually changed
+                if ($oldAmount != $newAmount) {
+                    $cashflowEntry->update([
+                        'amount' => $newAmount,
+                        'description' => "Pembayaran penagihan proyek: {$projectBilling->project->name}" .
+                                       ($projectBilling->isTerminPayment() ? " ({$projectBilling->getTerminLabel()})" : ''),
+                        'notes' => ($cashflowEntry->notes ?? '') .
+                                  " | Amount updated from Rp " . number_format($oldAmount, 0, ',', '.') .
+                                  " to Rp " . number_format($newAmount, 0, ',', '.') .
+                                  " at " . now()->format('Y-m-d H:i:s')
+                    ]);
+                    
+                    \Log::info("Updated cashflow amount for billing {$projectBilling->id}: from {$oldAmount} to {$newAmount}");
+                    
+                    // Log activity for tracking
+                    if ($projectBilling->project) {
+                        $projectBilling->project->activities()->create([
+                            'user_id' => auth()->id() ?? 1,
+                            'activity_type' => 'cashflow_updated',
+                            'description' => "Cashflow amount updated from Rp " . number_format($oldAmount, 0, ',', '.') .
+                                           " to Rp " . number_format($newAmount, 0, ',', '.'),
+                            'activity_date' => now(),
+                            'metadata' => json_encode([
+                                'billing_id' => $projectBilling->id,
+                                'cashflow_id' => $cashflowEntry->id,
+                                'old_amount' => $oldAmount,
+                                'new_amount' => $newAmount,
+                                'invoice_number' => $projectBilling->invoice_number
+                            ])
+                        ]);
+                    }
+                }
+            } else {
+                // If no cashflow entry exists for a paid billing, create one
+                \Log::warning("No cashflow entry found for paid billing {$projectBilling->id}, creating new entry");
+                $this->createCashflowEntry($projectBilling);
+            }
+        } catch (\Exception $e) {
+            \Log::error("Failed to update cashflow amount for billing {$projectBilling->id}: " . $e->getMessage());
+            \Log::error("Stack trace: " . $e->getTraceAsString());
+        }
+    }
+
+    /**
+     * Cleanup cashflow entry when billing is deleted
+     */
+    private function cleanupCashflowEntry(ProjectBilling $projectBilling): void
+    {
+        try {
+            \Log::info("Cleaning up cashflow entry for deleted billing {$projectBilling->id}");
+            
+            $cashflowEntry = CashflowEntry::where('reference_type', 'billing')
+                ->where('reference_id', $projectBilling->id)
+                ->first();
+
+            if ($cashflowEntry) {
+                // Mark as cancelled instead of deleting to maintain audit trail
+                $cashflowEntry->update([
+                    'status' => 'cancelled',
+                    'notes' => ($cashflowEntry->notes ?? '') . " | Dibatalkan karena tagihan dihapus pada " . now()->format('Y-m-d H:i:s')
+                ]);
+                
+                \Log::info("Successfully cancelled cashflow entry {$cashflowEntry->id} for deleted billing {$projectBilling->id}");
+            } else {
+                \Log::info("No cashflow entry found for deleted billing {$projectBilling->id}");
+            }
+        } catch (\Exception $e) {
+            \Log::error("Failed to cleanup cashflow entry for deleted billing {$projectBilling->id}: " . $e->getMessage());
+            \Log::error("Stack trace: " . $e->getTraceAsString());
         }
     }
 }
