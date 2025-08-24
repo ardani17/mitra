@@ -309,8 +309,17 @@ class SalaryReleaseController extends Controller
     /**
      * Remove the specified resource from storage.
      */
-    public function destroy(SalaryRelease $salaryRelease, Employee $employee = null)
+    public function destroy(Employee $employee, SalaryRelease $salaryRelease)
     {
+        // Verify that the salary release belongs to the employee
+        if ($salaryRelease->employee_id != $employee->id) {
+            if (request()->expectsJson()) {
+                return response()->json(['success' => false, 'message' => 'Rilis gaji tidak terkait dengan karyawan ini.']);
+            }
+            return redirect()->route('finance.employees.show', $employee)
+                ->with('error', 'Rilis gaji tidak terkait dengan karyawan ini.');
+        }
+
         Gate::authorize('delete', $salaryRelease);
 
         // Cannot delete if already released
