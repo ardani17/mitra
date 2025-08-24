@@ -88,7 +88,7 @@ class EmployeeController extends Controller
             'total' => Employee::count(),
             'active' => Employee::active()->count(),
             'inactive' => Employee::inactive()->count(),
-            'contract_expiring' => Employee::contractExpiringSoon()->count(),
+            'salary_budget' => Employee::getTotalUnreleasedSalaryBudget(),
         ];
 
         // Get salary status for all employees

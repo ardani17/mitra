@@ -59,12 +59,12 @@
 
                 <div class="mobile-stat-card">
                     <div class="flex items-center">
-                        <div class="stat-icon bg-yellow-100">
-                            <i class="fas fa-exclamation-triangle text-yellow-600"></i>
+                        <div class="stat-icon bg-green-100">
+                            <i class="fas fa-money-bill-wave text-green-600"></i>
                         </div>
                         <div class="stat-content">
-                            <p class="stat-label">Kontrak Berakhir</p>
-                            <p class="stat-value sm:text-2xl">{{ $stats['contract_expiring'] }}</p>
+                            <p class="stat-label">Anggaran Gaji</p>
+                            <p class="stat-value sm:text-lg">{{ 'Rp ' . number_format($stats['salary_budget'], 0, ',', '.') }}</p>
                         </div>
                     </div>
                 </div>
@@ -193,9 +193,9 @@
                                                     <div class="ml-4">
                                                         <div class="text-sm font-medium text-gray-900">{{ $employee->name }}</div>
                                                         <div class="text-sm text-gray-500">{{ $employee->employee_code }}</div>
-                                                        @if($employee->is_contract_expiring)
-                                                            <div class="text-xs text-red-600 font-medium">
-                                                                <i class="fas fa-exclamation-triangle mr-1"></i>Kontrak Berakhir
+                                                        @if($employee->hasUnreleasedSalaries())
+                                                            <div class="text-xs text-green-600 font-medium">
+                                                                <i class="fas fa-money-bill-wave mr-1"></i>{{ $employee->getFormattedUnreleasedSalaryTotal() }}
                                                             </div>
                                                         @endif
                                                     </div>
@@ -271,9 +271,9 @@
                                         <div class="ml-3 flex-1">
                                             <div class="mobile-table-card-title">{{ $employee->name }}</div>
                                             <div class="mobile-table-card-subtitle">{{ $employee->employee_code }} • {{ $employee->position }}</div>
-                                            @if($employee->is_contract_expiring)
-                                                <div class="text-xs text-red-600 font-medium mt-1">
-                                                    <i class="fas fa-exclamation-triangle mr-1"></i>Kontrak Berakhir
+                                            @if($employee->hasUnreleasedSalaries())
+                                                <div class="text-xs text-green-600 font-medium mt-1">
+                                                    <i class="fas fa-money-bill-wave mr-1"></i>{{ $employee->getFormattedUnreleasedSalaryTotal() }}
                                                 </div>
                                             @endif
                                         </div>

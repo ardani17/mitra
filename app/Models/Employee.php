@@ -175,7 +175,16 @@ class Employee extends Model
         return $this->dailySalaries()
             ->where('status', 'confirmed')
             ->whereNull('salary_release_id')
-            ->sum('amount');
+            ->sum('total_amount');
+    }
+
+    /**
+     * Get formatted unreleased salary total for this employee
+     */
+    public function getFormattedUnreleasedSalaryTotal()
+    {
+        $amount = $this->getUnreleasedSalaryTotal();
+        return 'Rp ' . number_format($amount, 0, ',', '.');
     }
 
     public function hasUnreleasedSalaries()
@@ -297,5 +306,24 @@ class Employee extends Model
         }
         
         return $query->count();
+    }
+    /**
+     * Get total unreleased salary budget across all employees
+     * This includes all confirmed daily salaries that haven't been released yet
+     */
+    public static function getTotalUnreleasedSalaryBudget()
+    {
+        return DailySalary::where('status', 'confirmed')
+            ->whereNull('salary_release_id')
+            ->sum('total_amount');
+    }
+
+    /**
+     * Get formatted total unreleased salary budget
+     */
+    public static function getFormattedUnreleasedSalaryBudget()
+    {
+        $amount = self::getTotalUnreleasedSalaryBudget();
+        return 'Rp ' . number_format($amount, 0, ',', '.');
     }
 }
