@@ -128,7 +128,8 @@
                                     <option value="freelance" {{ request('employment_type') === 'freelance' ? 'selected' : '' }}>Freelance</option>
                                 </select>
                             </div>
-                            <div class="mobile-filter-group sm:flex sm:items-end">
+                            <div class="mobile-filter-group">
+                                <label class="mobile-filter-label sm:invisible sm:select-none">Actions</label>
                                 <div class="flex flex-col sm:flex-row space-y-2 sm:space-y-0 sm:space-x-2 w-full">
                                     <button type="submit" class="mobile-btn-primary sm:w-auto sm:min-h-0 sm:px-4 sm:py-2 sm:text-sm">
                                         <i class="fas fa-search mr-2"></i>Filter
