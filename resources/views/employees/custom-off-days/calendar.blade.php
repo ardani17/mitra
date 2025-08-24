@@ -78,18 +78,6 @@
                             </button>
                         </form>
                         
-                        <!-- Navigation Buttons -->
-                        <div class="flex space-x-2">
-                            <a href="{{ route('finance.employees.custom-off-days.index', $employee) }}?year={{ $year }}&month={{ $month }}"
-                               class="flex-1 bg-gray-500 hover:bg-gray-700 text-white font-bold py-2 px-3 rounded text-center text-sm">
-                                <i class="fas fa-list mr-1"></i>Daftar
-                            </a>
-                            <a href="{{ route('finance.employees.custom-off-days.calendar', $employee) }}?year={{ $year }}&month={{ $month }}"
-                               class="flex-1 bg-green-500 hover:bg-green-700 text-white font-bold py-2 px-3 rounded text-center text-sm">
-                                <i class="fas fa-calendar mr-1"></i>Kalender
-                            </a>
-                        </div>
-                        
                         <!-- Legend -->
                         <div class="grid grid-cols-3 gap-2 text-xs">
                             <div class="flex items-center">
@@ -140,17 +128,6 @@
                                     </button>
                                 </form>
                                 
-                                <!-- Navigation Buttons -->
-                                <div class="flex items-center space-x-3">
-                                    <a href="{{ route('finance.employees.custom-off-days.index', $employee) }}?year={{ $year }}&month={{ $month }}"
-                                       class="bg-gray-500 hover:bg-gray-700 text-white py-1 px-3 rounded text-xs">
-                                        <i class="fas fa-list mr-2"></i>Daftar
-                                    </a>
-                                    <a href="{{ route('finance.employees.custom-off-days.calendar', $employee) }}?year={{ $year }}&month={{ $month }}"
-                                       class="bg-green-500 hover:bg-green-700 text-white py-1 px-3 rounded text-xs">
-                                        <i class="fas fa-calendar mr-2"></i>Kalender
-                                    </a>
-                                </div>
                             </div>
                             
                             <!-- Legend -->
