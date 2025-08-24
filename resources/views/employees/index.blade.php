@@ -57,7 +57,7 @@
                     </div>
                 </div>
 
-                <div class="mobile-stat-card">
+                <div class="mobile-stat-card" title="Total gaji karyawan yang sudah dikonfirmasi tapi belum dirilis. Setelah dirilis akan masuk ke pengeluaran.">
                     <div class="flex items-center">
                         <div class="stat-icon bg-green-100">
                             <i class="fas fa-money-bill-wave text-green-600"></i>
@@ -65,6 +65,7 @@
                         <div class="stat-content">
                             <p class="stat-label">Anggaran Gaji</p>
                             <p class="stat-value sm:text-lg">{{ 'Rp ' . number_format($stats['salary_budget'], 0, ',', '.') }}</p>
+                            <p class="text-xs text-gray-500 mt-1">Belum dirilis</p>
                         </div>
                     </div>
                 </div>
