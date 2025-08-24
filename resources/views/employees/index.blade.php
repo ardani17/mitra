@@ -1,10 +1,11 @@
 <x-app-layout>
     <x-slot name="header">
-        <div class="mobile-header sm:flex sm:justify-between sm:items-center">
+        <div class="mobile-header">
             <h2 class="mobile-header-title sm:font-semibold sm:text-xl sm:text-gray-800 sm:leading-tight">
                 {{ __('Manajemen Karyawan') }}
             </h2>
-            <div class="mobile-header-actions sm:flex sm:space-x-2 sm:space-y-0 sm:w-auto">
+            <!-- Desktop Actions - Hidden on Mobile -->
+            <div class="hidden sm:flex sm:space-x-2">
                 <a href="{{ route('finance.employees.export') }}"
                    class="mobile-btn-success sm:w-auto sm:min-h-0 sm:px-4 sm:py-2 sm:text-sm sm:font-bold">
                     <i class="fas fa-download mr-2"></i>Export
@@ -19,6 +20,17 @@
 
     <div class="py-12">
         <div class="max-w-7xl mx-auto sm:px-6 lg:px-8">
+            <!-- Mobile Actions - Below Title, Hidden on Desktop -->
+            <div class="sm:hidden mb-6 px-4 space-y-3">
+                <a href="{{ route('finance.employees.export') }}"
+                   class="mobile-btn-success w-full justify-center">
+                    <i class="fas fa-download mr-2"></i>Export
+                </a>
+                <a href="{{ route('finance.employees.create') }}"
+                   class="mobile-btn-primary w-full justify-center">
+                    <i class="fas fa-plus mr-2"></i>Tambah Karyawan
+                </a>
+            </div>
             <!-- Statistics Cards -->
             <div class="mobile-stats-grid sm:grid sm:grid-cols-2 md:grid-cols-4 sm:gap-6 mb-6">
                 <div class="mobile-stat-card">
@@ -75,12 +87,13 @@
             <div class="mobile-filter-container">
                 <div class="mobile-filter-header">
                     <h3 class="mobile-filter-title">Filter Karyawan</h3>
-                    <button type="button" class="mobile-filter-toggle sm:hidden" onclick="toggleEmployeeFilter()">
+                    <button type="button" class="mobile-filter-toggle sm:hidden bg-blue-50 text-blue-600 px-3 py-2 rounded-md text-sm font-medium hover:bg-blue-100 transition-colors" onclick="toggleEmployeeFilter()">
+                        <i class="fas fa-filter mr-1"></i>
                         <span id="employee-filter-toggle-text">Tampilkan Filter</span>
                     </button>
                 </div>
                 
-                <div id="employee-filter-content" class="mobile-filter-content hidden sm:block">
+                <div id="employee-filter-content" class="mobile-filter-content hidden sm:block" style="display: none;">
                     <form method="GET" action="{{ route('finance.employees.index') }}">
                         <div class="mobile-filter-row sm:grid sm:grid-cols-6 sm:gap-4">
                             <div class="mobile-filter-group sm:col-span-2">
@@ -375,13 +388,26 @@
             window.toggleEmployeeFilter = function() {
                 const content = document.getElementById('employee-filter-content');
                 const toggleText = document.getElementById('employee-filter-toggle-text');
+                const toggleButton = document.querySelector('.mobile-filter-toggle');
                 
-                if (content.classList.contains('hidden')) {
+                if (content.classList.contains('hidden') || content.style.display === 'none') {
                     content.classList.remove('hidden');
-                    toggleText.textContent = 'Sembunyikan Filter';
+                    content.style.display = 'block';
+                    content.classList.add('mobile-slide-down');
+                    if (toggleText) toggleText.textContent = 'Sembunyikan Filter';
+                    if (toggleButton) {
+                        toggleButton.classList.add('bg-blue-100');
+                        toggleButton.classList.remove('bg-blue-50');
+                    }
                 } else {
                     content.classList.add('hidden');
-                    toggleText.textContent = 'Tampilkan Filter';
+                    content.style.display = 'none';
+                    content.classList.remove('mobile-slide-down');
+                    if (toggleText) toggleText.textContent = 'Tampilkan Filter';
+                    if (toggleButton) {
+                        toggleButton.classList.remove('bg-blue-100');
+                        toggleButton.classList.add('bg-blue-50');
+                    }
                 }
             };
 
@@ -389,22 +415,38 @@
             function handleResize() {
                 const isMobile = window.innerWidth < 640;
                 const filterContent = document.getElementById('employee-filter-content');
+                const toggleText = document.getElementById('employee-filter-toggle-text');
+                const toggleButton = document.querySelector('.mobile-filter-toggle');
                 
                 if (!isMobile) {
                     // Show filter content on desktop
                     filterContent.classList.remove('hidden');
+                    filterContent.style.display = '';
                 } else {
-                    // Hide filter content on mobile by default
-                    if (!filterContent.classList.contains('hidden')) {
-                        // Only hide if it wasn't manually opened
-                        const hasActiveFilters = document.querySelector('form input[name="search"]').value ||
-                                                document.querySelector('form select[name="status"]').value ||
-                                                document.querySelector('form select[name="department"]').value ||
-                                                document.querySelector('form select[name="employment_type"]').value;
-                        
-                        if (!hasActiveFilters) {
-                            filterContent.classList.add('hidden');
-                            document.getElementById('employee-filter-toggle-text').textContent = 'Tampilkan Filter';
+                    // Always hide filter content on mobile by default
+                    // Check if there are active filters to determine initial state
+                    const hasActiveFilters = document.querySelector('form input[name="search"]').value ||
+                                            document.querySelector('form select[name="status"]').value ||
+                                            document.querySelector('form select[name="department"]').value ||
+                                            document.querySelector('form select[name="employment_type"]').value;
+                    
+                    if (hasActiveFilters) {
+                        // Show filter if there are active filters
+                        filterContent.classList.remove('hidden');
+                        filterContent.style.display = 'block';
+                        if (toggleText) toggleText.textContent = 'Sembunyikan Filter';
+                        if (toggleButton) {
+                            toggleButton.classList.add('bg-blue-100');
+                            toggleButton.classList.remove('bg-blue-50');
+                        }
+                    } else {
+                        // Hide filter by default
+                        filterContent.classList.add('hidden');
+                        filterContent.style.display = 'none';
+                        if (toggleText) toggleText.textContent = 'Tampilkan Filter';
+                        if (toggleButton) {
+                            toggleButton.classList.remove('bg-blue-100');
+                            toggleButton.classList.add('bg-blue-50');
                         }
                     }
                 }

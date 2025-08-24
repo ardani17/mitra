@@ -979,6 +979,10 @@
         gap: 1rem;
     }
     
+    .mobile-filter-content.hidden {
+        display: none !important;
+    }
+    
     .mobile-filter-row {
         display: flex;
         flex-direction: column;
@@ -1619,6 +1623,24 @@
         to {
             opacity: 1;
             transform: translateY(0);
+        }
+    }
+    
+    /* Mobile Filter Animation */
+    .mobile-slide-down {
+        animation: mobileSlideDown 0.3s ease-out;
+    }
+    
+    @keyframes mobileSlideDown {
+        from {
+            opacity: 0;
+            transform: translateY(-10px);
+            max-height: 0;
+        }
+        to {
+            opacity: 1;
+            transform: translateY(0);
+            max-height: 500px;
         }
     }
 }
