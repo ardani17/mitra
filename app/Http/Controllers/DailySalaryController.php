@@ -119,7 +119,7 @@ class DailySalaryController extends Controller
                 'meal_allowance' => 'nullable|numeric|min:0',
                 'attendance_bonus' => 'nullable|numeric',
                 'phone_allowance' => 'nullable|numeric|min:0',
-                'attendance_status' => 'required|in:present,late,absent',
+                'attendance_status' => 'required|in:present,late,absent,sick',
                 'overtime_amount' => 'nullable|numeric|min:0',
                 'deductions' => 'nullable|numeric|min:0',
                 'notes' => 'nullable|string'
@@ -159,7 +159,7 @@ class DailySalaryController extends Controller
         $deductions = $validated['deductions'] ?? 0;
         
         // Adjust values based on attendance status if not manually set
-        if (!$request->has('meal_allowance') || !$request->has('attendance_bonus') || !$request->has('phone_allowance')) {
+        if (!$request->has('meal_allowance') || !$request->has('attendance_bonus') || !$request->has('phone_allowance') || !$request->has('deductions')) {
             switch ($validated['attendance_status']) {
                 case 'present':
                     if (!$request->has('meal_allowance')) $mealAllowance = 10000;
@@ -172,10 +172,18 @@ class DailySalaryController extends Controller
                     if (!$request->has('phone_allowance')) $phoneAllowance = 5000;
                     break;
                 case 'absent':
-                    // For Libur: basic salary remains as employee's daily rate, others are 0
+                    // For Libur: semua nilai 0, tidak dapat gaji apapun
+                    if (!$request->has('basic_salary')) $basicSalary = 0;
                     if (!$request->has('meal_allowance')) $mealAllowance = 0;
                     if (!$request->has('attendance_bonus')) $attendanceBonus = 0;
                     if (!$request->has('phone_allowance')) $phoneAllowance = 0;
+                    break;
+                case 'sick':
+                    // For Sakit: Gaji Pokok = sesuai database, Uang Makan = 0, Uang Absen = 0, Uang Pulsa = 0, Potongan = 65000
+                    if (!$request->has('meal_allowance')) $mealAllowance = 0;
+                    if (!$request->has('attendance_bonus')) $attendanceBonus = 0;
+                    if (!$request->has('phone_allowance')) $phoneAllowance = 0;
+                    if (!$request->has('deductions')) $deductions = 65000;
                     break;
             }
         }
@@ -319,7 +327,7 @@ class DailySalaryController extends Controller
             'meal_allowance' => 'nullable|numeric|min:0',
             'attendance_bonus' => 'nullable|numeric',
             'phone_allowance' => 'nullable|numeric|min:0',
-            'attendance_status' => 'required|in:present,late,absent',
+            'attendance_status' => 'required|in:present,late,absent,sick',
             'overtime_amount' => 'nullable|numeric|min:0',
             'deductions' => 'nullable|numeric|min:0',
             'notes' => 'nullable|string'
@@ -348,7 +356,7 @@ class DailySalaryController extends Controller
         $deductions = $validated['deductions'] ?? $dailySalary->deductions;
         
         // Adjust values based on attendance status if not manually set
-        if (!$request->has('meal_allowance') || !$request->has('attendance_bonus') || !$request->has('phone_allowance')) {
+        if (!$request->has('meal_allowance') || !$request->has('attendance_bonus') || !$request->has('phone_allowance') || !$request->has('deductions')) {
             switch ($validated['attendance_status']) {
                 case 'present':
                     if (!$request->has('meal_allowance')) $mealAllowance = 10000;
@@ -361,10 +369,18 @@ class DailySalaryController extends Controller
                     if (!$request->has('phone_allowance')) $phoneAllowance = 5000;
                     break;
                 case 'absent':
-                    // For Libur: basic salary remains as provided, others are 0
+                    // For Libur: semua nilai 0, tidak dapat gaji apapun
+                    if (!$request->has('basic_salary')) $basicSalary = 0;
                     if (!$request->has('meal_allowance')) $mealAllowance = 0;
                     if (!$request->has('attendance_bonus')) $attendanceBonus = 0;
                     if (!$request->has('phone_allowance')) $phoneAllowance = 0;
+                    break;
+                case 'sick':
+                    // For Sakit: Gaji Pokok = sesuai database, Uang Makan = 0, Uang Absen = 0, Uang Pulsa = 0, Potongan = 65000
+                    if (!$request->has('meal_allowance')) $mealAllowance = 0;
+                    if (!$request->has('attendance_bonus')) $attendanceBonus = 0;
+                    if (!$request->has('phone_allowance')) $phoneAllowance = 0;
+                    if (!$request->has('deductions')) $deductions = 65000;
                     break;
             }
         }

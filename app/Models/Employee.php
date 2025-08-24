@@ -66,6 +66,16 @@ class Employee extends Model
         return $this->hasMany(EmployeeCustomOffDay::class);
     }
 
+    public function workSchedules()
+    {
+        return $this->hasMany(EmployeeWorkSchedule::class);
+    }
+
+    public function currentWorkSchedule()
+    {
+        return $this->hasOne(EmployeeWorkSchedule::class)->where('is_active', true);
+    }
+
     // Scopes
     public function scopeActive($query)
     {

@@ -20,37 +20,73 @@
 
     <div class="py-12">
         <div class="max-w-7xl mx-auto sm:px-6 lg:px-8">
-            <!-- Period Filter -->
+            <!-- Period Filter & Navigation -->
             <div class="bg-white overflow-hidden shadow-sm sm:rounded-lg mb-6">
                 <div class="p-4 bg-gray-50 border-b border-gray-200">
-                    <form method="GET" action="{{ route('finance.employees.custom-off-days.index', $employee) }}" class="flex items-center space-x-4">
-                        <div class="flex items-center space-x-2">
-                            <label class="text-sm font-medium text-gray-700">Periode:</label>
-                            <select name="month" class="rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500">
-                                @foreach($monthOptions as $monthNum => $monthName)
-                                    <option value="{{ $monthNum }}" {{ $monthNum == $month ? 'selected' : '' }}>
-                                        {{ $monthName }}
-                                    </option>
-                                @endforeach
-                            </select>
-                            <select name="year" class="rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500">
-                                @foreach($yearOptions as $yearOption)
-                                    <option value="{{ $yearOption }}" {{ $yearOption == $year ? 'selected' : '' }}>
-                                        {{ $yearOption }}
-                                    </option>
-                                @endforeach
-                            </select>
-                            <button type="submit" class="bg-indigo-500 hover:bg-indigo-700 text-white font-bold py-2 px-4 rounded">
-                                <i class="fas fa-search mr-2"></i>Filter
-                            </button>
-                        </div>
-                        <div class="flex items-center space-x-2">
-                            <a href="{{ route('finance.employees.custom-off-days.calendar', $employee) }}?year={{ $year }}&month={{ $month }}" 
-                               class="bg-green-500 hover:bg-green-700 text-white font-bold py-2 px-4 rounded">
-                                <i class="fas fa-calendar mr-2"></i>Kalender
-                            </a>
-                        </div>
-                    </form>
+                    <!-- Mobile Layout -->
+                    <div class="block sm:hidden space-y-4">
+                        <!-- Period Filter -->
+                        <form method="GET" action="{{ route('finance.employees.custom-off-days.index', $employee) }}" class="space-y-3">
+                            <div class="flex items-center space-x-2">
+                                <label class="text-sm font-medium text-gray-700 whitespace-nowrap">Periode:</label>
+                                <select name="month" class="flex-1 rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500 text-sm">
+                                    @foreach($monthOptions as $monthNum => $monthName)
+                                        <option value="{{ $monthNum }}" {{ $monthNum == $month ? 'selected' : '' }}>
+                                            {{ $monthName }}
+                                        </option>
+                                    @endforeach
+                                </select>
+                                <select name="year" class="flex-1 rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500 text-sm">
+                                    @foreach($yearOptions as $yearOption)
+                                        <option value="{{ $yearOption }}" {{ $yearOption == $year ? 'selected' : '' }}>
+                                            {{ $yearOption }}
+                                        </option>
+                                    @endforeach
+                                </select>
+                            </div>
+                            <div class="flex space-x-2">
+                                <button type="submit" class="flex-1 bg-indigo-500 hover:bg-indigo-700 text-white font-bold py-2 px-3 rounded text-sm">
+                                    <i class="fas fa-search mr-1"></i>Filter
+                                </button>
+                                <a href="{{ route('finance.employees.custom-off-days.calendar', $employee) }}?year={{ $year }}&month={{ $month }}"
+                                   class="flex-1 bg-green-500 hover:bg-green-700 text-white font-bold py-2 px-3 rounded text-center text-sm">
+                                    <i class="fas fa-calendar mr-1"></i>Kalender
+                                </a>
+                            </div>
+                        </form>
+                    </div>
+                    
+                    <!-- Desktop Layout -->
+                    <div class="hidden sm:block">
+                        <form method="GET" action="{{ route('finance.employees.custom-off-days.index', $employee) }}" class="flex items-center space-x-4">
+                            <div class="flex items-center space-x-2">
+                                <label class="text-sm font-medium text-gray-700">Periode:</label>
+                                <select name="month" class="rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500">
+                                    @foreach($monthOptions as $monthNum => $monthName)
+                                        <option value="{{ $monthNum }}" {{ $monthNum == $month ? 'selected' : '' }}>
+                                            {{ $monthName }}
+                                        </option>
+                                    @endforeach
+                                </select>
+                                <select name="year" class="rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500">
+                                    @foreach($yearOptions as $yearOption)
+                                        <option value="{{ $yearOption }}" {{ $yearOption == $year ? 'selected' : '' }}>
+                                            {{ $yearOption }}
+                                        </option>
+                                    @endforeach
+                                </select>
+                                <button type="submit" class="bg-indigo-500 hover:bg-indigo-700 text-white font-bold py-2 px-4 rounded">
+                                    <i class="fas fa-search mr-2"></i>Filter
+                                </button>
+                            </div>
+                            <div class="flex items-center space-x-2">
+                                <a href="{{ route('finance.employees.custom-off-days.calendar', $employee) }}?year={{ $year }}&month={{ $month }}"
+                                   class="bg-green-500 hover:bg-green-700 text-white font-bold py-2 px-4 rounded">
+                                    <i class="fas fa-calendar mr-2"></i>Kalender
+                                </a>
+                            </div>
+                        </form>
+                    </div>
                 </div>
             </div>
 

@@ -85,9 +85,9 @@
                                class="bg-indigo-500 hover:bg-indigo-700 text-white font-bold py-2 px-2 sm:px-4 rounded text-xs sm:text-sm text-center">
                                 <i class="fas fa-calendar-times mr-1 sm:mr-2"></i><span class="hidden sm:inline">Hari </span>Libur
                             </a>
-                            <button onclick="exportSalaryData()" class="bg-green-500 hover:bg-green-700 text-white font-bold py-2 px-2 sm:px-4 rounded text-xs sm:text-sm">
-                                <i class="fas fa-download mr-1 sm:mr-2"></i>Export
-                            </button>
+                            <a href="{{ route('finance.employees.custom-off-days.calendar', $employee) }}?year={{ $year }}&month={{ $month }}" class="bg-green-500 hover:bg-green-700 text-white font-bold py-2 px-2 sm:px-4 rounded text-xs sm:text-sm text-center">
+                                <i class="fas fa-calendar mr-1 sm:mr-2"></i>Kalender
+                            </a>
                             <button onclick="showSalaryReleaseModal()" class="bg-purple-500 hover:bg-purple-700 text-white font-bold py-2 px-2 sm:px-4 rounded text-xs sm:text-sm">
                                 <i class="fas fa-paper-plane mr-1 sm:mr-2"></i><span class="hidden sm:inline">Rilis </span>Gaji
                             </button>
@@ -420,6 +420,7 @@
                             <option value="present">Hadir</option>
                             <option value="late">Telat</option>
                             <option value="absent">Libur</option>
+                            <option value="sick">Sakit</option>
                         </select>
                     </div>
                     
@@ -615,12 +616,6 @@
             console.log('Navigating to:', url);
             console.log('Selected Month:', selectedMonth, 'Selected Year:', selectedYear);
             window.location.href = url;
-        }
-
-        // Export salary data
-        function exportSalaryData() {
-            const url = `{{ route('finance.employees.export') }}?employee_id={{ $employee->id }}&year={{ $year }}&month={{ $month }}`;
-            window.open(url, '_blank');
         }
 
 
@@ -1153,6 +1148,7 @@
             const mealAllowanceField = document.getElementById('mealAllowance');
             const attendanceBonusField = document.getElementById('attendanceBonus');
             const phoneAllowanceField = document.getElementById('phoneAllowance');
+            const deductionsField = document.getElementById('deductions');
             
             switch (attendanceStatus) {
                 case 'present':
@@ -1161,6 +1157,7 @@
                     mealAllowanceField.value = '10.000';
                     attendanceBonusField.value = '20.000';
                     phoneAllowanceField.value = '5.000';
+                    deductionsField.value = '0';
                     break;
                 case 'late':
                     // Telat: Gaji Pokok = database, Uang Makan = 10000, Uang Absen = 0, Uang Pulsa = 5000
@@ -1168,13 +1165,23 @@
                     mealAllowanceField.value = '10.000';
                     attendanceBonusField.value = '0';
                     phoneAllowanceField.value = '5.000';
+                    deductionsField.value = '0';
                     break;
                 case 'absent':
-                    // Libur: Gaji Pokok tetap sesuai database, yang lain 0
+                    // Libur: semua nilai 0, tidak dapat gaji apapun
+                    basicSalaryField.value = '0';
+                    mealAllowanceField.value = '0';
+                    attendanceBonusField.value = '0';
+                    phoneAllowanceField.value = '0';
+                    deductionsField.value = '0';
+                    break;
+                case 'sick':
+                    // Sakit: Gaji Pokok = database, Uang Makan = 0, Uang Absen = 0, Uang Pulsa = 0, Potongan = 65000
                     basicSalaryField.value = '{{ number_format($employee->daily_rate, 0, ",", ".") }}';
                     mealAllowanceField.value = '0';
                     attendanceBonusField.value = '0';
                     phoneAllowanceField.value = '0';
+                    deductionsField.value = '65.000';
                     break;
             }
         }

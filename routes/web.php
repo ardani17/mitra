@@ -232,6 +232,11 @@ Route::middleware('auth')->group(function () {
         Route::post('/employees/{employee}/custom-off-days/quick-remove', [EmployeeCustomOffDayController::class, 'quickRemove'])->name('employees.custom-off-days.quick-remove');
         Route::delete('/employees/{employee}/custom-off-days-bulk', [EmployeeCustomOffDayController::class, 'bulkDelete'])->name('employees.custom-off-days.bulk-delete');
         
+        // Attendance Status Management
+        Route::post('/employees/{employee}/attendance-status', [EmployeeCustomOffDayController::class, 'updateAttendanceStatus'])->name('employees.attendance-status.update');
+        Route::get('/employees/{employee}/attendance-status', [EmployeeCustomOffDayController::class, 'getAttendanceStatus'])->name('employees.attendance-status.get');
+        Route::delete('/employees/{employee}/attendance-status', [EmployeeCustomOffDayController::class, 'deleteAttendanceStatus'])->name('employees.attendance-status.delete');
+        
         // Employee Daily Salary Management (moved from separate menu)
         Route::post('/employees/{employee}/daily-salaries', [DailySalaryController::class, 'store'])->name('employees.daily-salaries.store');
         Route::put('/employees/{employee}/daily-salaries/{dailySalary}', [DailySalaryController::class, 'update'])->name('employees.daily-salaries.update');
