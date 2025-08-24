@@ -162,9 +162,10 @@
                                 <p class="text-sm sm:text-lg font-semibold text-gray-900">
                                     <span class="text-green-600">{{ $monthlyStats['present_days'] }}</span> /
                                     <span class="text-yellow-600">{{ $monthlyStats['late_days'] }}</span> /
+                                    <span class="text-blue-600">{{ $monthlyStats['sick_days'] }}</span> /
                                     <span class="text-red-600">{{ $monthlyStats['absent_days'] }}</span>
                                 </p>
-                                <p class="text-xs text-gray-500">Hadir / Telat / Libur</p>
+                                <p class="text-xs text-gray-500">Hadir / Telat / Sakit / Libur</p>
                             </div>
                         </div>
                     </div>

@@ -250,6 +250,7 @@ class EmployeeController extends Controller
             'average_daily' => $existingSalaries->count() > 0 ? $existingSalaries->avg('total_amount') : 0,
             'present_days' => $existingSalaries->where('attendance_status', 'present')->count(),
             'late_days' => $existingSalaries->where('attendance_status', 'late')->count(),
+            'sick_days' => $existingSalaries->where('attendance_status', 'sick')->count(),
             'absent_days' => $existingSalaries->where('attendance_status', 'absent')->count(),
         ];
         
