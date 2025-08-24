@@ -119,6 +119,25 @@
                 </div>
             </div>
 
+            <!-- Legend -->
+            <div class="bg-white overflow-hidden shadow-sm sm:rounded-lg mb-6">
+                <div class="p-4 bg-gray-50 border-b border-gray-200">
+                    <h4 class="text-sm font-semibold text-gray-700 mb-3">
+                        <i class="fas fa-info-circle mr-2"></i>Keterangan
+                    </h4>
+                    <div class="grid grid-cols-1 md:grid-cols-2 gap-4 text-sm">
+                        <div class="flex items-center space-x-2">
+                            <div class="w-4 h-4 bg-white border border-gray-300 rounded"></div>
+                            <span class="text-gray-600">Libur Custom (dapat diedit/dihapus)</span>
+                        </div>
+                        <div class="flex items-center space-x-2">
+                            <div class="w-4 h-4 bg-blue-50 border border-blue-200 rounded"></div>
+                            <span class="text-gray-600">Dari Data Absensi (edit melalui kalender)</span>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
             <!-- Off Days List -->
             <div class="bg-white overflow-hidden shadow-sm sm:rounded-lg">
                 <div class="p-6 bg-white border-b border-gray-200">
@@ -150,40 +169,62 @@
                                 </thead>
                                 <tbody class="bg-white divide-y divide-gray-200">
                                     @foreach($offDays as $offDay)
-                                        <tr class="hover:bg-gray-50">
+                                        <tr class="hover:bg-gray-50 {{ $offDay['source'] === 'attendance' ? 'bg-blue-50' : '' }}">
                                             <td class="px-6 py-4 whitespace-nowrap">
                                                 <div class="text-sm font-medium text-gray-900">
-                                                    {{ $offDay->formatted_off_date }}
+                                                    {{ $offDay['formatted_date'] }}
                                                 </div>
+                                                @if($offDay['source'] === 'attendance')
+                                                    <div class="text-xs text-blue-600 mt-1">
+                                                        <i class="fas fa-calendar-check mr-1"></i>Dari Absensi
+                                                    </div>
+                                                @endif
                                             </td>
                                             <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
-                                                {{ $offDay->day_name }}
+                                                {{ $offDay['day_name'] }}
                                             </td>
                                             <td class="px-6 py-4 text-sm text-gray-900">
-                                                {{ $offDay->reason_or_default }}
+                                                {{ $offDay['reason'] }}
+                                                @if($offDay['source'] === 'attendance')
+                                                    <span class="inline-flex items-center px-2 py-0.5 rounded text-xs font-medium bg-blue-100 text-blue-800 ml-2">
+                                                        Otomatis
+                                                    </span>
+                                                @endif
                                             </td>
                                             <td class="px-6 py-4 whitespace-nowrap">
-                                                {!! $offDay->status_badge !!}
+                                                {!! $offDay['status'] !!}
                                             </td>
                                             <td class="px-6 py-4 whitespace-nowrap text-sm font-medium">
                                                 <div class="flex space-x-2">
-                                                    <a href="{{ route('finance.employees.custom-off-days.show', [$employee, $offDay]) }}" 
-                                                       class="text-indigo-600 hover:text-indigo-900" title="Lihat Detail">
-                                                        <i class="fas fa-eye"></i>
-                                                    </a>
-                                                    <a href="{{ route('finance.employees.custom-off-days.edit', [$employee, $offDay]) }}" 
-                                                       class="text-yellow-600 hover:text-yellow-900" title="Edit">
-                                                        <i class="fas fa-edit"></i>
-                                                    </a>
-                                                    <form action="{{ route('finance.employees.custom-off-days.destroy', [$employee, $offDay]) }}" 
-                                                          method="POST" class="inline"
-                                                          onsubmit="return confirm('Apakah Anda yakin ingin menghapus hari libur ini?')">
-                                                        @csrf
-                                                        @method('DELETE')
-                                                        <button type="submit" class="text-red-600 hover:text-red-900" title="Hapus">
-                                                            <i class="fas fa-trash"></i>
-                                                        </button>
-                                                    </form>
+                                                    @if($offDay['source'] === 'custom')
+                                                        <!-- Custom off days can be viewed, edited, and deleted -->
+                                                        <a href="{{ route('finance.employees.custom-off-days.show', [$employee, $offDay['original_data']]) }}"
+                                                           class="text-indigo-600 hover:text-indigo-900" title="Lihat Detail">
+                                                            <i class="fas fa-eye"></i>
+                                                        </a>
+                                                        <a href="{{ route('finance.employees.custom-off-days.edit', [$employee, $offDay['original_data']]) }}"
+                                                           class="text-yellow-600 hover:text-yellow-900" title="Edit">
+                                                            <i class="fas fa-edit"></i>
+                                                        </a>
+                                                        <form action="{{ route('finance.employees.custom-off-days.destroy', [$employee, $offDay['original_data']]) }}"
+                                                              method="POST" class="inline"
+                                                              onsubmit="return confirm('Apakah Anda yakin ingin menghapus hari libur ini?')">
+                                                            @csrf
+                                                            @method('DELETE')
+                                                            <button type="submit" class="text-red-600 hover:text-red-900" title="Hapus">
+                                                                <i class="fas fa-trash"></i>
+                                                            </button>
+                                                        </form>
+                                                    @else
+                                                        <!-- Attendance-based off days can only be edited via calendar -->
+                                                        <a href="{{ route('finance.employees.custom-off-days.calendar', $employee) }}?year={{ $year }}&month={{ $month }}"
+                                                           class="text-green-600 hover:text-green-900" title="Edit di Kalender">
+                                                            <i class="fas fa-calendar-edit"></i>
+                                                        </a>
+                                                        <span class="text-gray-400" title="Data dari absensi - edit melalui kalender">
+                                                            <i class="fas fa-lock"></i>
+                                                        </span>
+                                                    @endif
                                                 </div>
                                             </td>
                                         </tr>

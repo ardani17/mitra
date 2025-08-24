@@ -22,10 +22,66 @@ class EmployeeCustomOffDayController extends Controller
         $year = $request->get('year', now()->year);
         $month = $request->get('month', now()->month);
 
-        $offDays = $employee->customOffDays()
+        // Get custom off days from employee_custom_off_days table
+        $customOffDays = $employee->customOffDays()
             ->forPeriod($year, $month)
             ->orderBy('off_date')
             ->get();
+
+        // Get attendance-based off days from daily_salaries table
+        $startDate = \Carbon\Carbon::create($year, $month, 1);
+        $endDate = $startDate->copy()->endOfMonth();
+        
+        $attendanceOffDays = $employee->dailySalaries()
+            ->whereBetween('work_date', [$startDate->format('Y-m-d'), $endDate->format('Y-m-d')])
+            ->whereIn('attendance_status', ['absent', 'sick', 'leave'])
+            ->orderBy('work_date')
+            ->get();
+
+        // Merge both data sources into a unified collection
+        $offDays = collect();
+        
+        // Add custom off days
+        foreach ($customOffDays as $customOffDay) {
+            $offDays->push([
+                'id' => $customOffDay->id,
+                'date' => $customOffDay->off_date,
+                'formatted_date' => $customOffDay->off_date->format('d/m/Y'),
+                'day_name' => $this->getDayName($customOffDay->off_date->format('l')),
+                'reason' => $customOffDay->reason ?: 'Libur custom',
+                'source' => 'custom',
+                'status' => $this->getOffDayStatusBadge($customOffDay->off_date),
+                'can_edit' => true,
+                'can_delete' => true,
+                'original_data' => $customOffDay
+            ]);
+        }
+        
+        // Add attendance-based off days (only if not already in custom off days)
+        foreach ($attendanceOffDays as $dailySalary) {
+            // Check if this date already exists in custom off days
+            $existsInCustom = $customOffDays->contains(function ($customOffDay) use ($dailySalary) {
+                return $customOffDay->off_date->format('Y-m-d') === $dailySalary->work_date->format('Y-m-d');
+            });
+            
+            if (!$existsInCustom) {
+                $offDays->push([
+                    'id' => 'daily_salary_' . $dailySalary->id,
+                    'date' => $dailySalary->work_date,
+                    'formatted_date' => $dailySalary->work_date->format('d/m/Y'),
+                    'day_name' => $this->getDayName($dailySalary->work_date->format('l')),
+                    'reason' => $this->getAttendanceStatusReason($dailySalary->attendance_status),
+                    'source' => 'attendance',
+                    'status' => $this->getOffDayStatusBadge($dailySalary->work_date),
+                    'can_edit' => false, // Attendance-based off days should be edited via calendar
+                    'can_delete' => false,
+                    'original_data' => $dailySalary
+                ]);
+            }
+        }
+        
+        // Sort by date
+        $offDays = $offDays->sortBy('date')->values();
 
         $monthOptions = [
             1 => 'Januari', 2 => 'Februari', 3 => 'Maret', 4 => 'April',
@@ -538,6 +594,36 @@ class EmployeeCustomOffDayController extends Controller
         } else {
             return redirect()->back()
                 ->with('error', 'Tidak ada data kehadiran untuk tanggal ini.');
+        }
+    }
+
+    /**
+     * Get reason text based on attendance status
+     */
+    private function getAttendanceStatusReason($attendanceStatus)
+    {
+        $reasons = [
+            'absent' => 'Libur',
+            'sick' => 'Sakit',
+            'leave' => 'Cuti'
+        ];
+        
+        return $reasons[$attendanceStatus] ?? 'Libur';
+    }
+
+    /**
+     * Get status badge for off day based on date
+     */
+    private function getOffDayStatusBadge($date)
+    {
+        $date = \Carbon\Carbon::parse($date);
+        
+        if ($date->isToday()) {
+            return '<span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-red-100 text-red-800">Hari Ini</span>';
+        } elseif ($date->isPast()) {
+            return '<span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-gray-100 text-gray-800">Sudah Lewat</span>';
+        } else {
+            return '<span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-blue-100 text-blue-800">Akan Datang</span>';
         }
     }
 }
