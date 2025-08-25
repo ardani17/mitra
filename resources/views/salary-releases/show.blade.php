@@ -35,7 +35,14 @@
                     @endif
                 @endcan
                 
-                <a href="{{ route('finance.salary-releases.index') }}" 
+                <!-- Print Button -->
+                <a href="{{ route('finance.salary-releases.print', $salaryRelease) }}"
+                   target="_blank"
+                   class="bg-purple-500 hover:bg-purple-700 text-white font-bold py-2 px-4 rounded">
+                    <i class="fas fa-print mr-2"></i>Print Slip Gaji
+                </a>
+                
+                <a href="{{ route('finance.salary-releases.index') }}"
                    class="bg-gray-500 hover:bg-gray-700 text-white font-bold py-2 px-4 rounded">
                     <i class="fas fa-arrow-left mr-2"></i>Kembali
                 </a>

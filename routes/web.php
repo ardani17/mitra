@@ -277,7 +277,9 @@ Route::middleware('auth')->group(function () {
         Route::get('/daily-salaries-calendar', [DailySalaryController::class, 'calendar'])->name('daily-salaries.calendar');
         Route::post('/daily-salaries/bulk-confirm', [DailySalaryController::class, 'bulkConfirm'])->name('daily-salaries.bulk-confirm');
         
-        Route::resource('salary-releases', SalaryReleaseController::class)->except(['index', 'create']);
+        Route::resource('salary-releases', SalaryReleaseController::class)->except(['index', 'create', 'destroy']);
+        Route::delete('/salary-releases/{salary_release}', [SalaryReleaseController::class, 'destroyDirect'])->name('salary-releases.destroy');
+        Route::get('/salary-releases/{salary_release}/print', [SalaryReleaseController::class, 'print'])->name('salary-releases.print');
         Route::post('/salary-releases/{salaryRelease}/release', [SalaryReleaseController::class, 'release'])->name('salary-releases.release');
         Route::post('/salary-releases/{salaryRelease}/mark-as-paid', [SalaryReleaseController::class, 'markAsPaid'])->name('salary-releases.mark-as-paid');
         Route::post('/salary-releases/{salaryRelease}/revert-to-draft', [SalaryReleaseController::class, 'revertToDraft'])->name('salary-releases.revert-to-draft');

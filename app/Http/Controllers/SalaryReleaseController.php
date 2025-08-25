@@ -308,6 +308,7 @@ class SalaryReleaseController extends Controller
 
     /**
      * Remove the specified resource from storage.
+     * For employee-specific route: /employees/{employee}/salary-releases/{salaryRelease}
      */
     public function destroy(Employee $employee, SalaryRelease $salaryRelease)
     {
@@ -327,7 +328,7 @@ class SalaryReleaseController extends Controller
             if (request()->expectsJson()) {
                 return response()->json(['success' => false, 'message' => 'Tidak dapat menghapus rilis gaji yang sudah dirilis.']);
             }
-            return redirect()->route('finance.salary-releases.index')
+            return redirect()->route('finance.employees.show', $employee)
                 ->with('error', 'Tidak dapat menghapus rilis gaji yang sudah dirilis.');
         }
 
@@ -345,10 +346,7 @@ class SalaryReleaseController extends Controller
                 return response()->json(['success' => true, 'message' => 'Rilis gaji berhasil dihapus.']);
             }
 
-            $redirectRoute = $employee ? 'finance.employees.show' : 'finance.salary-releases.index';
-            $redirectParam = $employee ? $employee : null;
-
-            return redirect()->route($redirectRoute, $redirectParam)
+            return redirect()->route('finance.employees.show', $employee)
                 ->with('success', 'Rilis gaji berhasil dihapus.');
 
         } catch (\Exception $e) {
@@ -358,10 +356,53 @@ class SalaryReleaseController extends Controller
                 return response()->json(['success' => false, 'message' => 'Gagal menghapus rilis gaji: ' . $e->getMessage()]);
             }
             
-            $redirectRoute = $employee ? 'finance.employees.show' : 'finance.salary-releases.index';
-            $redirectParam = $employee ? $employee : null;
+            return redirect()->route('finance.employees.show', $employee)
+                ->with('error', 'Gagal menghapus rilis gaji: ' . $e->getMessage());
+        }
+    }
 
-            return redirect()->route($redirectRoute, $redirectParam)
+    /**
+     * Remove the specified resource from storage.
+     * For direct salary release route: /salary-releases/{salary_release}
+     */
+    public function destroyDirect(SalaryRelease $salary_release)
+    {
+        Gate::authorize('delete', $salary_release);
+
+        // Cannot delete if already released
+        if ($salary_release->is_released) {
+            if (request()->expectsJson()) {
+                return response()->json(['success' => false, 'message' => 'Tidak dapat menghapus rilis gaji yang sudah dirilis.']);
+            }
+            return redirect()->route('finance.salary-releases.index')
+                ->with('error', 'Tidak dapat menghapus rilis gaji yang sudah dirilis.');
+        }
+
+        DB::beginTransaction();
+        try {
+            // Detach daily salaries
+            $salary_release->dailySalaries()->update(['salary_release_id' => null]);
+            
+            // Delete the release
+            $salary_release->delete();
+
+            DB::commit();
+
+            if (request()->expectsJson()) {
+                return response()->json(['success' => true, 'message' => 'Rilis gaji berhasil dihapus.']);
+            }
+
+            return redirect()->route('finance.salary-releases.index')
+                ->with('success', 'Rilis gaji berhasil dihapus.');
+
+        } catch (\Exception $e) {
+            DB::rollback();
+            
+            if (request()->expectsJson()) {
+                return response()->json(['success' => false, 'message' => 'Gagal menghapus rilis gaji: ' . $e->getMessage()]);
+            }
+            
+            return redirect()->route('finance.salary-releases.index')
                 ->with('error', 'Gagal menghapus rilis gaji: ' . $e->getMessage());
         }
     }
@@ -551,5 +592,17 @@ class SalaryReleaseController extends Controller
             ->get();
 
         return response()->json($salaryReleases);
+    }
+
+    /**
+     * Display the print view for salary slip
+     */
+    public function print(SalaryRelease $salary_release)
+    {
+        Gate::authorize('view', $salary_release);
+
+        $salary_release->load(['employee', 'dailySalaries', 'releasedBy']);
+
+        return view('salary-releases.print', compact('salary_release'));
     }
 }
