@@ -439,8 +439,8 @@
                                                 'present' => 'Hadir',
                                                 'sakit' => 'Sakit',
                                                 'sick' => 'Sakit',
-                                                'alpha' => 'Alpha',
-                                                'absent' => 'Alpha',
+                                                'alpha' => 'Libur',
+                                                'absent' => 'Libur',
                                                 'late' => 'Telat'
                                             ];
                                             $statusColors = [
