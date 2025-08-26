@@ -6,6 +6,7 @@ use Illuminate\Support\ServiceProvider;
 use Illuminate\Support\Facades\Gate;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\View;
+use Illuminate\Pagination\Paginator;
 use App\Models\Project;
 use App\Models\ProjectExpense;
 use App\Models\ProjectBilling;
@@ -39,6 +40,10 @@ class AppServiceProvider extends ServiceProvider
      */
     public function boot(): void
     {
+        // Set default pagination views
+        Paginator::defaultView('vendor.pagination.responsive-tailwind');
+        Paginator::defaultSimpleView('vendor.pagination.simple-responsive-tailwind');
+        
         // Register policies
         Gate::policy(Project::class, ProjectPolicy::class);
         Gate::policy(ProjectExpense::class, ExpensePolicy::class);
