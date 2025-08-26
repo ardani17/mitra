@@ -41,8 +41,8 @@ class AppServiceProvider extends ServiceProvider
     public function boot(): void
     {
         // Set default pagination views
-        Paginator::defaultView('vendor.pagination.responsive-tailwind');
-        Paginator::defaultSimpleView('vendor.pagination.simple-responsive-tailwind');
+        Paginator::defaultView('vendor.pagination.clean-mobile');
+        Paginator::defaultSimpleView('vendor.pagination.clean-mobile');
         
         // Register policies
         Gate::policy(Project::class, ProjectPolicy::class);

@@ -2,6 +2,98 @@
 @tailwind components;
 @tailwind utilities;
 
+/* Clean Mobile Pagination Styles */
+.pagination-container {
+    background: transparent;
+    padding: 0;
+    margin: 0;
+}
+
+/* Mobile Pagination Buttons */
+.pagination-btn-active {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    width: 40px;
+    height: 40px;
+    background-color: #3b82f6;
+    color: white;
+    border-radius: 8px;
+    text-decoration: none;
+    transition: all 0.2s ease;
+    border: none;
+    box-shadow: 0 2px 4px rgba(59, 130, 246, 0.2);
+}
+
+.pagination-btn-active:hover {
+    background-color: #2563eb;
+    transform: translateY(-1px);
+    box-shadow: 0 4px 8px rgba(59, 130, 246, 0.3);
+}
+
+.pagination-btn-disabled {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    width: 40px;
+    height: 40px;
+    background-color: #f1f5f9;
+    color: #94a3b8;
+    border-radius: 8px;
+    cursor: not-allowed;
+    border: none;
+}
+
+/* Mobile Page Info */
+.pagination-info {
+    font-size: 14px;
+    font-weight: 500;
+    color: #64748b;
+    background-color: #f8fafc;
+    padding: 8px 16px;
+    border-radius: 8px;
+    border: 1px solid #e2e8f0;
+    min-width: 60px;
+    text-align: center;
+}
+
+/* Ensure no conflicts with existing styles */
+.pagination-container * {
+    box-sizing: border-box;
+}
+
+/* Remove any inherited styles that might cause issues */
+.pagination-container .block,
+.pagination-container .hidden {
+    display: block;
+}
+
+.pagination-container .hidden {
+    display: none !important;
+}
+
+@media (min-width: 768px) {
+    .pagination-container .block {
+        display: none !important;
+    }
+    
+    .pagination-container .hidden {
+        display: flex !important;
+    }
+}
+
+/* Clean desktop pagination styles */
+@media (min-width: 768px) {
+    .pagination-container nav a,
+    .pagination-container nav span {
+        transition: all 0.2s ease;
+    }
+    
+    .pagination-container nav a:hover {
+        background-color: #f3f4f6 !important;
+    }
+}
+
 /* Custom Blue Sky Theme */
 :root {
     --primary-blue: #0ea5e9;

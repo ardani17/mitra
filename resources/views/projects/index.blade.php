@@ -472,7 +472,7 @@
         <!-- Pagination -->
         <div class="bg-gradient-to-r from-blue-50 to-blue-100 px-4 py-3 border-t border-blue-200 sm:px-6">
             <div class="pagination-wrapper">
-                {{ $projects->links('vendor.pagination.responsive-tailwind') }}
+                {{ $projects->links('vendor.pagination.clean-mobile') }}
             </div>
         </div>
     </div>
