@@ -110,6 +110,12 @@ class CashflowController extends Controller
      */
     public function store(Request $request)
     {
+        // Clean the amount field from formatting (remove dots used as thousand separators)
+        if ($request->has('amount')) {
+            $cleanAmount = str_replace('.', '', $request->input('amount'));
+            $request->merge(['amount' => $cleanAmount]);
+        }
+
         $validated = $request->validate([
             'project_id' => 'nullable|exists:projects,id',
             'category_id' => 'required|exists:cashflow_categories,id',
@@ -168,6 +174,12 @@ class CashflowController extends Controller
         if (!$cashflow->canBeEdited()) {
             return redirect()->route('finance.cashflow.index')
                 ->with('error', 'Entry ini tidak dapat diedit.');
+        }
+
+        // Clean the amount field from formatting (remove dots used as thousand separators)
+        if ($request->has('amount')) {
+            $cleanAmount = str_replace('.', '', $request->input('amount'));
+            $request->merge(['amount' => $cleanAmount]);
         }
 
         $validated = $request->validate([

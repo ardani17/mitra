@@ -200,6 +200,14 @@ Route::middleware('auth')->group(function () {
         Route::post('/cashflow-import', [CashflowController::class, 'import'])->name('cashflow.import');
         Route::get('/cashflow-template', [CashflowController::class, 'downloadTemplate'])->name('cashflow.template');
         
+        // Cashflow Category Management
+        Route::resource('cashflow-categories', App\Http\Controllers\CashflowCategoryController::class);
+        Route::post('/cashflow-categories/{cashflowCategory}/toggle', [App\Http\Controllers\CashflowCategoryController::class, 'toggle'])->name('cashflow-categories.toggle');
+        Route::post('/cashflow-categories/bulk-update', [App\Http\Controllers\CashflowCategoryController::class, 'bulkUpdate'])->name('cashflow-categories.bulk-update');
+        Route::get('/cashflow-categories-export', [App\Http\Controllers\CashflowCategoryController::class, 'export'])->name('cashflow-categories.export');
+        Route::post('/cashflow-categories-import', [App\Http\Controllers\CashflowCategoryController::class, 'import'])->name('cashflow-categories.import');
+        Route::get('/cashflow-categories-template', [App\Http\Controllers\CashflowCategoryController::class, 'downloadTemplate'])->name('cashflow-categories.template');
+        
         // API endpoints for finance dashboard
         Route::get('/api/dashboard-data', [FinanceDashboardController::class, 'getDashboardData'])->name('api.dashboard-data');
         Route::get('/api/cashflow-chart', [FinanceDashboardController::class, 'getCashflowChart'])->name('api.cashflow-chart');
