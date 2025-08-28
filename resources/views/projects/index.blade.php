@@ -45,9 +45,16 @@
             <div class="grid grid-cols-1 md:grid-cols-4 gap-4 mb-4">
                 <div>
                     <label class="block text-sm font-medium text-slate-700 mb-1">Pencarian Real-time</label>
-                    <input type="text" name="search" value="{{ request('search') }}" 
-                           class="form-input" placeholder="Cari nama proyek, kode, atau deskripsi..."
-                           id="searchInput">
+                    <div class="relative">
+                        <input type="text" name="search" value="{{ request('search') }}"
+                               class="form-input pr-20" placeholder="Cari nama proyek, kode, atau deskripsi..."
+                               id="searchInput" autocomplete="off">
+                        <!-- Mobile search button (hidden by default, shown on mobile when input has value) -->
+                        <button type="submit" id="mobileSearchBtn"
+                                class="absolute right-1 top-1/2 transform -translate-y-1/2 bg-blue-500 hover:bg-blue-600 text-white px-3 py-1 rounded text-sm font-medium hidden">
+                            Cari
+                        </button>
+                    </div>
                 </div>
                 
                 <div>
@@ -480,60 +487,225 @@
 
 <script>
 document.addEventListener('DOMContentLoaded', function() {
+    // Device detection
+    const isMobile = /Android|webOS|iPhone|iPad|iPod|BlackBerry|IEMobile|Opera Mini/i.test(navigator.userAgent);
+    const isIOS = /iPhone|iPad|iPod/i.test(navigator.userAgent);
+    console.log('Device:', isMobile ? 'Mobile' : 'Desktop', isIOS ? '(iOS)' : '');
+    
     // Advanced Filter Toggle
     const toggleButton = document.getElementById('toggleAdvancedFilter');
     const advancedFilters = document.getElementById('advancedFilters');
     const toggleText = document.getElementById('filterToggleText');
     const toggleIcon = document.getElementById('filterToggleIcon');
     
-    toggleButton.addEventListener('click', function() {
-        if (advancedFilters.classList.contains('hidden')) {
-            advancedFilters.classList.remove('hidden');
-            toggleText.textContent = 'Sembunyikan Filter Lanjutan';
-            toggleIcon.style.transform = 'rotate(180deg)';
-        } else {
-            advancedFilters.classList.add('hidden');
-            toggleText.textContent = 'Tampilkan Filter Lanjutan';
-            toggleIcon.style.transform = 'rotate(0deg)';
-        }
-    });
+    if (toggleButton) {
+        toggleButton.addEventListener('click', function() {
+            if (advancedFilters.classList.contains('hidden')) {
+                advancedFilters.classList.remove('hidden');
+                toggleText.textContent = 'Sembunyikan Filter Lanjutan';
+                toggleIcon.style.transform = 'rotate(180deg)';
+            } else {
+                advancedFilters.classList.add('hidden');
+                toggleText.textContent = 'Tampilkan Filter Lanjutan';
+                toggleIcon.style.transform = 'rotate(0deg)';
+            }
+        });
+    }
     
-    // Real-time Search with Debounce
+    // Search functionality with enhanced mobile support
     const searchInput = document.getElementById('searchInput');
     const statusFilter = document.getElementById('statusFilter');
     const typeFilter = document.getElementById('typeFilter');
+    const filterForm = document.getElementById('filterForm');
+    const mobileSearchBtn = document.getElementById('mobileSearchBtn');
     let searchTimeout;
+    let lastSearchValue = searchInput ? searchInput.value : '';
     
-    function performSearch() {
+    // Function to perform search
+    function performSearch(immediate = false) {
+        if (!searchInput || !filterForm) return;
+        
+        const currentValue = searchInput.value.trim();
+        
+        // Only search if value has changed
+        if (currentValue === lastSearchValue && !immediate) {
+            console.log('Search value unchanged, skipping');
+            return;
+        }
+        
+        lastSearchValue = currentValue;
+        console.log('Performing search for:', currentValue);
+        
         clearTimeout(searchTimeout);
-        searchTimeout = setTimeout(() => {
-            document.getElementById('filterForm').submit();
-        }, 500); // 500ms delay
+        
+        if (immediate) {
+            filterForm.submit();
+        } else {
+            searchTimeout = setTimeout(() => {
+                filterForm.submit();
+            }, isMobile ? 800 : 500); // Longer delay on mobile
+        }
+    }
+    
+    // Enhanced search input handling
+    if (searchInput && filterForm) {
+        // Show/hide mobile search button
+        function updateMobileButton() {
+            if (mobileSearchBtn && isMobile) {
+                if (searchInput.value.trim() !== '') {
+                    mobileSearchBtn.classList.remove('hidden');
+                } else {
+                    mobileSearchBtn.classList.add('hidden');
+                }
+            }
+        }
+        
+        // Desktop: Real-time search with debounce
+        if (!isMobile) {
+            searchInput.addEventListener('input', function(e) {
+                console.log('Desktop input event:', e.target.value);
+                performSearch();
+            });
+        } else {
+            // Mobile: Different strategy for better compatibility
+            
+            // Method 1: Input event (works on most modern mobile browsers)
+            searchInput.addEventListener('input', function(e) {
+                console.log('Mobile input event:', e.target.value);
+                updateMobileButton();
+                // Don't auto-search on every keystroke on mobile
+                // User can tap the search button or press Enter
+            });
+            
+            // Method 2: Keyup event (fallback for older browsers)
+            searchInput.addEventListener('keyup', function(e) {
+                console.log('Mobile keyup event:', e.target.value, 'Key:', e.key);
+                updateMobileButton();
+                
+                // Search on Enter key
+                if (e.key === 'Enter' || e.keyCode === 13) {
+                    e.preventDefault();
+                    performSearch(true);
+                }
+            });
+            
+            // Method 3: Change event (when input loses focus)
+            searchInput.addEventListener('change', function(e) {
+                console.log('Mobile change event:', e.target.value);
+                updateMobileButton();
+                if (e.target.value.trim() !== '') {
+                    performSearch();
+                }
+            });
+            
+            // Method 4: Search event (for search-type inputs)
+            searchInput.addEventListener('search', function(e) {
+                console.log('Mobile search event:', e.target.value);
+                performSearch(true);
+            });
+            
+            // iOS specific handling
+            if (isIOS) {
+                // iOS sometimes needs special handling for input events
+                let composing = false;
+                
+                searchInput.addEventListener('compositionstart', function() {
+                    composing = true;
+                    console.log('iOS composition start');
+                });
+                
+                searchInput.addEventListener('compositionend', function(e) {
+                    composing = false;
+                    console.log('iOS composition end:', e.target.value);
+                    updateMobileButton();
+                });
+                
+                // Fallback for iOS: use touchend on the input
+                searchInput.addEventListener('touchend', function() {
+                    setTimeout(() => {
+                        updateMobileButton();
+                    }, 100);
+                });
+            }
+            
+            // Handle form submission on Enter key (mobile)
+            searchInput.addEventListener('keypress', function(e) {
+                if (e.key === 'Enter' || e.keyCode === 13) {
+                    e.preventDefault();
+                    performSearch(true);
+                }
+            });
+            
+            // Mobile search button click
+            if (mobileSearchBtn) {
+                mobileSearchBtn.addEventListener('click', function(e) {
+                    e.preventDefault();
+                    console.log('Mobile search button clicked');
+                    performSearch(true);
+                });
+            }
+            
+            // Initialize mobile button visibility
+            updateMobileButton();
+        }
+        
+        // Prevent form submission on Enter in desktop mode (let debounce handle it)
+        if (!isMobile) {
+            searchInput.addEventListener('keypress', function(e) {
+                if (e.key === 'Enter' || e.keyCode === 13) {
+                    e.preventDefault();
+                    performSearch(true);
+                }
+            });
+        }
     }
     
     // Auto-submit on filter changes
-    searchInput.addEventListener('input', performSearch);
-    statusFilter.addEventListener('change', function() {
-        document.getElementById('filterForm').submit();
-    });
-    typeFilter.addEventListener('change', function() {
-        document.getElementById('filterForm').submit();
-    });
+    if (statusFilter) {
+        statusFilter.addEventListener('change', function() {
+            console.log('Status filter changed:', this.value);
+            if (filterForm) {
+                filterForm.submit();
+            }
+        });
+    }
+    
+    if (typeFilter) {
+        typeFilter.addEventListener('change', function() {
+            console.log('Type filter changed:', this.value);
+            if (filterForm) {
+                filterForm.submit();
+            }
+        });
+    }
     
     // Show loading indicator during search
-    const form = document.getElementById('filterForm');
-    form.addEventListener('submit', function() {
-        const submitButton = form.querySelector('button[type="submit"]');
-        const originalText = submitButton.innerHTML;
-        submitButton.innerHTML = '<svg class="animate-spin w-4 h-4 mr-2" fill="none" viewBox="0 0 24 24"><circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle><path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path></svg>Mencari...';
-        submitButton.disabled = true;
-        
-        // Re-enable after 3 seconds (fallback)
-        setTimeout(() => {
-            submitButton.innerHTML = originalText;
-            submitButton.disabled = false;
-        }, 3000);
-    });
+    if (filterForm) {
+        filterForm.addEventListener('submit', function(e) {
+            console.log('Form submitting...');
+            
+            // Find all submit buttons
+            const submitButtons = this.querySelectorAll('button[type="submit"], #mobileSearchBtn');
+            submitButtons.forEach(button => {
+                const originalText = button.innerHTML;
+                button.innerHTML = '<svg class="animate-spin w-4 h-4 inline mr-1" fill="none" viewBox="0 0 24 24"><circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle><path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path></svg>Mencari...';
+                button.disabled = true;
+                
+                // Store original text for restoration
+                button.dataset.originalText = originalText;
+            });
+            
+            // Re-enable after 3 seconds (fallback)
+            setTimeout(() => {
+                submitButtons.forEach(button => {
+                    if (button.dataset.originalText) {
+                        button.innerHTML = button.dataset.originalText;
+                        button.disabled = false;
+                    }
+                });
+            }, 3000);
+        });
+    }
     
     // Format number inputs for budget range
     const budgetInputs = document.querySelectorAll('input[name="budget_min"], input[name="budget_max"]');
@@ -568,8 +740,12 @@ document.addEventListener('DOMContentLoaded', function() {
         });
     }
     
-    // Filter lanjutan selalu tersembunyi secara default
-    // Tidak ada auto-expand logic - user harus manual klik untuk membuka
+    // Debug: Log any JavaScript errors
+    window.addEventListener('error', function(e) {
+        console.error('JS Error:', e.message, 'at', e.filename, ':', e.lineno);
+    });
+    
+    console.log('Search initialization complete');
 });
 </script>
 @endsection
