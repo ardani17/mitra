@@ -15,12 +15,29 @@ class ProjectExpenseObserver
      */
     public function created(ProjectExpense $projectExpense): void
     {
+        Log::info('ProjectExpenseObserver::created - START', [
+            'expense_id' => $projectExpense->id,
+            'status' => $projectExpense->status,
+            'amount' => $projectExpense->amount,
+            'project_id' => $projectExpense->project_id,
+            'user_id' => $projectExpense->user_id,
+            'expense_date' => $projectExpense->expense_date
+        ]);
+        
         // Handle cashflow integration when expense is created with 'approved' status
         if ($projectExpense->status === 'approved') {
+            Log::info('ProjectExpenseObserver::created - Status is approved, creating cashflow entry', [
+                'expense_id' => $projectExpense->id
+            ]);
             $this->createCashflowEntry($projectExpense);
+        } else {
+            Log::info('ProjectExpenseObserver::created - Status is not approved, skipping cashflow', [
+                'expense_id' => $projectExpense->id,
+                'actual_status' => $projectExpense->status
+            ]);
         }
         
-        Log::info('ProjectExpense created', [
+        Log::info('ProjectExpenseObserver::created - END', [
             'expense_id' => $projectExpense->id,
             'status' => $projectExpense->status,
             'amount' => $projectExpense->amount,
@@ -100,6 +117,12 @@ class ProjectExpenseObserver
      */
     private function createCashflowEntry(ProjectExpense $projectExpense): void
     {
+        Log::info('createCashflowEntry - START', [
+            'expense_id' => $projectExpense->id,
+            'amount' => $projectExpense->amount,
+            'project_id' => $projectExpense->project_id
+        ]);
+        
         try {
             DB::beginTransaction();
 
@@ -109,6 +132,12 @@ class ProjectExpenseObserver
                 ->first();
 
             if ($existingEntry) {
+                Log::info('createCashflowEntry - Existing entry found', [
+                    'expense_id' => $projectExpense->id,
+                    'cashflow_entry_id' => $existingEntry->id,
+                    'cashflow_status' => $existingEntry->status
+                ]);
+                
                 // Update existing entry if it was cancelled
                 if ($existingEntry->status === 'cancelled') {
                     $existingEntry->update([
@@ -132,6 +161,13 @@ class ProjectExpenseObserver
             // Get or create the system category for project expense
             $category = $this->getOrCreateExpenseCategory();
             
+            Log::info('createCashflowEntry - Category check', [
+                'expense_id' => $projectExpense->id,
+                'category_found' => $category ? true : false,
+                'category_id' => $category ? $category->id : null,
+                'category_code' => $category ? $category->code : null
+            ]);
+            
             if (!$category) {
                 Log::error('Failed to get or create EXP_PROJECT category for cashflow integration', [
                     'expense_id' => $projectExpense->id
@@ -140,8 +176,8 @@ class ProjectExpenseObserver
                 return;
             }
 
-            // Create new cashflow entry
-            $cashflowEntry = CashflowEntry::create([
+            // Prepare cashflow data
+            $cashflowData = [
                 'reference_type' => 'expense',
                 'reference_id' => $projectExpense->id,
                 'project_id' => $projectExpense->project_id,
@@ -156,24 +192,40 @@ class ProjectExpenseObserver
                 'status' => 'confirmed',
                 'confirmed_at' => now(),
                 'confirmed_by' => $this->getCurrentUserId()
+            ];
+            
+            Log::info('createCashflowEntry - Creating cashflow entry with data', [
+                'expense_id' => $projectExpense->id,
+                'cashflow_data' => $cashflowData
             ]);
+
+            // Create new cashflow entry
+            $cashflowEntry = CashflowEntry::create($cashflowData);
 
             Log::info('Cashflow entry created successfully', [
                 'expense_id' => $projectExpense->id,
                 'cashflow_entry_id' => $cashflowEntry->id,
-                'amount' => $projectExpense->amount
+                'amount' => $projectExpense->amount,
+                'cashflow_type' => $cashflowEntry->type,
+                'cashflow_status' => $cashflowEntry->status
             ]);
 
             DB::commit();
 
         } catch (\Exception $e) {
             DB::rollBack();
-            Log::error('Failed to create cashflow entry', [
+            Log::error('Failed to create cashflow entry - EXCEPTION', [
                 'expense_id' => $projectExpense->id,
-                'error' => $e->getMessage(),
+                'error_message' => $e->getMessage(),
+                'error_file' => $e->getFile(),
+                'error_line' => $e->getLine(),
                 'trace' => $e->getTraceAsString()
             ]);
         }
+        
+        Log::info('createCashflowEntry - END', [
+            'expense_id' => $projectExpense->id
+        ]);
     }
 
     /**

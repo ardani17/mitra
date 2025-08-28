@@ -127,10 +127,34 @@ class ExpenseController extends Controller
         
         $user = Auth::user();
         
+        // Log the initial request
+        \Log::info('ExpenseController::store - Starting expense creation', [
+            'user_id' => $user->id,
+            'user_name' => $user->name,
+            'user_roles' => $user->roles->pluck('name')->toArray(),
+            'amount' => $data['amount'],
+            'bypass_enabled' => BypassApprovalService::isEnabled(),
+            'can_bypass' => BypassApprovalService::canBypass($user),
+            'high_amount_threshold' => Setting::get('expense_high_amount_threshold', 10000000)
+        ]);
+        
         // Check if director bypass should be applied
         if (BypassApprovalService::shouldBypassExpenseApproval($user)) {
             $data['status'] = 'approved';
+            
+            \Log::info('ExpenseController::store - Director bypass applied', [
+                'expense_amount' => $data['amount'],
+                'status_set_to' => 'approved'
+            ]);
+            
             $expense = ProjectExpense::create($data);
+            
+            \Log::info('ExpenseController::store - Expense created with bypass', [
+                'expense_id' => $expense->id,
+                'expense_status' => $expense->status,
+                'expense_amount' => $expense->amount,
+                'project_id' => $expense->project_id
+            ]);
             
             // Log activity using ActivityLogger
             ActivityLogger::logExpenseCreated($expense);
@@ -138,10 +162,24 @@ class ExpenseController extends Controller
             return redirect()->route('expenses.index')->with('success', 'Pengeluaran berhasil dibuat dan langsung disetujui (Director Bypass).');
         } else {
             $data['status'] = 'pending';
+            
+            \Log::info('ExpenseController::store - Normal approval workflow', [
+                'expense_amount' => $data['amount'],
+                'status_set_to' => 'pending',
+                'requires_director_approval' => $data['amount'] > Setting::get('expense_high_amount_threshold', 10000000)
+            ]);
+            
             $expense = ProjectExpense::create($data);
             
             // Buat approval records untuk workflow
             $this->createApprovalWorkflow($expense);
+            
+            \Log::info('ExpenseController::store - Expense created with approval workflow', [
+                'expense_id' => $expense->id,
+                'expense_status' => $expense->status,
+                'expense_amount' => $expense->amount,
+                'project_id' => $expense->project_id
+            ]);
             
             // Log activity using ActivityLogger
             ActivityLogger::logExpenseCreated($expense);
