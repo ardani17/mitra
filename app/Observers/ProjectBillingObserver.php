@@ -14,6 +14,12 @@ class ProjectBillingObserver
     public function created(ProjectBilling $projectBilling): void
     {
         $this->updateProjectBillingStatus($projectBilling);
+        
+        // FIXED: Handle cashflow creation for billings created with 'paid' status
+        if ($projectBilling->status === 'paid') {
+            \Log::info("Billing {$projectBilling->id} created with paid status, creating cashflow entry");
+            $this->createCashflowEntry($projectBilling);
+        }
     }
 
     /**
