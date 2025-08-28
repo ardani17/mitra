@@ -529,10 +529,46 @@ class CashflowCategorySeeder extends Seeder
             ],
         ];
 
-        // Clear existing categories first (optional - comment out if you want to keep existing data)
-        DB::table('cashflow_categories')->truncate();
+        // WARNING: NEVER USE truncate() IN PRODUCTION!
+        // This was the line that deleted all your data:
+        // DB::table('cashflow_categories')->truncate();
         
-        // Insert new categories
-        DB::table('cashflow_categories')->insert($categories);
+        // SAFE APPROACH: Only insert categories that don't exist yet
+        foreach ($categories as $category) {
+            // Check if category with this code already exists
+            $exists = DB::table('cashflow_categories')
+                ->where('code', $category['code'])
+                ->exists();
+            
+            if (!$exists) {
+                // Only insert if it doesn't exist
+                DB::table('cashflow_categories')->insert($category);
+            } else {
+                // Optionally update the existing category (except for the code)
+                DB::table('cashflow_categories')
+                    ->where('code', $category['code'])
+                    ->update([
+                        'name' => $category['name'],
+                        'type' => $category['type'],
+                        'group' => $category['group'],
+                        'description' => $category['description'],
+                        'sort_order' => $category['sort_order'],
+                        'updated_at' => now(),
+                    ]);
+            }
+        }
+        
+        // Update existing categories that don't have group field filled
+        DB::table('cashflow_categories')
+            ->whereNull('group')
+            ->orWhere('group', '')
+            ->update([
+                'group' => DB::raw("CASE 
+                    WHEN type = 'income' THEN 'pendapatan_lain'
+                    WHEN type = 'expense' THEN 'pengeluaran_lain'
+                    ELSE 'lainnya'
+                END"),
+                'updated_at' => now(),
+            ]);
     }
 }
