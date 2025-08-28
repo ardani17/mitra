@@ -34,7 +34,7 @@ class ProjectController extends Controller
         
         $query = Project::with(['timelines']);
         
-        // Filter berdasarkan pencarian dengan word-based search
+        // Filter berdasarkan pencarian dengan word-based search (case-insensitive for PostgreSQL)
         if ($request->has('search') && $request->search) {
             $search = trim($request->search);
             
@@ -47,12 +47,13 @@ class ProjectController extends Controller
                     if (empty($word)) continue;
                     
                     // Each word must be found in at least one of the fields
+                    // Using ILIKE for PostgreSQL case-insensitive search
                     $q->where(function($subQuery) use ($word) {
-                        $subQuery->where('name', 'like', "%{$word}%")
-                                 ->orWhere('description', 'like', "%{$word}%")
-                                 ->orWhere('code', 'like', "%{$word}%")
-                                 ->orWhere('location', 'like', "%{$word}%")
-                                 ->orWhere('client', 'like', "%{$word}%");
+                        $subQuery->where('name', 'ILIKE', "%{$word}%")
+                                 ->orWhere('description', 'ILIKE', "%{$word}%")
+                                 ->orWhere('code', 'ILIKE', "%{$word}%")
+                                 ->orWhere('location', 'ILIKE', "%{$word}%")
+                                 ->orWhere('client', 'ILIKE', "%{$word}%");
                     });
                 }
             });
@@ -390,7 +391,7 @@ class ProjectController extends Controller
         
         $query = Project::query();
         
-        // Apply same filters as index with word-based search
+        // Apply same filters as index with word-based search (case-insensitive for PostgreSQL)
         if ($request->has('search') && $request->search) {
             $search = trim($request->search);
             
@@ -403,12 +404,13 @@ class ProjectController extends Controller
                     if (empty($word)) continue;
                     
                     // Each word must be found in at least one of the fields
+                    // Using ILIKE for PostgreSQL case-insensitive search
                     $q->where(function($subQuery) use ($word) {
-                        $subQuery->where('name', 'like', "%{$word}%")
-                                 ->orWhere('description', 'like', "%{$word}%")
-                                 ->orWhere('code', 'like', "%{$word}%")
-                                 ->orWhere('location', 'like', "%{$word}%")
-                                 ->orWhere('client', 'like', "%{$word}%");
+                        $subQuery->where('name', 'ILIKE', "%{$word}%")
+                                 ->orWhere('description', 'ILIKE', "%{$word}%")
+                                 ->orWhere('code', 'ILIKE', "%{$word}%")
+                                 ->orWhere('location', 'ILIKE', "%{$word}%")
+                                 ->orWhere('client', 'ILIKE', "%{$word}%");
                     });
                 }
             });
@@ -620,15 +622,16 @@ class ProjectController extends Controller
     {
         $query = $request->get('q', '');
         
-        // Split query into words for better search
+        // Split query into words for better search (case-insensitive for PostgreSQL)
         $queryWords = preg_split('/\s+/', trim($query));
         
         $projects = Project::where(function($q) use ($queryWords) {
                 foreach ($queryWords as $word) {
                     if (empty($word)) continue;
                     $q->where(function($subQuery) use ($word) {
-                        $subQuery->where('name', 'like', '%' . $word . '%')
-                                 ->orWhere('code', 'like', '%' . $word . '%');
+                        // Using ILIKE for PostgreSQL case-insensitive search
+                        $subQuery->where('name', 'ILIKE', '%' . $word . '%')
+                                 ->orWhere('code', 'ILIKE', '%' . $word . '%');
                     });
                 }
             })
