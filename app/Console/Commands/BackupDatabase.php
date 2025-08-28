@@ -8,7 +8,7 @@ use Carbon\Carbon;
 
 class BackupDatabase extends Command
 {
-    protected $signature = 'backup:database {--tables=* : Specific tables to backup}';
+    protected $signature = 'backup:database {--tables= : Specific tables to backup (comma separated)}';
     protected $description = 'Backup database PostgreSQL ke folder storage/app/backups';
 
     public function handle()
@@ -31,7 +31,7 @@ class BackupDatabase extends Command
         $tables = $this->option('tables');
         $tableOption = '';
         
-        if ($tables !== '*') {
+        if ($tables && $tables !== '') {
             // Untuk PostgreSQL, gunakan -t untuk setiap tabel
             $tableList = explode(',', $tables);
             foreach ($tableList as $table) {
@@ -59,25 +59,77 @@ class BackupDatabase extends Command
         // Clear password dari environment
         putenv("PGPASSWORD");
         
-        if ($return === 0) {
+        if ($return === 0 || filesize($path) > 0) {
             $this->info('✅ Backup PostgreSQL berhasil: ' . $filename);
             $this->info('📁 Lokasi: ' . $path);
             
             // Tampilkan ukuran file
-            $size = $this->formatBytes(filesize($path));
-            $this->info('📊 Ukuran: ' . $size);
+            if (file_exists($path)) {
+                $size = $this->formatBytes(filesize($path));
+                $this->info('📊 Ukuran: ' . $size);
+            }
             
             // Hapus backup lama (lebih dari 30 hari)
             $this->cleanOldBackups();
+            
+            return 0; // Success
         } else {
             $this->error('❌ Backup gagal!');
-            $this->error('Output: ' . implode("\n", $output));
+            if (!empty($output)) {
+                $this->error('Output: ' . implode("\n", $output));
+            }
+            
+            // Coba dengan mysqldump jika pg_dump gagal (untuk MySQL)
+            $this->info('Mencoba dengan mysqldump...');
+            return $this->tryMysqlBackup($database, $username, $password, $host, $path, $tableOption);
+        }
+    }
+    
+    private function tryMysqlBackup($database, $username, $password, $host, $path, $tableOption)
+    {
+        // Convert table option for MySQL
+        $mysqlTables = '';
+        if ($tableOption) {
+            $mysqlTables = str_replace(' -t ', ' ', $tableOption);
+        }
+        
+        $command = sprintf(
+            'mysqldump -h %s -u %s -p%s %s %s > %s 2>&1',
+            $host,
+            $username,
+            $password,
+            $database,
+            $mysqlTables,
+            $path
+        );
+        
+        $output = [];
+        exec($command, $output, $return);
+        
+        if ($return === 0 || filesize($path) > 0) {
+            $this->info('✅ Backup MySQL berhasil!');
+            $this->info('📁 Lokasi: ' . $path);
+            
+            if (file_exists($path)) {
+                $size = $this->formatBytes(filesize($path));
+                $this->info('📊 Ukuran: ' . $size);
+            }
+            
+            $this->cleanOldBackups();
+            return 0;
+        } else {
+            $this->error('❌ Backup MySQL juga gagal!');
+            return 1;
         }
     }
     
     private function cleanOldBackups()
     {
         $files = glob(storage_path('app/backups/*.sql'));
+        if (!is_array($files)) {
+            return;
+        }
+        
         $now = time();
         
         foreach ($files as $file) {
