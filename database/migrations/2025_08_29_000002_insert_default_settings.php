@@ -1,87 +1,107 @@
 <?php
 
-namespace Database\Seeders;
+use Illuminate\Database\Migrations\Migration;
+use Illuminate\Support\Facades\DB;
 
-use Illuminate\Database\Console\Seeds\WithoutModelEvents;
-use Illuminate\Database\Seeder;
-use App\Models\Setting;
-
-class SettingsSeeder extends Seeder
+return new class extends Migration
 {
     /**
-     * Run the database seeds.
+     * Run the migrations.
      */
-    public function run(): void
+    public function up(): void
     {
         $settings = [
+            // Expense Settings
             [
                 'key' => 'expense_director_bypass_enabled',
                 'value' => '0',
                 'description' => 'Enable director to bypass expense approval workflow when creating expenses',
-                'type' => 'boolean'
+                'type' => 'boolean',
+                'created_at' => now(),
+                'updated_at' => now()
             ],
             [
                 'key' => 'expense_approval_notification_enabled',
                 'value' => '1',
                 'description' => 'Send email notifications for expense approvals',
-                'type' => 'boolean'
+                'type' => 'boolean',
+                'created_at' => now(),
+                'updated_at' => now()
             ],
             [
                 'key' => 'expense_high_amount_threshold',
                 'value' => '10000000',
                 'description' => 'Amount threshold for high-value expenses requiring director approval (in Rupiah)',
-                'type' => 'integer'
+                'type' => 'integer',
+                'created_at' => now(),
+                'updated_at' => now()
             ],
+            
             // Salary Cut-off Settings
             [
                 'key' => 'salary_cutoff_start_day',
                 'value' => '11',
                 'description' => 'Tanggal mulai periode gaji (1-31)',
-                'type' => 'integer'
+                'type' => 'integer',
+                'created_at' => now(),
+                'updated_at' => now()
             ],
             [
                 'key' => 'salary_cutoff_end_day',
                 'value' => '10',
                 'description' => 'Tanggal akhir periode gaji (1-31)',
-                'type' => 'integer'
+                'type' => 'integer',
+                'created_at' => now(),
+                'updated_at' => now()
             ],
             [
                 'key' => 'salary_status_complete_threshold',
                 'value' => '90',
                 'description' => 'Persentase minimum untuk status lengkap (%)',
-                'type' => 'integer'
+                'type' => 'integer',
+                'created_at' => now(),
+                'updated_at' => now()
             ],
             [
                 'key' => 'salary_status_partial_threshold',
                 'value' => '50',
                 'description' => 'Persentase minimum untuk status kurang (%)',
-                'type' => 'integer'
+                'type' => 'integer',
+                'created_at' => now(),
+                'updated_at' => now()
             ],
             [
                 'key' => 'salary_status_auto_refresh',
                 'value' => '1',
                 'description' => 'Auto refresh status setiap 5 menit (0=off, 1=on)',
-                'type' => 'boolean'
+                'type' => 'boolean',
+                'created_at' => now(),
+                'updated_at' => now()
             ],
             [
                 'key' => 'salary_status_email_notification',
                 'value' => '1',
                 'description' => 'Email notification untuk status rendah (0=off, 1=on)',
-                'type' => 'boolean'
+                'type' => 'boolean',
+                'created_at' => now(),
+                'updated_at' => now()
             ]
         ];
 
         foreach ($settings as $setting) {
-            Setting::updateOrCreate(
-                ['key' => $setting['key']],
-                [
-                    'value' => $setting['value'],
-                    'description' => $setting['description'],
-                    'type' => $setting['type']
-                ]
-            );
+            // Check if setting doesn't exist before inserting
+            if (!DB::table('settings')->where('key', $setting['key'])->exists()) {
+                DB::table('settings')->insert($setting);
+            }
         }
-
-        $this->command->info('Settings seeded successfully!');
     }
-}
+
+    /**
+     * Reverse the migrations.
+     */
+    public function down(): void
+    {
+        // We don't delete settings on rollback as they might have been modified
+        // This is a safety measure to prevent losing configuration
+    }
+};

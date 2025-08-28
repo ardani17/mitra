@@ -13,18 +13,47 @@ class DatabaseSeeder extends Seeder
      */
     public function run(): void
     {
-        // Create roles first
-        $this->call(RoleSeeder::class);
+        // ====================================================
+        // IMPORTANT: Data master sudah dipindahkan ke migration!
+        // ====================================================
+        // Roles, Settings, CashflowCategories, dan Default Users
+        // sudah otomatis terinstal melalui migration.
+        // 
+        // Migration files:
+        // - 2025_08_29_000001_insert_default_roles.php
+        // - 2025_08_29_000002_insert_default_settings.php  
+        // - 2025_08_29_000003_insert_default_cashflow_categories.php
+        // - 2025_08_29_000004_insert_default_users.php
+        // ====================================================
+
+        // Seeder berikut SUDAH TIDAK DIPERLUKAN di production:
+        // - RoleSeeder::class (sudah di migration)
+        // - SettingsSeeder::class (sudah di migration)
+        // - CashflowCategorySeeder::class (sudah di migration)
+        // - UserSeeder::class (sudah di migration)
+
+        // ====================================================
+        // DEVELOPMENT/TESTING ONLY
+        // ====================================================
+        // Uncomment baris di bawah HANYA untuk testing/development
+        // JANGAN uncomment untuk production!
         
-        // Create users with roles
-        $this->call(UserSeeder::class);
-        
-        // CATATAN: Seeder data dummy untuk testing
-        // Uncomment baris di bawah jika ingin mengisi data dummy untuk testing
-        
-        $this->call(ProjectBillingSeeder::class);
-        $this->call(ProjectTimelineSeeder::class);
-        $this->call(ProjectExpenseSeeder::class);
-        $this->call(ProjectRevenueSeeder::class);
+        if (app()->environment(['local', 'staging', 'testing'])) {
+            $this->command->warn('Running seeders for TESTING environment...');
+            
+            // Uncomment seeder yang diperlukan untuk testing:
+            // $this->call(ProjectBillingSeeder::class);
+            // $this->call(ProjectTimelineSeeder::class);
+            // $this->call(ProjectExpenseSeeder::class);
+            // $this->call(ProjectRevenueSeeder::class);
+            // $this->call(TestEmployeeSeeder::class);
+            // $this->call(DailySalarySeeder::class);
+            // $this->call(CurrentPeriodSalarySeeder::class);
+            
+            $this->command->info('Testing seeders completed.');
+        } else {
+            $this->command->info('Production environment detected. No seeders needed.');
+            $this->command->info('Master data is automatically installed via migrations.');
+        }
     }
 }
