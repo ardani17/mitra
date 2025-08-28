@@ -235,6 +235,9 @@
     </div>
 </div>
 
+<!-- Include the enhanced project search module -->
+<script src="{{ asset('js/project-search.js') }}"></script>
+
 <script>
 // Format currency function
 function formatCurrency(input) {
@@ -263,138 +266,23 @@ document.querySelector('form').addEventListener('submit', function(e) {
 document.addEventListener('DOMContentLoaded', function() {
     const typeSelect = document.getElementById('type');
     const categorySelect = document.getElementById('category_id');
-    const projectSearch = document.getElementById('project_search');
-    const projectId = document.getElementById('project_id');
-    const projectSuggestions = document.getElementById('project_suggestions');
     const amountInput = document.getElementById('amount');
     const previewSection = document.getElementById('preview-section');
-    
-    // Project autocomplete functionality
-    let projectDebounceTimer;
     let selectedProjectName = '';
     
-    // Load popular projects on focus
-    projectSearch.addEventListener('focus', function() {
-        if (this.value.trim() === '') {
-            loadPopularProjects();
+    // Initialize enhanced project search
+    const projectSearch = new ProjectSearch({
+        searchInputId: 'project_search',
+        hiddenInputId: 'project_id',
+        suggestionsDivId: 'project_suggestions',
+        apiSearchUrl: '{{ route("api.projects.search") }}',
+        apiPopularUrl: '{{ route("api.projects.popular") }}',
+        onSelect: function(projectData) {
+            selectedProjectName = projectData.name || '';
+            updatePreview();
+            console.log('Project selected:', projectData);
         }
     });
-    
-    // Search projects on input
-    projectSearch.addEventListener('input', function() {
-        const query = this.value.trim();
-        
-        // Clear the hidden project_id if user is typing (unless it matches current selection)
-        if (!this.dataset.selectedDisplay || this.value !== this.dataset.selectedDisplay) {
-            projectId.value = '';
-            delete this.dataset.selectedDisplay;
-            selectedProjectName = '';
-        }
-        
-        clearTimeout(projectDebounceTimer);
-        projectDebounceTimer = setTimeout(() => {
-            if (query.length >= 1) {
-                searchProjects(query);
-            } else if (query.length === 0) {
-                loadPopularProjects();
-            } else {
-                hideProjectSuggestions();
-            }
-        }, 300);
-        
-        updatePreview();
-    });
-    
-    // Hide suggestions when clicking outside
-    document.addEventListener('click', function(e) {
-        if (!projectSearch.contains(e.target) && !projectSuggestions.contains(e.target)) {
-            hideProjectSuggestions();
-        }
-    });
-    
-    // Load popular projects
-    function loadPopularProjects() {
-        fetch('{{ route("api.projects.popular") }}')
-            .then(response => response.json())
-            .then(projects => {
-                displayProjectSuggestions(projects, 'Proyek Populer');
-            })
-            .catch(error => {
-                console.error('Error loading popular projects:', error);
-            });
-    }
-    
-    // Search projects
-    function searchProjects(query) {
-        fetch(`{{ route("api.projects.search") }}?q=${encodeURIComponent(query)}`)
-            .then(response => response.json())
-            .then(projects => {
-                displayProjectSuggestions(projects, 'Hasil Pencarian');
-            })
-            .catch(error => {
-                console.error('Error searching projects:', error);
-            });
-    }
-    
-    // Display project suggestions
-    function displayProjectSuggestions(projects, title) {
-        if (projects.length === 0) {
-            projectSuggestions.innerHTML = `
-                <div class="px-3 py-2 text-sm text-gray-500">
-                    Tidak ada proyek ditemukan
-                </div>
-            `;
-            projectSuggestions.classList.remove('hidden');
-            return;
-        }
-        
-        let html = '';
-        if (title && projects.length > 0) {
-            html += `<div class="px-3 py-2 text-xs font-medium text-gray-500 bg-gray-50 border-b">${title}</div>`;
-        }
-        
-        projects.forEach(project => {
-            html += `
-                <div class="px-3 py-2 hover:bg-blue-50 cursor-pointer border-b border-gray-100 last:border-b-0 project-suggestion"
-                     data-project-id="${project.id}"
-                     data-project-display="${project.display}"
-                     data-project-name="${project.name}">
-                    <div class="text-sm text-gray-900">${project.display}</div>
-                    ${project.code ? `<div class="text-xs text-gray-500">${project.name}</div>` : ''}
-                </div>
-            `;
-        });
-        
-        projectSuggestions.innerHTML = html;
-        projectSuggestions.classList.remove('hidden');
-        
-        // Add click event listeners to suggestions
-        document.querySelectorAll('.project-suggestion').forEach(suggestion => {
-            suggestion.addEventListener('click', function() {
-                const id = this.getAttribute('data-project-id');
-                const display = this.getAttribute('data-project-display');
-                const name = this.getAttribute('data-project-name');
-                
-                projectId.value = id;
-                projectSearch.value = display;
-                projectSearch.dataset.selectedDisplay = display;
-                selectedProjectName = name;
-                hideProjectSuggestions();
-                
-                // Trigger change event on hidden input for any listeners
-                const event = new Event('change', { bubbles: true });
-                projectId.dispatchEvent(event);
-                
-                updatePreview();
-            });
-        });
-    }
-    
-    // Hide project suggestions
-    function hideProjectSuggestions() {
-        projectSuggestions.classList.add('hidden');
-        projectSuggestions.innerHTML = '';
-    }
 
     // Format amount input on page load if it has value
     if (amountInput && amountInput.value) {
