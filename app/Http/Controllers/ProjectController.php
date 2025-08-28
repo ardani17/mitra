@@ -584,4 +584,72 @@ class ProjectController extends Controller
         $clients = ProjectClient::getPopularClients(20);
         return response()->json($clients);
     }
+    
+    /**
+     * Search projects for autocomplete
+     */
+    public function searchProjects(Request $request)
+    {
+        $query = $request->get('q', '');
+        
+        $projects = Project::where(function($q) use ($query) {
+                $q->where('name', 'like', '%' . $query . '%')
+                  ->orWhere('code', 'like', '%' . $query . '%');
+            })
+            ->select('id', 'name', 'code')
+            ->orderBy('name')
+            ->limit(20)
+            ->get()
+            ->map(function($project) {
+                return [
+                    'id' => $project->id,
+                    'name' => $project->name,
+                    'code' => $project->code,
+                    'display' => $project->code ? $project->code . ' - ' . $project->name : $project->name
+                ];
+            });
+        
+        return response()->json($projects);
+    }
+    
+    /**
+     * Get popular/frequently used projects
+     */
+    public function getPopularProjects(Request $request)
+    {
+        // Get projects with most expenses
+        $popularProjects = Project::withCount('expenses')
+            ->having('expenses_count', '>', 0)
+            ->orderBy('expenses_count', 'desc')
+            ->limit(10)
+            ->get()
+            ->map(function($project) {
+                return [
+                    'id' => $project->id,
+                    'name' => $project->name,
+                    'code' => $project->code,
+                    'display' => $project->code ? $project->code . ' - ' . $project->name : $project->name
+                ];
+            });
+        
+        // If less than 10 popular projects, add recent projects
+        if ($popularProjects->count() < 10) {
+            $recentProjects = Project::whereNotIn('id', $popularProjects->pluck('id'))
+                ->orderBy('created_at', 'desc')
+                ->limit(10 - $popularProjects->count())
+                ->get()
+                ->map(function($project) {
+                    return [
+                        'id' => $project->id,
+                        'name' => $project->name,
+                        'code' => $project->code,
+                        'display' => $project->code ? $project->code . ' - ' . $project->name : $project->name
+                    ];
+                });
+            
+            $popularProjects = $popularProjects->concat($recentProjects);
+        }
+        
+        return response()->json($popularProjects);
+    }
 }

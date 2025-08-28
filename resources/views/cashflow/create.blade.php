@@ -71,18 +71,25 @@
                 </div>
 
                 <div>
-                    <label for="project_id" class="block text-sm font-medium text-gray-700 mb-2">
+                    <label for="project_search" class="block text-sm font-medium text-gray-700 mb-2">
                         Proyek (Opsional)
                     </label>
-                    <select name="project_id" id="project_id"
-                            class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 text-sm sm:text-base @error('project_id') border-red-500 @enderror">
-                        <option value="">Pilih Proyek</option>
-                        @foreach($projects as $project)
-                            <option value="{{ $project->id }}" {{ old('project_id') == $project->id ? 'selected' : '' }}>
-                                {{ $project->name }}
-                            </option>
-                        @endforeach
-                    </select>
+                    <div class="relative">
+                        <input type="text"
+                               id="project_search"
+                               class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 text-sm sm:text-base @error('project_id') border-red-500 @enderror"
+                               placeholder="Ketik untuk mencari proyek..."
+                               autocomplete="off"
+                               value="">
+                        <input type="hidden"
+                               name="project_id"
+                               id="project_id"
+                               value="{{ old('project_id') }}">
+                        <div id="project_suggestions" class="absolute z-10 w-full bg-white border border-gray-300 rounded-md shadow-lg mt-1 hidden max-h-60 overflow-y-auto">
+                            <!-- Suggestions will be populated here -->
+                        </div>
+                    </div>
+                    <p class="mt-1 text-xs text-gray-500">Mulai mengetik nama atau kode proyek untuk mencari</p>
                     @error('project_id')
                         <p class="mt-1 text-sm text-red-600">{{ $message }}</p>
                     @enderror
@@ -256,9 +263,138 @@ document.querySelector('form').addEventListener('submit', function(e) {
 document.addEventListener('DOMContentLoaded', function() {
     const typeSelect = document.getElementById('type');
     const categorySelect = document.getElementById('category_id');
-    const projectSelect = document.getElementById('project_id');
+    const projectSearch = document.getElementById('project_search');
+    const projectId = document.getElementById('project_id');
+    const projectSuggestions = document.getElementById('project_suggestions');
     const amountInput = document.getElementById('amount');
     const previewSection = document.getElementById('preview-section');
+    
+    // Project autocomplete functionality
+    let projectDebounceTimer;
+    let selectedProjectName = '';
+    
+    // Load popular projects on focus
+    projectSearch.addEventListener('focus', function() {
+        if (this.value.trim() === '') {
+            loadPopularProjects();
+        }
+    });
+    
+    // Search projects on input
+    projectSearch.addEventListener('input', function() {
+        const query = this.value.trim();
+        
+        // Clear the hidden project_id if user is typing (unless it matches current selection)
+        if (!this.dataset.selectedDisplay || this.value !== this.dataset.selectedDisplay) {
+            projectId.value = '';
+            delete this.dataset.selectedDisplay;
+            selectedProjectName = '';
+        }
+        
+        clearTimeout(projectDebounceTimer);
+        projectDebounceTimer = setTimeout(() => {
+            if (query.length >= 1) {
+                searchProjects(query);
+            } else if (query.length === 0) {
+                loadPopularProjects();
+            } else {
+                hideProjectSuggestions();
+            }
+        }, 300);
+        
+        updatePreview();
+    });
+    
+    // Hide suggestions when clicking outside
+    document.addEventListener('click', function(e) {
+        if (!projectSearch.contains(e.target) && !projectSuggestions.contains(e.target)) {
+            hideProjectSuggestions();
+        }
+    });
+    
+    // Load popular projects
+    function loadPopularProjects() {
+        fetch('{{ route("api.projects.popular") }}')
+            .then(response => response.json())
+            .then(projects => {
+                displayProjectSuggestions(projects, 'Proyek Populer');
+            })
+            .catch(error => {
+                console.error('Error loading popular projects:', error);
+            });
+    }
+    
+    // Search projects
+    function searchProjects(query) {
+        fetch(`{{ route("api.projects.search") }}?q=${encodeURIComponent(query)}`)
+            .then(response => response.json())
+            .then(projects => {
+                displayProjectSuggestions(projects, 'Hasil Pencarian');
+            })
+            .catch(error => {
+                console.error('Error searching projects:', error);
+            });
+    }
+    
+    // Display project suggestions
+    function displayProjectSuggestions(projects, title) {
+        if (projects.length === 0) {
+            projectSuggestions.innerHTML = `
+                <div class="px-3 py-2 text-sm text-gray-500">
+                    Tidak ada proyek ditemukan
+                </div>
+            `;
+            projectSuggestions.classList.remove('hidden');
+            return;
+        }
+        
+        let html = '';
+        if (title && projects.length > 0) {
+            html += `<div class="px-3 py-2 text-xs font-medium text-gray-500 bg-gray-50 border-b">${title}</div>`;
+        }
+        
+        projects.forEach(project => {
+            html += `
+                <div class="px-3 py-2 hover:bg-blue-50 cursor-pointer border-b border-gray-100 last:border-b-0 project-suggestion"
+                     data-project-id="${project.id}"
+                     data-project-display="${project.display}"
+                     data-project-name="${project.name}">
+                    <div class="text-sm text-gray-900">${project.display}</div>
+                    ${project.code ? `<div class="text-xs text-gray-500">${project.name}</div>` : ''}
+                </div>
+            `;
+        });
+        
+        projectSuggestions.innerHTML = html;
+        projectSuggestions.classList.remove('hidden');
+        
+        // Add click event listeners to suggestions
+        document.querySelectorAll('.project-suggestion').forEach(suggestion => {
+            suggestion.addEventListener('click', function() {
+                const id = this.getAttribute('data-project-id');
+                const display = this.getAttribute('data-project-display');
+                const name = this.getAttribute('data-project-name');
+                
+                projectId.value = id;
+                projectSearch.value = display;
+                projectSearch.dataset.selectedDisplay = display;
+                selectedProjectName = name;
+                hideProjectSuggestions();
+                
+                // Trigger change event on hidden input for any listeners
+                const event = new Event('change', { bubbles: true });
+                projectId.dispatchEvent(event);
+                
+                updatePreview();
+            });
+        });
+    }
+    
+    // Hide project suggestions
+    function hideProjectSuggestions() {
+        projectSuggestions.classList.add('hidden');
+        projectSuggestions.innerHTML = '';
+    }
 
     // Format amount input on page load if it has value
     if (amountInput && amountInput.value) {
@@ -294,7 +430,7 @@ document.addEventListener('DOMContentLoaded', function() {
     });
 
     // Update preview when form changes
-    [typeSelect, categorySelect, projectSelect, amountInput].forEach(element => {
+    [typeSelect, categorySelect, projectId, amountInput].forEach(element => {
         element.addEventListener('change', updatePreview);
         element.addEventListener('input', updatePreview);
     });
@@ -302,7 +438,6 @@ document.addEventListener('DOMContentLoaded', function() {
     function updatePreview() {
         const type = typeSelect.value;
         const categoryOption = categorySelect.querySelector('option:checked');
-        const projectOption = projectSelect.querySelector('option:checked');
         const amount = amountInput.value.replace(/\./g, ''); // Remove dots for calculation
 
         if (type && categoryOption && categoryOption.value && amount) {
@@ -312,7 +447,7 @@ document.addEventListener('DOMContentLoaded', function() {
             document.getElementById('preview-type').className = `ml-2 font-medium ${type === 'income' ? 'text-green-600' : 'text-red-600'}`;
             
             document.getElementById('preview-category').textContent = categoryOption.textContent;
-            document.getElementById('preview-project').textContent = projectOption && projectOption.value ? projectOption.textContent : 'Tidak ada';
+            document.getElementById('preview-project').textContent = selectedProjectName || 'Tidak ada';
             
             const formattedAmount = new Intl.NumberFormat('id-ID', {
                 style: 'currency',
@@ -327,6 +462,20 @@ document.addEventListener('DOMContentLoaded', function() {
         }
     }
 
+    // Initialize if project is already selected (for old input)
+    if (projectId.value) {
+        // Try to find and display the selected project
+        @if(isset($projects))
+        const projectsData = @json($projects);
+        const project = projectsData.find(p => p.id == projectId.value);
+        if (project) {
+            projectSearch.value = project.code ? project.code + ' - ' + project.name : project.name;
+            projectSearch.dataset.selectedDisplay = projectSearch.value;
+            selectedProjectName = project.name;
+        }
+        @endif
+    }
+    
     // Initialize preview on page load
     updatePreview();
 });

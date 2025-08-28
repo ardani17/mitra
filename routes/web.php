@@ -82,6 +82,10 @@ Route::middleware('auth')->group(function () {
     Route::get('/api/projects/clients/search', [ProjectController::class, 'searchClients'])->name('api.projects.clients.search');
     Route::get('/api/projects/clients/popular', [ProjectController::class, 'getPopularClients'])->name('api.projects.clients.popular');
     
+    // API routes untuk autocomplete proyek
+    Route::get('/api/projects/search', [ProjectController::class, 'searchProjects'])->name('api.projects.search');
+    Route::get('/api/projects/popular', [ProjectController::class, 'getPopularProjects'])->name('api.projects.popular');
+    
     // Expense routes
     Route::resource('expenses', ExpenseController::class);
     Route::post('/expenses/{id}/submit', [ExpenseController::class, 'submitForApproval'])->name('expenses.submit');

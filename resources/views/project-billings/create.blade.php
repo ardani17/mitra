@@ -29,21 +29,26 @@
             
             <div class="grid grid-cols-1 sm:grid-cols-2 gap-4 sm:gap-6">
                 <div>
-                    <label for="project_id" class="block text-sm font-medium text-slate-700 mb-2">
+                    <label for="project_search" class="block text-sm font-medium text-slate-700 mb-2">
                         Pilih Proyek <span class="text-red-500">*</span>
                     </label>
-                    <select name="project_id" id="project_id" required
-                            class="w-full px-3 py-2 text-sm sm:text-base border border-slate-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent @error('project_id') border-red-500 @enderror">
-                        <option value="">Pilih Proyek...</option>
-                        @foreach($projects as $project)
-                            <option value="{{ $project->id }}" 
-                                    data-nilai-jasa="{{ $project->nilai_jasa }}"
-                                    data-nilai-material="{{ $project->nilai_material }}"
-                                    {{ old('project_id') == $project->id ? 'selected' : '' }}>
-                                {{ $project->name }} - {{ $project->code }}
-                            </option>
-                        @endforeach
-                    </select>
+                    <div class="relative">
+                        <input type="text"
+                               id="project_search"
+                               class="w-full px-3 py-2 text-sm sm:text-base border border-slate-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent @error('project_id') border-red-500 @enderror"
+                               placeholder="Ketik untuk mencari proyek..."
+                               autocomplete="off"
+                               value="">
+                        <input type="hidden"
+                               name="project_id"
+                               id="project_id"
+                               value="{{ old('project_id') }}"
+                               required>
+                        <div id="project_suggestions" class="absolute z-10 w-full bg-white border border-gray-300 rounded-md shadow-lg mt-1 hidden max-h-60 overflow-y-auto">
+                            <!-- Suggestions will be populated here -->
+                        </div>
+                    </div>
+                    <p class="mt-1 text-xs text-gray-500">Mulai mengetik nama atau kode proyek untuk mencari</p>
                     @error('project_id')
                         <p class="mt-1 text-sm text-red-600">{{ $message }}</p>
                     @enderror
@@ -308,7 +313,9 @@
 <script>
 document.addEventListener('DOMContentLoaded', function() {
     // Elements
-    const projectSelect = document.getElementById('project_id');
+    const projectSearch = document.getElementById('project_search');
+    const projectId = document.getElementById('project_id');
+    const projectSuggestions = document.getElementById('project_suggestions');
     const projectInfo = document.getElementById('project-info');
     const nilaiJasaDisplay = document.getElementById('nilai_jasa_display');
     const nilaiJasa = document.getElementById('nilai_jasa');
@@ -411,13 +418,170 @@ document.addEventListener('DOMContentLoaded', function() {
     setupCurrencyInput(nilaiJasaDisplay, nilaiJasa);
     setupCurrencyInput(nilaiMaterialDisplay, nilaiMaterial);
 
-    // Handle project selection
-    projectSelect.addEventListener('change', function() {
-        const selectedOption = this.options[this.selectedIndex];
+    // Project autocomplete functionality
+    let projectDebounceTimer;
+    let selectedProjectData = null;
+    
+    // Load popular projects on focus
+    projectSearch.addEventListener('focus', function() {
+        if (this.value.trim() === '') {
+            loadPopularProjects();
+        }
+    });
+    
+    // Search projects on input
+    projectSearch.addEventListener('input', function() {
+        const query = this.value.trim();
         
-        if (this.value) {
-            const nilaiJasaValue = parseInt(selectedOption.dataset.nilaiJasa) || 0;
-            const nilaiMaterialValue = parseInt(selectedOption.dataset.nilaiMaterial) || 0;
+        // Clear the hidden project_id if user is typing (unless it matches current selection)
+        if (!this.dataset.selectedDisplay || this.value !== this.dataset.selectedDisplay) {
+            projectId.value = '';
+            delete this.dataset.selectedDisplay;
+            selectedProjectData = null;
+            updateProjectInfo(null);
+        }
+        
+        clearTimeout(projectDebounceTimer);
+        projectDebounceTimer = setTimeout(() => {
+            if (query.length >= 1) {
+                searchProjects(query);
+            } else if (query.length === 0) {
+                loadPopularProjects();
+            } else {
+                hideProjectSuggestions();
+            }
+        }, 300);
+    });
+    
+    // Hide suggestions when clicking outside
+    document.addEventListener('click', function(e) {
+        if (!projectSearch.contains(e.target) && !projectSuggestions.contains(e.target)) {
+            hideProjectSuggestions();
+        }
+    });
+    
+    // Load popular projects
+    function loadPopularProjects() {
+        fetch('{{ route("api.projects.popular") }}')
+            .then(response => response.json())
+            .then(projects => {
+                // Fetch additional project data with values
+                fetchProjectsWithValues(projects);
+            })
+            .catch(error => {
+                console.error('Error loading popular projects:', error);
+            });
+    }
+    
+    // Search projects
+    function searchProjects(query) {
+        fetch(`{{ route("api.projects.search") }}?q=${encodeURIComponent(query)}`)
+            .then(response => response.json())
+            .then(projects => {
+                // Fetch additional project data with values
+                fetchProjectsWithValues(projects);
+            })
+            .catch(error => {
+                console.error('Error searching projects:', error);
+            });
+    }
+    
+    // Fetch project values for display
+    function fetchProjectsWithValues(projects) {
+        // For now, we'll display projects without values
+        // In production, you might want to fetch these values via another API call
+        displayProjectSuggestions(projects, projects.length > 0 ? 'Hasil Pencarian' : null);
+    }
+    
+    // Display project suggestions
+    function displayProjectSuggestions(projects, title) {
+        if (projects.length === 0) {
+            projectSuggestions.innerHTML = `
+                <div class="px-3 py-2 text-sm text-gray-500">
+                    Tidak ada proyek ditemukan
+                </div>
+            `;
+            projectSuggestions.classList.remove('hidden');
+            return;
+        }
+        
+        let html = '';
+        if (title && projects.length > 0) {
+            html += `<div class="px-3 py-2 text-xs font-medium text-gray-500 bg-gray-50 border-b">${title}</div>`;
+        }
+        
+        projects.forEach(project => {
+            html += `
+                <div class="px-3 py-2 hover:bg-blue-50 cursor-pointer border-b border-gray-100 last:border-b-0 project-suggestion"
+                     data-project-id="${project.id}"
+                     data-project-display="${project.display}"
+                     data-project-name="${project.name}"
+                     data-project-code="${project.code}">
+                    <div class="text-sm text-gray-900">${project.display}</div>
+                    ${project.code ? `<div class="text-xs text-gray-500">${project.name}</div>` : ''}
+                </div>
+            `;
+        });
+        
+        projectSuggestions.innerHTML = html;
+        projectSuggestions.classList.remove('hidden');
+        
+        // Add click event listeners to suggestions
+        document.querySelectorAll('.project-suggestion').forEach(suggestion => {
+            suggestion.addEventListener('click', function() {
+                const id = this.getAttribute('data-project-id');
+                const display = this.getAttribute('data-project-display');
+                
+                projectId.value = id;
+                projectSearch.value = display;
+                projectSearch.dataset.selectedDisplay = display;
+                
+                // Store selected project data
+                selectedProjectData = {
+                    id: id,
+                    display: display,
+                    name: this.getAttribute('data-project-name'),
+                    code: this.getAttribute('data-project-code')
+                };
+                
+                // Fetch project details and update form
+                fetchProjectDetails(id);
+                
+                hideProjectSuggestions();
+                
+                // Trigger change event on hidden input for any listeners
+                const event = new Event('change', { bubbles: true });
+                projectId.dispatchEvent(event);
+            });
+        });
+    }
+    
+    // Hide project suggestions
+    function hideProjectSuggestions() {
+        projectSuggestions.classList.add('hidden');
+        projectSuggestions.innerHTML = '';
+    }
+    
+    // Fetch project details
+    function fetchProjectDetails(projectId) {
+        // Get the project from the original projects array if available
+        @if(isset($projects))
+        const projectsData = @json($projects);
+        const project = projectsData.find(p => p.id == projectId);
+        if (project) {
+            updateProjectInfo(project);
+        }
+        @else
+        // If projects data not available, you might need to make an API call
+        updateProjectInfo(null);
+        @endif
+    }
+    
+    // Update project info display
+    function updateProjectInfo(project) {
+        if (project) {
+            const nilaiJasaValue = parseInt(project.nilai_jasa) || 0;
+            const nilaiMaterialValue = parseInt(project.nilai_material) || 0;
             const totalValue = nilaiJasaValue + nilaiMaterialValue;
 
             // Update display
@@ -445,7 +609,7 @@ document.addEventListener('DOMContentLoaded', function() {
         }
         
         calculateTotal();
-    });
+    }
 
     // Add event listeners for PPN changes
     ppnRate.addEventListener('input', calculateTotal);
@@ -454,6 +618,14 @@ document.addEventListener('DOMContentLoaded', function() {
 
     // Form validation before submit
     form.addEventListener('submit', function(e) {
+        // Check if project is selected
+        if (!projectId.value) {
+            e.preventDefault();
+            alert('Silakan pilih proyek dari daftar yang tersedia');
+            projectSearch.focus();
+            return false;
+        }
+        
         const jasaValue = parseInt(nilaiJasa.value) || 0;
         const materialValue = parseInt(nilaiMaterial.value) || 0;
         
@@ -490,8 +662,17 @@ document.addEventListener('DOMContentLoaded', function() {
     });
 
     // Initialize if project is already selected (for old input)
-    if (projectSelect.value) {
-        projectSelect.dispatchEvent(new Event('change'));
+    if (projectId.value) {
+        // Try to find and display the selected project
+        @if(isset($projects))
+        const projectsData = @json($projects);
+        const project = projectsData.find(p => p.id == projectId.value);
+        if (project) {
+            projectSearch.value = project.code ? project.code + ' - ' + project.name : project.name;
+            projectSearch.dataset.selectedDisplay = projectSearch.value;
+            updateProjectInfo(project);
+        }
+        @endif
     }
 
     // Initial calculation

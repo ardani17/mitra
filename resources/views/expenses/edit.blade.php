@@ -20,14 +20,23 @@
             <div class="grid grid-cols-1 lg:grid-cols-2 gap-4 sm:gap-6">
                 <div>
                     <label class="block text-sm font-medium text-gray-700 mb-2">Proyek *</label>
-                    <select name="project_id" required class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 text-sm sm:text-base">
-                        <option value="">Pilih Proyek</option>
-                        @foreach($projects as $proj)
-                            <option value="{{ $proj->id }}" {{ old('project_id', $expense->project_id) == $proj->id ? 'selected' : '' }}>
-                                {{ $proj->name }}
-                            </option>
-                        @endforeach
-                    </select>
+                    <div class="relative">
+                        <input type="text"
+                               id="project_search"
+                               class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 text-sm sm:text-base"
+                               placeholder="Ketik untuk mencari proyek..."
+                               autocomplete="off"
+                               value="{{ $expense->project->code ? $expense->project->code . ' - ' . $expense->project->name : $expense->project->name }}">
+                        <input type="hidden"
+                               name="project_id"
+                               id="project_id"
+                               value="{{ old('project_id', $expense->project_id) }}"
+                               required>
+                        <div id="project_suggestions" class="absolute z-10 w-full bg-white border border-gray-300 rounded-md shadow-lg mt-1 hidden max-h-60 overflow-y-auto">
+                            <!-- Suggestions will be populated here -->
+                        </div>
+                    </div>
+                    <p class="mt-1 text-xs text-gray-500">Mulai mengetik nama atau kode proyek untuk mencari</p>
                     @error('project_id')
                         <p class="mt-1 text-sm text-red-600">{{ $message }}</p>
                     @enderror
@@ -140,6 +149,140 @@ document.addEventListener('DOMContentLoaded', function() {
     if (amountInput && amountInput.value) {
         formatCurrency(amountInput);
     }
+    
+    // Project autocomplete functionality
+    const projectSearch = document.getElementById('project_search');
+    const projectId = document.getElementById('project_id');
+    const projectSuggestions = document.getElementById('project_suggestions');
+    let projectDebounceTimer;
+    
+    // Store initial display value
+    projectSearch.dataset.selectedDisplay = projectSearch.value;
+    
+    // Load popular projects on focus
+    projectSearch.addEventListener('focus', function() {
+        if (this.value.trim() === '') {
+            loadPopularProjects();
+        }
+    });
+    
+    // Search projects on input
+    projectSearch.addEventListener('input', function() {
+        const query = this.value.trim();
+        
+        // Clear the hidden project_id if user is typing (unless it matches current selection)
+        if (!this.dataset.selectedDisplay || this.value !== this.dataset.selectedDisplay) {
+            projectId.value = '';
+            delete this.dataset.selectedDisplay;
+        }
+        
+        clearTimeout(projectDebounceTimer);
+        projectDebounceTimer = setTimeout(() => {
+            if (query.length >= 1) {
+                searchProjects(query);
+            } else if (query.length === 0) {
+                loadPopularProjects();
+            } else {
+                hideProjectSuggestions();
+            }
+        }, 300);
+    });
+    
+    // Hide suggestions when clicking outside
+    document.addEventListener('click', function(e) {
+        if (!projectSearch.contains(e.target) && !projectSuggestions.contains(e.target)) {
+            hideProjectSuggestions();
+        }
+    });
+    
+    // Load popular projects
+    function loadPopularProjects() {
+        fetch('{{ route("api.projects.popular") }}')
+            .then(response => response.json())
+            .then(projects => {
+                displayProjectSuggestions(projects, 'Proyek Populer');
+            })
+            .catch(error => {
+                console.error('Error loading popular projects:', error);
+            });
+    }
+    
+    // Search projects
+    function searchProjects(query) {
+        fetch(`{{ route("api.projects.search") }}?q=${encodeURIComponent(query)}`)
+            .then(response => response.json())
+            .then(projects => {
+                displayProjectSuggestions(projects, 'Hasil Pencarian');
+            })
+            .catch(error => {
+                console.error('Error searching projects:', error);
+            });
+    }
+    
+    // Display project suggestions
+    function displayProjectSuggestions(projects, title) {
+        if (projects.length === 0) {
+            projectSuggestions.innerHTML = `
+                <div class="px-3 py-2 text-sm text-gray-500">
+                    Tidak ada proyek ditemukan
+                </div>
+            `;
+            projectSuggestions.classList.remove('hidden');
+            return;
+        }
+        
+        let html = '';
+        if (title && projects.length > 0) {
+            html += `<div class="px-3 py-2 text-xs font-medium text-gray-500 bg-gray-50 border-b">${title}</div>`;
+        }
+        
+        projects.forEach(project => {
+            html += `
+                <div class="px-3 py-2 hover:bg-blue-50 cursor-pointer border-b border-gray-100 last:border-b-0 project-suggestion"
+                     data-project-id="${project.id}"
+                     data-project-display="${project.display}">
+                    <div class="text-sm text-gray-900">${project.display}</div>
+                    ${project.code ? `<div class="text-xs text-gray-500">${project.name}</div>` : ''}
+                </div>
+            `;
+        });
+        
+        projectSuggestions.innerHTML = html;
+        projectSuggestions.classList.remove('hidden');
+        
+        // Add click event listeners to suggestions
+        document.querySelectorAll('.project-suggestion').forEach(suggestion => {
+            suggestion.addEventListener('click', function() {
+                const id = this.getAttribute('data-project-id');
+                const display = this.getAttribute('data-project-display');
+                
+                projectId.value = id;
+                projectSearch.value = display;
+                projectSearch.dataset.selectedDisplay = display;
+                hideProjectSuggestions();
+                
+                // Trigger change event on hidden input for any listeners
+                const event = new Event('change', { bubbles: true });
+                projectId.dispatchEvent(event);
+            });
+        });
+    }
+    
+    // Hide project suggestions
+    function hideProjectSuggestions() {
+        projectSuggestions.classList.add('hidden');
+        projectSuggestions.innerHTML = '';
+    }
+    
+    // Validate form submission
+    document.querySelector('form').addEventListener('submit', function(e) {
+        if (!projectId.value) {
+            e.preventDefault();
+            alert('Silakan pilih proyek dari daftar yang tersedia');
+            projectSearch.focus();
+            return false;
+        }
+    });
 });
 </script>
 @endsection
