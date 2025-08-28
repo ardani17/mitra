@@ -34,13 +34,27 @@ class ProjectController extends Controller
         
         $query = Project::with(['timelines']);
         
-        // Filter berdasarkan pencarian
+        // Filter berdasarkan pencarian dengan word-based search
         if ($request->has('search') && $request->search) {
-            $search = $request->search;
-            $query->where(function($q) use ($search) {
-                $q->where('name', 'like', "%{$search}%")
-                  ->orWhere('description', 'like', "%{$search}%")
-                  ->orWhere('code', 'like', "%{$search}%");
+            $search = trim($request->search);
+            
+            // Split search string into individual words
+            $searchWords = preg_split('/\s+/', $search);
+            
+            $query->where(function($q) use ($searchWords) {
+                foreach ($searchWords as $word) {
+                    // Skip empty words
+                    if (empty($word)) continue;
+                    
+                    // Each word must be found in at least one of the fields
+                    $q->where(function($subQuery) use ($word) {
+                        $subQuery->where('name', 'like', "%{$word}%")
+                                 ->orWhere('description', 'like', "%{$word}%")
+                                 ->orWhere('code', 'like', "%{$word}%")
+                                 ->orWhere('location', 'like', "%{$word}%")
+                                 ->orWhere('client', 'like', "%{$word}%");
+                    });
+                }
             });
         }
         
@@ -376,13 +390,27 @@ class ProjectController extends Controller
         
         $query = Project::query();
         
-        // Apply same filters as index
+        // Apply same filters as index with word-based search
         if ($request->has('search') && $request->search) {
-            $search = $request->search;
-            $query->where(function($q) use ($search) {
-                $q->where('name', 'like', "%{$search}%")
-                  ->orWhere('description', 'like', "%{$search}%")
-                  ->orWhere('code', 'like', "%{$search}%");
+            $search = trim($request->search);
+            
+            // Split search string into individual words
+            $searchWords = preg_split('/\s+/', $search);
+            
+            $query->where(function($q) use ($searchWords) {
+                foreach ($searchWords as $word) {
+                    // Skip empty words
+                    if (empty($word)) continue;
+                    
+                    // Each word must be found in at least one of the fields
+                    $q->where(function($subQuery) use ($word) {
+                        $subQuery->where('name', 'like', "%{$word}%")
+                                 ->orWhere('description', 'like', "%{$word}%")
+                                 ->orWhere('code', 'like', "%{$word}%")
+                                 ->orWhere('location', 'like', "%{$word}%")
+                                 ->orWhere('client', 'like', "%{$word}%");
+                    });
+                }
             });
         }
         
@@ -592,9 +620,17 @@ class ProjectController extends Controller
     {
         $query = $request->get('q', '');
         
-        $projects = Project::where(function($q) use ($query) {
-                $q->where('name', 'like', '%' . $query . '%')
-                  ->orWhere('code', 'like', '%' . $query . '%');
+        // Split query into words for better search
+        $queryWords = preg_split('/\s+/', trim($query));
+        
+        $projects = Project::where(function($q) use ($queryWords) {
+                foreach ($queryWords as $word) {
+                    if (empty($word)) continue;
+                    $q->where(function($subQuery) use ($word) {
+                        $subQuery->where('name', 'like', '%' . $word . '%')
+                                 ->orWhere('code', 'like', '%' . $word . '%');
+                    });
+                }
             })
             ->select('id', 'name', 'code')
             ->orderBy('name')
