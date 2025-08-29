@@ -210,7 +210,9 @@ class SyncProjectToCashflow extends Command
                     'reference_id' => $billing->id,
                     'project_id' => $billing->project_id,
                     'category_id' => $category->id,
-                    'transaction_date' => $billing->payment_date ?? $billing->created_at->format('Y-m-d'),
+                    'transaction_date' => $billing->paid_date ? $billing->paid_date->format('Y-m-d') :
+                                         ($billing->billing_date ? $billing->billing_date->format('Y-m-d') :
+                                          $billing->created_at->format('Y-m-d')),
                     'description' => "Pembayaran invoice {$billing->invoice_number}",
                     'amount' => $amount,
                     'type' => 'income',

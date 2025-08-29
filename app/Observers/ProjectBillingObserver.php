@@ -116,6 +116,12 @@ class ProjectBillingObserver
                 \Log::info("Billing {$projectBilling->id} amount changed while paid, updating cashflow entry");
                 $this->updateCashflowAmount($projectBilling);
             }
+            
+            // Check if paid_date changed
+            if ($projectBilling->wasChanged('paid_date')) {
+                \Log::info("Billing {$projectBilling->id} paid_date changed while paid, updating cashflow transaction date");
+                $this->updateCashflowDate($projectBilling);
+            }
         }
     }
 
@@ -169,12 +175,17 @@ class ProjectBillingObserver
             }
 
             // Create new cashflow entry
+            // Use paid_date from billing if available, otherwise use current date
+            $transactionDate = $projectBilling->paid_date
+                ? $projectBilling->paid_date->format('Y-m-d')
+                : now()->toDateString();
+            
             $cashflowEntry = CashflowEntry::create([
                 'reference_type' => 'billing',
                 'reference_id' => $projectBilling->id,
                 'project_id' => $projectBilling->project_id,
                 'category_id' => $category->id,
-                'transaction_date' => now()->toDateString(),
+                'transaction_date' => $transactionDate,
                 'description' => "Pembayaran penagihan proyek: {$projectBilling->project->name}" .
                                ($projectBilling->isTerminPayment() ? " ({$projectBilling->getTerminLabel()})" : ''),
                 'amount' => $projectBilling->total_amount,
@@ -183,7 +194,7 @@ class ProjectBillingObserver
                 'notes' => "Auto-generated dari penagihan #{$projectBilling->invoice_number}",
                 'created_by' => auth()->id() ?? 1,
                 'status' => 'confirmed',
-                'confirmed_at' => now(),
+                'confirmed_at' => $projectBilling->paid_date ?? now(),
                 'confirmed_by' => auth()->id() ?? 1
             ]);
 
@@ -273,6 +284,64 @@ class ProjectBillingObserver
             }
         } catch (\Exception $e) {
             \Log::error("Failed to update cashflow amount for billing {$projectBilling->id}: " . $e->getMessage());
+            \Log::error("Stack trace: " . $e->getTraceAsString());
+        }
+    }
+    
+    /**
+     * Update cashflow transaction date when billing paid_date changes
+     * NEW: Added to handle paid_date changes for paid billings
+     */
+    private function updateCashflowDate(ProjectBilling $projectBilling): void
+    {
+        try {
+            $cashflowEntry = CashflowEntry::where('reference_type', 'billing')
+                ->where('reference_id', $projectBilling->id)
+                ->where('status', '!=', 'cancelled')
+                ->first();
+            
+            if ($cashflowEntry) {
+                $oldDate = $cashflowEntry->transaction_date;
+                $newDate = $projectBilling->paid_date
+                    ? $projectBilling->paid_date->format('Y-m-d')
+                    : now()->toDateString();
+                
+                // Only update if date actually changed
+                if ($oldDate != $newDate) {
+                    $cashflowEntry->update([
+                        'transaction_date' => $newDate,
+                        'confirmed_at' => $projectBilling->paid_date ?? now(),
+                        'notes' => ($cashflowEntry->notes ?? '') .
+                                  " | Transaction date updated from {$oldDate} to {$newDate}" .
+                                  " at " . now()->format('Y-m-d H:i:s')
+                    ]);
+                    
+                    \Log::info("Updated cashflow transaction date for billing {$projectBilling->id}: from {$oldDate} to {$newDate}");
+                    
+                    // Log activity for tracking
+                    if ($projectBilling->project) {
+                        $projectBilling->project->activities()->create([
+                            'user_id' => auth()->id() ?? 1,
+                            'activity_type' => 'cashflow_date_updated',
+                            'description' => "Cashflow transaction date updated from {$oldDate} to {$newDate}",
+                            'activity_date' => now(),
+                            'metadata' => json_encode([
+                                'billing_id' => $projectBilling->id,
+                                'cashflow_id' => $cashflowEntry->id,
+                                'old_date' => $oldDate,
+                                'new_date' => $newDate,
+                                'invoice_number' => $projectBilling->invoice_number
+                            ])
+                        ]);
+                    }
+                }
+            } else {
+                // If no cashflow entry exists for a paid billing, create one
+                \Log::warning("No cashflow entry found for paid billing {$projectBilling->id} when updating date, creating new entry");
+                $this->createCashflowEntry($projectBilling);
+            }
+        } catch (\Exception $e) {
+            \Log::error("Failed to update cashflow date for billing {$projectBilling->id}: " . $e->getMessage());
             \Log::error("Stack trace: " . $e->getTraceAsString());
         }
     }

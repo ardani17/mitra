@@ -167,7 +167,8 @@ class SyncBillingCashflow extends Command
                 'reference_id' => $billing->id,
                 'project_id' => $billing->project_id,
                 'category_id' => $category->id,
-                'transaction_date' => $billing->billing_date ?? now()->toDateString(),
+                'transaction_date' => $billing->paid_date ? $billing->paid_date->toDateString() :
+                                     ($billing->billing_date ?? now()->toDateString()),
                 'description' => "Pembayaran penagihan proyek: {$billing->project->name}" .
                                ($billing->isTerminPayment() ? " ({$billing->getTerminLabel()})" : ''),
                 'amount' => $billing->total_amount,
