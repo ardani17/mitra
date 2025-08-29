@@ -119,7 +119,8 @@ class ProjectBillingController extends Controller
             'total_amount' => 'nullable|numeric|min:0',
             'invoice_number' => 'required|string|max:255|unique:project_billings,invoice_number',
             'billing_date' => 'required|date',
-            'status' => 'required|in:draft,sent',
+            'status' => 'required|in:draft,sent,paid',
+            'paid_date' => 'nullable|date|required_if:status,paid|before_or_equal:today',
             'description' => 'nullable|string|max:1000'
         ]);
 
@@ -145,6 +146,7 @@ class ProjectBillingController extends Controller
                 'total_amount' => $validated['total_amount'],
                 'billing_date' => $validated['billing_date'],
                 'status' => $validated['status'],
+                'paid_date' => $validated['status'] === 'paid' ? $validated['paid_date'] : null,
                 'notes' => $validated['description'] ?? null
             ];
 
@@ -234,7 +236,7 @@ class ProjectBillingController extends Controller
             'total_amount' => 'nullable|numeric|min:0',
             'billing_date' => 'required|date',
             'status' => 'required|in:draft,sent,paid,overdue',
-            'paid_date' => 'nullable|date|required_if:status,paid',
+            'paid_date' => 'nullable|date|required_if:status,paid|before_or_equal:today',
             'description' => 'nullable|string|max:1000'
         ]);
 

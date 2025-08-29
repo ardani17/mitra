@@ -182,10 +182,30 @@
                             class="w-full px-3 py-2 text-sm sm:text-base border border-slate-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent @error('status') border-red-500 @enderror">
                         <option value="draft" {{ old('status', 'draft') == 'draft' ? 'selected' : '' }}>Draft</option>
                         <option value="sent" {{ old('status') == 'sent' ? 'selected' : '' }}>Terkirim</option>
+                        <option value="paid" {{ old('status') == 'paid' ? 'selected' : '' }}>Lunas</option>
                     </select>
                     @error('status')
                         <p class="mt-1 text-sm text-red-600">{{ $message }}</p>
                     @enderror
+                </div>
+            </div>
+
+            <!-- Paid Date (shown when status is paid) -->
+            <div id="paid-date-section" class="mt-4 sm:mt-6 {{ old('status') == 'paid' ? '' : 'hidden' }}">
+                <div class="grid grid-cols-1 sm:grid-cols-2 gap-4 sm:gap-6">
+                    <div>
+                        <label for="paid_date" class="block text-sm font-medium text-slate-700 mb-2">
+                            Tanggal Uang Diterima <span class="text-red-500">*</span>
+                        </label>
+                        <input type="date" name="paid_date" id="paid_date"
+                               value="{{ old('paid_date', date('Y-m-d')) }}"
+                               max="{{ date('Y-m-d') }}"
+                               class="w-full px-3 py-2 text-sm sm:text-base border border-slate-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent @error('paid_date') border-red-500 @enderror">
+                        <p class="text-xs text-slate-500 mt-1">Tanggal ketika pembayaran diterima (tidak bisa tanggal masa depan)</p>
+                        @error('paid_date')
+                            <p class="mt-1 text-sm text-red-600">{{ $message }}</p>
+                        @enderror
+                    </div>
                 </div>
             </div>
         </div>
@@ -323,6 +343,9 @@ document.addEventListener('DOMContentLoaded', function() {
     const nilaiMaterial = document.getElementById('nilai_material');
     const ppnRate = document.getElementById('ppn_rate');
     const ppnCalculation = document.getElementById('ppn_calculation');
+    const statusSelect = document.getElementById('status');
+    const paidDateSection = document.getElementById('paid-date-section');
+    const paidDateInput = document.getElementById('paid_date');
     const form = document.getElementById('billing-form');
     let selectedProjectData = null;
 
@@ -486,6 +509,22 @@ document.addEventListener('DOMContentLoaded', function() {
     // Add event listeners for PPN changes
     ppnRate.addEventListener('input', calculateTotal);
     ppnCalculation.addEventListener('change', calculateTotal);
+
+    // Handle status change for paid date visibility
+    statusSelect.addEventListener('change', function() {
+        if (this.value === 'paid') {
+            paidDateSection.classList.remove('hidden');
+            paidDateInput.required = true;
+        } else {
+            paidDateSection.classList.add('hidden');
+            paidDateInput.required = false;
+            paidDateInput.value = ''; // Clear the value when hidden
+        }
+    });
+
+    // Set max date for paid_date to today
+    const today = new Date().toISOString().split('T')[0];
+    paidDateInput.setAttribute('max', today);
 
 
     // Form validation before submit

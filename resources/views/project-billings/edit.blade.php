@@ -111,7 +111,9 @@
                         </label>
                         <input type="date" name="paid_date" id="paid_date"
                                value="{{ old('paid_date', $projectBilling->paid_date) }}"
+                               max="{{ date('Y-m-d') }}"
                                class="w-full px-3 py-2 border border-slate-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent text-sm sm:text-base @error('paid_date') border-red-500 @enderror">
+                        <p class="text-xs text-slate-500 mt-1">Tanggal ketika pembayaran diterima (tidak bisa tanggal masa depan)</p>
                         @error('paid_date')
                             <p class="mt-1 text-xs sm:text-sm text-red-600">{{ $message }}</p>
                         @enderror
@@ -360,6 +362,13 @@ document.addEventListener('DOMContentLoaded', function() {
     // Add event listeners for PPN changes
     ppnRate.addEventListener('input', calculateTotal);
     ppnCalculation.addEventListener('change', calculateTotal);
+
+    // Set max date for paid_date to today
+    const today = new Date().toISOString().split('T')[0];
+    const paidDateInput = document.getElementById('paid_date');
+    if (paidDateInput) {
+        paidDateInput.setAttribute('max', today);
+    }
 
     // Set minimum due date to billing date
     const billingDateInput = document.getElementById('billing_date');
