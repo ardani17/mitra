@@ -186,12 +186,12 @@ class StorageService
             'lainnya' => 'dokumen/lainnya',
             'kontrak' => 'dokumen/kontrak',
             'gambar' => 'gambar',
-            // Remove 'tes' => 'tes' mapping to prevent root level folder creation
         ];
         
-        // If no mapping found, treat it as a subfolder under dokumen
-        // This ensures dynamic folders stay within their parent structure
-        return $mapping[$category] ?? "dokumen/{$category}";
+        // If no mapping found, return the category as-is
+        // This allows custom folders to be created at the root level
+        // without forcing them under "dokumen"
+        return $mapping[$category] ?? $category;
     }
     
     /**
