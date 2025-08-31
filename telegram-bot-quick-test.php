@@ -9,7 +9,7 @@ $BOT_TOKEN = '8281280313:AAG0B4mu6tEzs3N0_BSO3VGatHov7t0klls';  // <-- Ganti den
 $USE_LOCAL = true;  // true = local server, false = official API
 
 // Server configuration
-$LOCAL_SERVER_HOST = '103.195.190.235';  // IP public VPS Anda
+$LOCAL_SERVER_HOST = 'localhost';  // IP public VPS Anda
 $LOCAL_SERVER_PORT = '8081';
 
 // API URL
