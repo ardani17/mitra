@@ -3,6 +3,7 @@
 namespace App\Http\Controllers;
 
 use App\Services\SystemStatisticsService;
+use App\Services\SystemStatisticsAlternativeService;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Log;
@@ -11,9 +12,16 @@ class SystemStatisticsController extends Controller
 {
     protected $statisticsService;
 
-    public function __construct(SystemStatisticsService $statisticsService)
+    public function __construct()
     {
-        $this->statisticsService = $statisticsService;
+        // Check if we have open_basedir restriction
+        if (\ini_get('open_basedir')) {
+            // Use alternative service for restricted environments
+            $this->statisticsService = new SystemStatisticsAlternativeService();
+        } else {
+            // Use normal service
+            $this->statisticsService = new SystemStatisticsService();
+        }
     }
 
     /**
