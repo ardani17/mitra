@@ -33,6 +33,47 @@ class SystemStatisticsService
     }
 
     /**
+     * Try to use the helper script with sudo for better permissions
+     */
+    private function tryHelperScript($command = 'all')
+    {
+        // Only use helper on Linux
+        if (PHP_OS_FAMILY !== 'Linux') {
+            return null;
+        }
+        
+        // Check if helper script exists
+        $helperPath = base_path('scripts/system-metrics-helper.php');
+        if (!file_exists($helperPath)) {
+            return null;
+        }
+        
+        // Try to run with sudo (will work if sudoers is configured)
+        $cmd = "sudo php " . escapeshellarg($helperPath) . " " . escapeshellarg($command) . " 2>/dev/null";
+        $output = @shell_exec($cmd);
+        
+        if ($output) {
+            $data = @json_decode($output, true);
+            if ($data !== null) {
+                return $data;
+            }
+        }
+        
+        // Try without sudo (if script has proper permissions)
+        $cmd = "php " . escapeshellarg($helperPath) . " " . escapeshellarg($command) . " 2>/dev/null";
+        $output = @shell_exec($cmd);
+        
+        if ($output) {
+            $data = @json_decode($output, true);
+            if ($data !== null) {
+                return $data;
+            }
+        }
+        
+        return null;
+    }
+
+    /**
      * Get all system metrics with caching
      */
     public function getAllMetrics(): array
@@ -57,6 +98,19 @@ class SystemStatisticsService
     public function getCpuUsage(): array
     {
         try {
+            // Try helper script first on Linux
+            if (PHP_OS_FAMILY === 'Linux') {
+                $helperData = $this->tryHelperScript('cpu');
+                if ($helperData && isset($helperData['usage'])) {
+                    return [
+                        'usage' => $helperData['usage'] ?? 0,
+                        'cores' => $helperData['cores'] ?? 1,
+                        'threads' => $helperData['threads'] ?? 1,
+                        'load_average' => $helperData['load_average'] ?? [0, 0, 0],
+                    ];
+                }
+            }
+            
             if (PHP_OS_FAMILY === 'Windows') {
                 // Windows-specific CPU usage using wmic
                 if ($this->isShellExecAvailable()) {
@@ -186,6 +240,22 @@ class SystemStatisticsService
     public function getMemoryUsage(): array
     {
         try {
+            // Try helper script first on Linux
+            if (PHP_OS_FAMILY === 'Linux') {
+                $helperData = $this->tryHelperScript('memory');
+                if ($helperData && isset($helperData['total'])) {
+                    return [
+                        'total' => $helperData['total'] ?? 0,
+                        'total_formatted' => $this->formatBytes($helperData['total'] ?? 0),
+                        'used' => $helperData['used'] ?? 0,
+                        'used_formatted' => $this->formatBytes($helperData['used'] ?? 0),
+                        'free' => $helperData['available'] ?? 0,
+                        'free_formatted' => $this->formatBytes($helperData['available'] ?? 0),
+                        'percentage' => $helperData['percentage'] ?? 0,
+                    ];
+                }
+            }
+            
             if (PHP_OS_FAMILY === 'Windows') {
                 // Windows-specific memory usage
                 if ($this->isShellExecAvailable()) {
@@ -293,6 +363,31 @@ class SystemStatisticsService
     public function getDiskUsage(): array
     {
         try {
+            // Try helper script first on Linux
+            if (PHP_OS_FAMILY === 'Linux') {
+                $helperData = $this->tryHelperScript('disk');
+                if ($helperData && is_array($helperData) && !empty($helperData)) {
+                    $disks = [];
+                    foreach ($helperData as $disk) {
+                        if (isset($disk['mount'])) {
+                            $disks[] = [
+                                'mount' => $disk['mount'],
+                                'total' => $disk['total'] ?? 0,
+                                'total_formatted' => $this->formatBytes($disk['total'] ?? 0),
+                                'used' => $disk['used'] ?? 0,
+                                'used_formatted' => $this->formatBytes($disk['used'] ?? 0),
+                                'free' => $disk['free'] ?? 0,
+                                'free_formatted' => $this->formatBytes($disk['free'] ?? 0),
+                                'percentage' => $disk['percentage'] ?? 0,
+                            ];
+                        }
+                    }
+                    if (!empty($disks)) {
+                        return $disks;
+                    }
+                }
+            }
+            
             $disks = [];
             
             if (PHP_OS_FAMILY === 'Windows') {

@@ -65,6 +65,16 @@ Route::middleware('auth')->group(function () {
         Route::get('/api/system-statistics/metrics', [App\Http\Controllers\SystemStatisticsController::class, 'metrics'])->name('api.system-statistics.metrics');
         Route::get('/system-statistics/export', [App\Http\Controllers\SystemStatisticsController::class, 'export'])->name('system-statistics.export');
         Route::post('/api/system-statistics/clear-cache', [App\Http\Controllers\SystemStatisticsController::class, 'clearCache'])->name('api.system-statistics.clear-cache');
+        
+        // Debug route for system statistics
+        Route::get('/system-statistics/debug', function() {
+            $debugService = new \App\Services\SystemStatisticsDebugService();
+            return response()->json([
+                'system_access' => $debugService->debugSystemAccess(),
+                'cpu_methods' => $debugService->testCpuMethods(),
+                'memory_methods' => $debugService->testMemoryMethods(),
+            ]);
+        })->name('system-statistics.debug');
     });
     
     // Company routes
