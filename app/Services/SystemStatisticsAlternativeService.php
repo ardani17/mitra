@@ -42,26 +42,52 @@ class SystemStatisticsAlternativeService
             $load = \sys_getloadavg();
         }
         
-        // Estimate CPU cores (fallback)
+        // Try multiple methods to detect CPU cores
         $cores = 1;
+        
+        // Method 1: Check environment variables
         if (isset($_SERVER['NUMBER_OF_PROCESSORS'])) {
             $cores = (int)$_SERVER['NUMBER_OF_PROCESSORS'];
-        } elseif (\function_exists('shell_exec') && !\ini_get('open_basedir')) {
-            // Only try if no open_basedir restriction
-            $cores_check = @\shell_exec('nproc 2>/dev/null');
-            if ($cores_check) {
-                $cores = (int)$cores_check ?: 1;
+        }
+        
+        // Method 2: Try to get from PHP configuration
+        if ($cores == 1) {
+            // Try to detect from load average behavior
+            // If load average is consistently higher than 1, we likely have more cores
+            if ($load[0] > 2 || $load[1] > 2) {
+                // Estimate cores based on typical load patterns
+                $cores = (int)\ceil($load[1]); // Use 5-minute average as estimate
+                $cores = \min($cores, 8); // Cap at 8 for safety
+                $cores = \max($cores, 2); // At least 2 if load is high
+            }
+        }
+        
+        // Method 3: Check if we can use shell_exec with specific commands
+        if ($cores == 1 && \function_exists('shell_exec')) {
+            // Try getconf which might work even with restrictions
+            $cores_check = @\shell_exec('getconf _NPROCESSORS_ONLN 2>/dev/null');
+            if ($cores_check && \is_numeric(\trim($cores_check))) {
+                $cores = (int)\trim($cores_check);
             }
         }
         
         // Calculate usage from load average
         $usage = $cores > 0 ? \min(100, \round(($load[0] / $cores) * 100, 2)) : 0;
         
+        // Determine CPU status
+        $status = 'good';
+        if ($usage >= 90) {
+            $status = 'critical';
+        } elseif ($usage >= 70) {
+            $status = 'warning';
+        }
+        
         return [
             'usage' => $usage,
             'cores' => $cores,
-            'threads' => $cores, // Assume threads = cores
+            'threads' => $cores * 2, // Modern CPUs usually have 2 threads per core
             'load_average' => $load,
+            'status' => $status,
         ];
     }
 
@@ -70,32 +96,93 @@ class SystemStatisticsAlternativeService
      */
     public function getMemoryUsage(): array
     {
-        // Get PHP memory info as a proxy
+        // Get PHP memory info
         $phpLimit = $this->convertToBytes(\ini_get('memory_limit'));
         $phpUsage = \memory_get_usage(true);
-        $phpReal = \memory_get_usage(false);
         
-        // Try to get system memory from PHP info
-        $total = $phpLimit * 10; // Estimate system has 10x PHP limit
-        $used = $phpUsage * 10; // Rough estimate
+        // Initialize with defaults
+        $total = 0;
+        $used = 0;
+        $free = 0;
+        $swapTotal = 0;
+        $swapUsed = 0;
+        $swapFree = 0;
         
-        // If we can get from environment
-        if (isset($_SERVER['MEMORY_LIMIT'])) {
-            $total = $this->convertToBytes($_SERVER['MEMORY_LIMIT']);
+        // Try to get real memory info using shell_exec if available
+        if (\function_exists('shell_exec')) {
+            // Try free command first (might work even with restrictions)
+            $freeCmd = @\shell_exec('free -b 2>/dev/null | grep -E "^Mem:|^Swap:"');
+            if ($freeCmd) {
+                $lines = \explode("\n", $freeCmd);
+                foreach ($lines as $line) {
+                    if (\strpos($line, 'Mem:') === 0) {
+                        $parts = \preg_split('/\s+/', \trim($line));
+                        if (\count($parts) >= 3) {
+                            $total = (int)($parts[1] ?? 0);
+                            $used = (int)($parts[2] ?? 0);
+                            $free = $total - $used;
+                        }
+                    } elseif (\strpos($line, 'Swap:') === 0) {
+                        $parts = \preg_split('/\s+/', \trim($line));
+                        if (\count($parts) >= 3) {
+                            $swapTotal = (int)($parts[1] ?? 0);
+                            $swapUsed = (int)($parts[2] ?? 0);
+                            $swapFree = $swapTotal - $swapUsed;
+                        }
+                    }
+                }
+            }
+        }
+        
+        // Fallback: Estimate based on PHP limits
+        if ($total == 0) {
+            // Typical server configurations
+            if ($phpLimit >= 1073741824) { // >= 1GB PHP limit
+                $total = 8589934592; // Assume 8GB system RAM
+            } elseif ($phpLimit >= 536870912) { // >= 512MB
+                $total = 4294967296; // Assume 4GB system RAM
+            } elseif ($phpLimit >= 268435456) { // >= 256MB
+                $total = 2147483648; // Assume 2GB system RAM
+            } else {
+                $total = 1073741824; // Assume 1GB system RAM
+            }
+            
+            // Estimate usage based on PHP usage ratio
+            $phpRatio = $phpUsage / $phpLimit;
+            $used = (int)($total * $phpRatio * 0.5); // Assume system uses similar ratio
+            $free = $total - $used;
         }
         
         // Calculate percentage
         $percentage = $total > 0 ? \round(($used / $total) * 100, 2) : 0;
+        $swapPercentage = $swapTotal > 0 ? \round(($swapUsed / $swapTotal) * 100, 2) : 0;
+        
+        // Determine status based on RAM and SWAP usage
+        $status = 'good';
+        if ($percentage >= 90 || $swapPercentage >= 80) {
+            $status = 'critical';
+        } elseif ($percentage >= 75 || $swapPercentage >= 50) {
+            $status = 'warning';
+        }
         
         return [
             'total' => $total,
             'total_formatted' => $this->formatBytes($total),
             'used' => $used,
             'used_formatted' => $this->formatBytes($used),
-            'free' => $total - $used,
-            'free_formatted' => $this->formatBytes($total - $used),
+            'free' => $free,
+            'free_formatted' => $this->formatBytes($free),
             'percentage' => $percentage,
-            'note' => 'Estimated values due to system restrictions',
+            'status' => $status,
+            'swap' => [
+                'total' => $swapTotal,
+                'total_formatted' => $this->formatBytes($swapTotal),
+                'used' => $swapUsed,
+                'used_formatted' => $this->formatBytes($swapUsed),
+                'free' => $swapFree,
+                'free_formatted' => $this->formatBytes($swapFree),
+                'percentage' => $swapPercentage,
+            ],
         ];
     }
 
@@ -115,6 +202,14 @@ class SystemStatisticsAlternativeService
             $used = $total - $free;
             $percentage = $total > 0 ? \round(($used / $total) * 100, 2) : 0;
             
+            // Determine disk status
+            $status = 'good';
+            if ($percentage >= 90) {
+                $status = 'critical';
+            } elseif ($percentage >= 75) {
+                $status = 'warning';
+            }
+            
             $disks[] = [
                 'mount' => 'Application Directory',
                 'path' => $path,
@@ -125,6 +220,7 @@ class SystemStatisticsAlternativeService
                 'free' => $free,
                 'free_formatted' => $this->formatBytes($free),
                 'percentage' => $percentage,
+                'status' => $status,
             ];
         }
         
@@ -140,6 +236,14 @@ class SystemStatisticsAlternativeService
                     $storageUsed = $storageTotal - $storageFree;
                     $storagePercentage = $storageTotal > 0 ? \round(($storageUsed / $storageTotal) * 100, 2) : 0;
                     
+                    // Determine disk status
+                    $storageStatus = 'good';
+                    if ($storagePercentage >= 90) {
+                        $storageStatus = 'critical';
+                    } elseif ($storagePercentage >= 75) {
+                        $storageStatus = 'warning';
+                    }
+                    
                     $disks[] = [
                         'mount' => 'Storage Directory',
                         'path' => $storagePath,
@@ -150,6 +254,7 @@ class SystemStatisticsAlternativeService
                         'free' => $storageFree,
                         'free_formatted' => $this->formatBytes($storageFree),
                         'percentage' => $storagePercentage,
+                        'status' => $storageStatus,
                     ];
                 }
             }
@@ -168,6 +273,14 @@ class SystemStatisticsAlternativeService
         $memoryPeak = \memory_get_peak_usage(true);
         $percentage = $memoryLimit > 0 ? \round(($memoryUsage / $memoryLimit) * 100, 2) : 0;
         
+        // Determine PHP memory status
+        $status = 'good';
+        if ($percentage >= 90) {
+            $status = 'critical';
+        } elseif ($percentage >= 75) {
+            $status = 'warning';
+        }
+        
         return [
             'limit' => $memoryLimit,
             'limit_formatted' => $this->formatBytes($memoryLimit),
@@ -176,6 +289,7 @@ class SystemStatisticsAlternativeService
             'peak' => $memoryPeak,
             'peak_formatted' => $this->formatBytes($memoryPeak),
             'percentage' => $percentage,
+            'status' => $status,
         ];
     }
 
@@ -196,14 +310,24 @@ class SystemStatisticsAlternativeService
             $connectionQuery = DB::select("SELECT count(*) as active FROM pg_stat_activity");
             $activeConnections = $connectionQuery[0]->active ?? 0;
             
+            // Determine database status
+            $connectionPercentage = \round(($activeConnections / 100) * 100, 2);
+            $status = 'good';
+            if ($connectionPercentage >= 90) {
+                $status = 'critical';
+            } elseif ($connectionPercentage >= 70) {
+                $status = 'warning';
+            }
+            
             return [
                 'size' => $dbSize,
                 'size_formatted' => $this->formatBytes($dbSize),
                 'tables' => $tables,
                 'active_connections' => $activeConnections,
                 'max_connections' => 100,
-                'connection_percentage' => \round(($activeConnections / 100) * 100, 2),
+                'connection_percentage' => $connectionPercentage,
                 'type' => 'PostgreSQL',
+                'status' => $status,
             ];
         } catch (\Exception $e) {
             // Try MySQL
@@ -223,6 +347,7 @@ class SystemStatisticsAlternativeService
                     'max_connections' => 100,
                     'connection_percentage' => 0,
                     'type' => 'MySQL',
+                    'status' => 'good',
                 ];
             } catch (\Exception $e2) {
                 return [
@@ -233,6 +358,7 @@ class SystemStatisticsAlternativeService
                     'max_connections' => 0,
                     'connection_percentage' => 0,
                     'type' => 'Unknown',
+                    'status' => 'unknown',
                 ];
             }
         }

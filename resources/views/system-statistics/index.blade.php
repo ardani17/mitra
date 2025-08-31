@@ -222,7 +222,27 @@
             // Update CPU Card
             updateCpuCard(data.cpu);
             
-            // Update Memory Card
+            // Update Memory Card (with status calculation including SWAP)
+            if (data.memory) {
+                // Calculate status based on RAM and SWAP usage
+                let status = 'good';
+                const ramPercentage = data.memory.percentage || 0;
+                const swapPercentage = (data.memory.swap && data.memory.swap.percentage) || 0;
+                
+                // Determine status based on both RAM and SWAP
+                if (ramPercentage >= 90 || swapPercentage >= 80) {
+                    status = 'critical';
+                } else if (ramPercentage >= 75 || swapPercentage >= 50) {
+                    status = 'warning';
+                } else {
+                    status = 'good';
+                }
+                
+                // Add status to memory object if not present
+                if (!data.memory.status) {
+                    data.memory.status = status;
+                }
+            }
             updateMemoryCard(data.memory);
             
             // Update PHP Memory Card
@@ -280,6 +300,26 @@
         // Update Memory Card
         function updateMemoryCard(memory) {
             const statusColor = getStatusBadgeColor(memory.status);
+            
+            // Check if SWAP data exists and has values
+            let swapSection = '';
+            if (memory.swap && memory.swap.total > 0) {
+                swapSection = `
+                    <div class="mt-3 pt-3 border-t border-emerald-300 border-opacity-30">
+                        <p class="text-xs sm:text-sm opacity-90 font-semibold">SWAP Memory</p>
+                        <div class="flex items-center justify-between mt-1">
+                            <div class="flex-1">
+                                <p class="text-sm sm:text-base lg:text-lg font-bold">${memory.swap.percentage}%</p>
+                                <div class="w-full bg-emerald-300 rounded-full h-1 mt-1">
+                                    <div class="bg-white h-1 rounded-full transition-all duration-500" style="width: ${memory.swap.percentage}%"></div>
+                                </div>
+                                <p class="text-xs opacity-75 mt-1">${memory.swap.used_formatted} / ${memory.swap.total_formatted}</p>
+                            </div>
+                        </div>
+                    </div>
+                `;
+            }
+            
             const content = `
                 <div class="flex items-center justify-between">
                     <div class="flex-1 min-w-0">
@@ -294,6 +334,7 @@
                         🧠
                     </div>
                 </div>
+                ${swapSection}
                 <div class="mt-2">
                     <span class="inline-flex items-center px-2 py-1 rounded-full text-xs font-medium bg-${statusColor}-200 text-${statusColor}-800">
                         ${memory.status}
