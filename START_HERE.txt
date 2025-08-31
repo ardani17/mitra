@@ -1,0 +1,83 @@
+=====================================
+TELEGRAM BOT TEST - QUICK START GUIDE
+=====================================
+
+Anda sudah menginstall telegram-bot-api server di VPS.
+Sekarang mari test apakah server berjalan dengan baik!
+
+LANGKAH-LANGKAH:
+================
+
+1. DAPATKAN BOT TOKEN
+   - Buka Telegram
+   - Chat dengan @BotFather
+   - Kirim /newbot (atau gunakan bot existing)
+   - Copy token yang diberikan (format: 1234567890:ABCdefGHIjklMNOpqrsTUVwxyz)
+
+2. EDIT FILE telegram-bot-quick-test.php
+   - Buka file: telegram-bot-quick-test.php
+   - Cari baris: $BOT_TOKEN = 'YOUR_BOT_TOKEN_HERE';
+   - Ganti dengan token Anda
+   - Pastikan: $USE_LOCAL = true; (untuk test local server)
+
+3. JALANKAN TEST
+   Pilih salah satu:
+   
+   Windows:
+   - Double click: run-telegram-test.bat
+   
+   Atau manual:
+   - php check-telegram-server.php (cek server status)
+   - php telegram-bot-quick-test.php (test cepat)
+   - php telegram-bot-test.php (test lengkap)
+
+4. KIRIM PESAN KE BOT
+   - Buka Telegram
+   - Cari bot Anda (username akan muncul di console)
+   - Kirim pesan apa saja
+   - Jalankan script lagi untuk melihat hasilnya
+
+5. TEST FILE BESAR (>20MB)
+   Script akan otomatis:
+   - Membuat file test 25MB
+   - Upload ke Telegram
+   - Jika berhasil = local server berfungsi dengan limit 2GB!
+
+FILE-FILE YANG TERSEDIA:
+========================
+- check-telegram-server.php    : Cek status server
+- telegram-bot-quick-test.php  : Test cepat & sederhana
+- telegram-bot-test.php        : Test lengkap dengan interactive mode
+- TELEGRAM_BOT_TEST_README.md  : Dokumentasi lengkap
+- run-telegram-test.bat        : Runner untuk Windows
+- run-telegram-test.sh         : Runner untuk Linux
+
+TROUBLESHOOTING:
+===============
+1. Error "Connection failed"
+   - Server belum jalan
+   - Jalankan di VPS: ./telegram-bot-api --api-id=XXX --api-hash=YYY --local
+
+2. Error "No messages found"
+   - Kirim pesan ke bot dulu
+   - Tunggu beberapa detik
+   - Jalankan script lagi
+
+3. File > 20MB gagal upload
+   - Pastikan menggunakan local server ($USE_LOCAL = true)
+   - Official API limit: 20MB download, 50MB upload
+   - Local server limit: 2GB untuk keduanya!
+
+HASIL YANG DIHARAPKAN:
+=====================
+✅ Bot Connected: @your_bot_name
+✅ Message received from Telegram
+✅ Reply sent successfully
+✅ Large file (25MB) uploaded successfully
+✅ LOCAL SERVER supports files up to 2GB!
+
+Jika semua test berhasil, Anda siap integrasi dengan Laravel!
+
+NEED HELP?
+==========
+Baca: TELEGRAM_BOT_TEST_README.md untuk info lengkap
