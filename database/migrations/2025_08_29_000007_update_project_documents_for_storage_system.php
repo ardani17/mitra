@@ -3,6 +3,7 @@
 use Illuminate\Database\Migrations\Migration;
 use Illuminate\Database\Schema\Blueprint;
 use Illuminate\Support\Facades\Schema;
+use Illuminate\Support\Facades\Log;
 
 return new class extends Migration
 {
@@ -11,6 +12,15 @@ return new class extends Migration
      */
     public function up(): void
     {
+        // Debug: Check if table exists before trying to modify it
+        if (!Schema::hasTable('project_documents')) {
+            Log::error('Migration Error: project_documents table does not exist yet!');
+            Log::error('This migration (2025_01_29_000001) is running before the table creation (2025_07_24_093843)');
+            throw new \Exception('Cannot modify project_documents table - it does not exist. Check migration order!');
+        }
+        
+        Log::info('project_documents table exists, proceeding with modifications...');
+        
         Schema::table('project_documents', function (Blueprint $table) {
             // Add new columns for storage system
             $table->string('storage_path', 500)->nullable()->after('file_path');
@@ -27,6 +37,8 @@ return new class extends Migration
             $table->index('sync_status');
             $table->index('last_sync_at');
         });
+        
+        Log::info('Successfully updated project_documents table with storage system columns');
     }
 
     /**
