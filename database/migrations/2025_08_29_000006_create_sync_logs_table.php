@@ -11,24 +11,28 @@ return new class extends Migration
      */
     public function up(): void
     {
+        // Check if table already exists (for existing deployments)
+        if (Schema::hasTable('sync_logs')) {
+            // Table already exists, skip creation
+            return;
+        }
+        
         Schema::create('sync_logs', function (Blueprint $table) {
             $table->id();
-            $table->string('syncable_type', 50);
-            $table->unsignedBigInteger('syncable_id');
-            $table->enum('action', ['upload', 'download', 'delete', 'check']);
-            $table->enum('status', ['success', 'failed', 'skipped']);
+            $table->foreignId('project_id')->constrained()->onDelete('cascade');
+            $table->enum('sync_type', ['upload', 'download', 'delete', 'rename', 'move']);
+            $table->enum('sync_status', ['pending', 'in_progress', 'completed', 'failed']);
             $table->string('source_path', 500)->nullable();
             $table->string('destination_path', 500)->nullable();
-            $table->unsignedBigInteger('file_size')->nullable();
-            $table->unsignedInteger('duration_ms')->nullable();
             $table->text('error_message')->nullable();
-            $table->text('rclone_output')->nullable();
-            $table->timestamp('created_at')->useCurrent();
+            $table->json('metadata')->nullable();
+            $table->timestamp('started_at')->nullable();
+            $table->timestamp('completed_at')->nullable();
+            $table->timestamps();
             
             // Indexes for better performance
-            $table->index(['syncable_type', 'syncable_id']);
+            $table->index(['project_id', 'sync_status']);
             $table->index('created_at');
-            $table->index('status');
         });
     }
 

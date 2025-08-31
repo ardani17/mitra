@@ -12,14 +12,20 @@ return new class extends Migration
      */
     public function up(): void
     {
-        // Debug: Check if table exists before trying to modify it
+        // Check if table exists before trying to modify it
         if (!Schema::hasTable('project_documents')) {
             Log::error('Migration Error: project_documents table does not exist yet!');
-            Log::error('This migration (2025_01_29_000001) is running before the table creation (2025_07_24_093843)');
+            Log::error('This migration (update_project_documents_for_storage_system) is running before the table creation');
             throw new \Exception('Cannot modify project_documents table - it does not exist. Check migration order!');
         }
         
-        Log::info('project_documents table exists, proceeding with modifications...');
+        // Check if columns already exist (for existing deployments that may have run old migration)
+        if (Schema::hasColumn('project_documents', 'storage_path')) {
+            Log::info('Storage system columns already exist in project_documents table, skipping...');
+            return;
+        }
+        
+        Log::info('Adding storage system columns to project_documents table...');
         
         Schema::table('project_documents', function (Blueprint $table) {
             // Add new columns for storage system
@@ -46,10 +52,19 @@ return new class extends Migration
      */
     public function down(): void
     {
+        // Check if columns exist before trying to drop them
+        if (!Schema::hasColumn('project_documents', 'storage_path')) {
+            return;
+        }
+        
         Schema::table('project_documents', function (Blueprint $table) {
-            // Drop indexes first
-            $table->dropIndex(['sync_status']);
-            $table->dropIndex(['last_sync_at']);
+            // Drop indexes first if they exist
+            if (Schema::hasIndex('project_documents', 'project_documents_sync_status_index')) {
+                $table->dropIndex(['sync_status']);
+            }
+            if (Schema::hasIndex('project_documents', 'project_documents_last_sync_at_index')) {
+                $table->dropIndex(['last_sync_at']);
+            }
             
             // Drop columns
             $table->dropColumn([
@@ -62,5 +77,21 @@ return new class extends Migration
                 'folder_structure'
             ]);
         });
+    }
+    
+    /**
+     * Helper method to check if an index exists
+     */
+    private function hasIndex($table, $indexName): bool
+    {
+        $connection = Schema::getConnection();
+        $dbName = $connection->getDatabaseName();
+        
+        $sql = "SELECT COUNT(*) as count FROM information_schema.statistics 
+                WHERE table_schema = ? AND table_name = ? AND index_name = ?";
+        
+        $result = $connection->select($sql, [$dbName, $table, $indexName]);
+        
+        return $result[0]->count > 0;
     }
 };

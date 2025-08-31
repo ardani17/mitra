@@ -11,6 +11,12 @@ return new class extends Migration
      */
     public function up(): void
     {
+        // Check if table already exists (for existing deployments)
+        if (Schema::hasTable('project_folders')) {
+            // Table already exists, skip creation
+            return;
+        }
+        
         Schema::create('project_folders', function (Blueprint $table) {
             $table->id();
             $table->foreignId('project_id')->constrained()->onDelete('cascade');
