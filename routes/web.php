@@ -324,9 +324,6 @@ require __DIR__.'/auth.php';
 // Include test routes (only in development)
 if (app()->environment('local', 'development')) {
     require __DIR__.'/web-test.php';
-    
-    // Temporary ZIP download debugging routes
-    require __DIR__.'/test-zip.php';
 }
 
 // Include download routes
