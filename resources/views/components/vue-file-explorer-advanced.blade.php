@@ -206,6 +206,10 @@
                 class="w-full text-left px-4 py-2 text-sm text-red-600 hover:bg-gray-100">
             <i class="fas fa-trash mr-2"></i> Delete
         </button>
+        <button @click="downloadFolderAsZip"
+                class="w-full text-left px-4 py-2 text-sm text-blue-600 hover:bg-gray-100">
+            <i class="fas fa-file-archive mr-2"></i> Download ZIP
+        </button>
     </div>
     
     <div class="bg-white rounded-lg shadow">
@@ -1090,6 +1094,163 @@ document.addEventListener('DOMContentLoaded', function() {
                     this.checkSync();
                 } else if (this.syncStatus === 'out-of-sync') {
                     this.performSync();
+                }
+            },
+            
+            async downloadFolderAsZip() {
+                const folder = this.contextMenuFolder;
+                this.closeContextMenu();
+                
+                if (!folder) return;
+                
+                try {
+                    // Show loading notification
+                    console.log('Starting ZIP download for folder:', folder);
+                    alert('Preparing ZIP download for folder: ' + folder.name + '...\nThis may take a moment for large folders.');
+                    
+                    // Extract folder path relative to project
+                    let folderPath = folder.path;
+                    const projectPrefix = 'proyek/{{ Str::slug($project->name) }}/';
+                    if (folderPath.startsWith(projectPrefix)) {
+                        folderPath = folderPath.substring(projectPrefix.length);
+                    }
+                    
+                    console.log('Folder path to download:', folderPath);
+                    console.log('Download URL:', '/projects/{{ $project->id }}/download-folder-zip');
+                    
+                    // Create a form and submit it to trigger download
+                    // This is more reliable for file downloads from Laravel
+                    const form = document.createElement('form');
+                    form.method = 'POST';
+                    form.action = '/projects/{{ $project->id }}/download-folder-zip';
+                    form.style.display = 'none';
+                    
+                    // Add CSRF token
+                    const csrfInput = document.createElement('input');
+                    csrfInput.type = 'hidden';
+                    csrfInput.name = '_token';
+                    csrfInput.value = document.querySelector('meta[name="csrf-token"]').content;
+                    form.appendChild(csrfInput);
+                    
+                    // Add folder path
+                    const pathInput = document.createElement('input');
+                    pathInput.type = 'hidden';
+                    pathInput.name = 'folder_path';
+                    pathInput.value = folderPath;
+                    form.appendChild(pathInput);
+                    
+                    // Append to body and submit
+                    document.body.appendChild(form);
+                    form.submit();
+                    
+                    // Clean up
+                    setTimeout(() => {
+                        document.body.removeChild(form);
+                    }, 100);
+                    
+                    console.log('ZIP download form submitted for folder:', folder.name);
+                    alert('Download started! Please check your downloads folder.');
+                    
+                    return; // Exit early since we're using form submission
+                    
+                    // The code below won't execute but keeping for reference
+                    const response = await fetch('/api/file-explorer/project/{{ $project->id }}/folders/download-zip', {
+                        method: 'POST',
+                        headers: {
+                            'Content-Type': 'application/json',
+                            'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]').content,
+                            'Accept': 'application/octet-stream, application/json'
+                        },
+                        body: JSON.stringify({
+                            folder_path: folderPath
+                        })
+                    });
+                    
+                    console.log('Response status:', response.status);
+                    console.log('Response headers:', response.headers);
+                    
+                    // Check content type
+                    const contentType = response.headers.get('content-type');
+                    console.log('Content-Type:', contentType);
+                    
+                    if (!response.ok) {
+                        // Try to get error message
+                        let errorMessage = 'Failed to download folder';
+                        
+                        if (contentType && contentType.includes('application/json')) {
+                            const errorData = await response.json();
+                            errorMessage = errorData.error || errorData.message || errorMessage;
+                        } else if (contentType && contentType.includes('text/html')) {
+                            const errorText = await response.text();
+                            console.error('HTML Error Response:', errorText);
+                            
+                            // Check for common Laravel errors
+                            if (errorText.includes('419')) {
+                                errorMessage = 'Session expired. Please refresh the page and try again.';
+                            } else if (errorText.includes('401') || errorText.includes('Unauthenticated')) {
+                                errorMessage = 'You are not authenticated. Please login and try again.';
+                            } else if (errorText.includes('403') || errorText.includes('Forbidden')) {
+                                errorMessage = 'You do not have permission to download this folder.';
+                            } else if (errorText.includes('404')) {
+                                errorMessage = 'The requested folder or endpoint was not found.';
+                            } else if (errorText.includes('500')) {
+                                errorMessage = 'Server error occurred. Please check server logs.';
+                            }
+                        } else {
+                            const errorText = await response.text();
+                            console.error('Error Response:', errorText);
+                            errorMessage = 'Server returned: ' + errorText.substring(0, 200);
+                        }
+                        
+                        throw new Error(errorMessage);
+                    }
+                    
+                    // Check if response is actually a ZIP file or download response
+                    if (contentType && (contentType.includes('application/zip') ||
+                                       contentType.includes('application/octet-stream') ||
+                                       contentType.includes('application/x-zip') ||
+                                       contentType.includes('application/force-download'))) {
+                        // This is a valid download response
+                        console.log('Valid ZIP response detected');
+                    } else if (contentType && contentType.includes('text/html')) {
+                        // This might be an error page
+                        const responseText = await response.text();
+                        console.error('HTML response received:', responseText.substring(0, 500));
+                        
+                        if (responseText.includes('<!DOCTYPE') || responseText.includes('<html')) {
+                            throw new Error('Server returned HTML instead of ZIP. Check authentication and routes.');
+                        }
+                    } else {
+                        console.warn('Unexpected content type:', contentType);
+                    }
+                    
+                    // Get the blob from response
+                    const blob = await response.blob();
+                    console.log('Blob size:', blob.size, 'bytes');
+                    
+                    if (blob.size === 0) {
+                        throw new Error('Downloaded file is empty');
+                    }
+                    
+                    // Create download link
+                    const url = window.URL.createObjectURL(blob);
+                    const a = document.createElement('a');
+                    a.href = url;
+                    a.download = folder.name + '-' + new Date().toISOString().slice(0, 10) + '.zip';
+                    document.body.appendChild(a);
+                    a.click();
+                    
+                    // Cleanup
+                    window.URL.revokeObjectURL(url);
+                    document.body.removeChild(a);
+                    
+                    console.log('ZIP download completed for folder:', folder.name);
+                    alert('Download started successfully!');
+                    
+                } catch (error) {
+                    console.error('Error downloading folder as ZIP:', error);
+                    console.error('Error stack:', error.stack);
+                    alert('Failed to download folder as ZIP:\n\n' + error.message + '\n\nPlease check browser console for details.');
                 }
             }
         }

@@ -15,6 +15,7 @@ use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Log;
 use Illuminate\Support\Facades\Storage;
 use Illuminate\Support\Str;
+use ZipArchive;
 
 class FileExplorerController extends Controller
 {
@@ -1074,6 +1075,120 @@ class FileExplorerController extends Controller
                 'message' => 'Failed to delete folder',
                 'error' => $e->getMessage()
             ], 500);
+        }
+    }
+    
+    /**
+     * Download folder as ZIP
+     */
+    public function downloadFolderAsZip(Request $request, Project $project)
+    {
+        $request->validate([
+            'folder_path' => 'required|string'
+        ]);
+        
+        try {
+            // Check permissions using Gate
+            if (!auth()->user()->can('view', $project)) {
+                abort(403, 'Unauthorized');
+            }
+            
+            $folderPath = $request->input('folder_path');
+            $projectSlug = Str::slug($project->name);
+            
+            // Build full path
+            $fullPath = storage_path("app/proyek/{$projectSlug}/{$folderPath}");
+            
+            // Check if folder exists
+            if (!is_dir($fullPath)) {
+                return response()->json([
+                    'error' => 'Folder not found'
+                ], 404);
+            }
+            
+            // Create temporary ZIP file
+            $zipFileName = Str::slug($project->code . '-' . basename($folderPath)) . '-' . date('Y-m-d-His') . '.zip';
+            $tempPath = storage_path('app/temp/' . $zipFileName);
+            
+            // Ensure temp directory exists
+            if (!file_exists(storage_path('app/temp'))) {
+                mkdir(storage_path('app/temp'), 0755, true);
+            }
+            
+            // Create ZIP archive
+            $zip = new ZipArchive();
+            
+            if ($zip->open($tempPath, ZipArchive::CREATE | ZipArchive::OVERWRITE) !== TRUE) {
+                return response()->json([
+                    'error' => 'Failed to create ZIP file'
+                ], 500);
+            }
+            
+            // Add files to ZIP recursively
+            $this->addFolderToZip($zip, $fullPath, basename($folderPath));
+            $zip->close();
+            
+            // Check if ZIP file was created successfully
+            if (!file_exists($tempPath)) {
+                return response()->json([
+                    'error' => 'Failed to create ZIP file'
+                ], 500);
+            }
+            
+            // Log the download
+            Log::info('Folder downloaded as ZIP', [
+                'project_id' => $project->id,
+                'folder_path' => $folderPath,
+                'zip_file' => $zipFileName,
+                'downloaded_by' => auth()->id()
+            ]);
+            
+            // Return the file download response directly
+            // This will handle the file streaming properly and delete it after sending
+            return response()->download($tempPath, $zipFileName, [
+                'Content-Type' => 'application/zip',
+                'Cache-Control' => 'no-cache, no-store, must-revalidate',
+                'Pragma' => 'no-cache',
+                'Expires' => '0'
+            ])->deleteFileAfterSend(true);
+            
+        } catch (\Exception $e) {
+            Log::error('Error creating ZIP download', [
+                'project_id' => $project->id,
+                'folder_path' => $request->input('folder_path'),
+                'error' => $e->getMessage()
+            ]);
+            
+            return response()->json([
+                'error' => 'Failed to create ZIP download: ' . $e->getMessage()
+            ], 500);
+        }
+    }
+    
+    /**
+     * Add folder contents to ZIP archive recursively
+     */
+    private function addFolderToZip($zip, $folderPath, $zipPath = '')
+    {
+        $files = scandir($folderPath);
+        
+        foreach ($files as $file) {
+            if ($file === '.' || $file === '..') {
+                continue;
+            }
+            
+            $filePath = $folderPath . '/' . $file;
+            $zipFilePath = $zipPath ? $zipPath . '/' . $file : $file;
+            
+            if (is_dir($filePath)) {
+                // Add directory to ZIP
+                $zip->addEmptyDir($zipFilePath);
+                // Recursively add subdirectory contents
+                $this->addFolderToZip($zip, $filePath, $zipFilePath);
+            } else {
+                // Add file to ZIP
+                $zip->addFile($filePath, $zipFilePath);
+            }
         }
     }
     

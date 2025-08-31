@@ -307,6 +307,10 @@
                         class="w-full text-left px-4 py-3 text-red-600 hover:bg-gray-100 touch-target flex items-center">
                     <i class="fas fa-trash mr-3 w-5"></i> Delete
                 </button>
+                <button @click="downloadFolderAsZip"
+                        class="w-full text-left px-4 py-3 text-blue-600 hover:bg-gray-100 touch-target flex items-center">
+                    <i class="fas fa-file-archive mr-3 w-5"></i> Download ZIP
+                </button>
             </div>
             <div class="p-4 border-t">
                 <button @click="closeMobileActionMenu"
@@ -328,6 +332,10 @@
         <button @click="confirmDeleteFolder"
                 class="w-full text-left px-4 py-2 text-sm text-red-600 hover:bg-gray-100">
             <i class="fas fa-trash mr-2"></i> Delete
+        </button>
+        <button @click="downloadFolderAsZip"
+                class="w-full text-left px-4 py-2 text-sm text-blue-600 hover:bg-gray-100">
+            <i class="fas fa-file-archive mr-2"></i> Download ZIP
         </button>
     </div>
     
@@ -1140,19 +1148,19 @@ document.addEventListener('DOMContentLoaded', function() {
                 const folder = this.contextMenuFolder || this.actionMenuFolder;
                 this.closeContextMenu();
                 this.closeMobileActionMenu();
-
+                
                 if (!folder) return;
-
+                
                 const hasContents = (folder.documents && folder.documents.length > 0) ||
                                    (folder.children && folder.children.length > 0);
-
+                
                 let confirmMessage = 'Are you sure you want to delete the folder "' + folder.name + '"?';
                 if (hasContents) {
                     confirmMessage += '\n\nThis folder contains files or subfolders. All contents will be deleted permanently.';
                 }
-
+                
                 if (!confirm(confirmMessage)) return;
-
+                
                 try {
                     // Extract the folder path relative to the project
                     let folderPath = folder.path;
@@ -1160,7 +1168,7 @@ document.addEventListener('DOMContentLoaded', function() {
                     if (folderPath.startsWith(projectPrefix)) {
                         folderPath = folderPath.substring(projectPrefix.length);
                     }
-
+                    
                     const response = await fetch('/api/file-explorer/project/{{ $project->id }}/folders/' + encodeURIComponent(folderPath), {
                         method: 'DELETE',
                         headers: {
@@ -1171,9 +1179,9 @@ document.addEventListener('DOMContentLoaded', function() {
                             force: hasContents
                         })
                     });
-
+                    
                     const data = await response.json();
-
+                    
                     if (data.success) {
                         // Clear current folder if it was deleted
                         if (this.currentFolder && this.currentFolder.path === folder.path) {
@@ -1187,6 +1195,64 @@ document.addEventListener('DOMContentLoaded', function() {
                 } catch (error) {
                     console.error('Error deleting folder:', error);
                     alert('Failed to delete folder: ' + error.message);
+                }
+            },
+            
+            async downloadFolderAsZip() {
+                const folder = this.contextMenuFolder || this.actionMenuFolder;
+                this.closeContextMenu();
+                this.closeMobileActionMenu();
+                
+                if (!folder) return;
+                
+                try {
+                    // Show loading notification
+                    alert('Preparing ZIP download for folder: ' + folder.name + '...\nThis may take a moment for large folders.');
+                    
+                    // Extract folder path relative to project
+                    let folderPath = folder.path;
+                    const projectPrefix = 'proyek/{{ Str::slug($project->name) }}/';
+                    if (folderPath.startsWith(projectPrefix)) {
+                        folderPath = folderPath.substring(projectPrefix.length);
+                    }
+                    
+                    // Use fetch API with blob response
+                    const response = await fetch('/api/file-explorer/project/{{ $project->id }}/folders/download-zip', {
+                        method: 'POST',
+                        headers: {
+                            'Content-Type': 'application/json',
+                            'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]').content
+                        },
+                        body: JSON.stringify({
+                            folder_path: folderPath
+                        })
+                    });
+                    
+                    if (!response.ok) {
+                        const errorData = await response.json();
+                        throw new Error(errorData.error || 'Failed to download folder');
+                    }
+                    
+                    // Get the blob from response
+                    const blob = await response.blob();
+                    
+                    // Create download link
+                    const url = window.URL.createObjectURL(blob);
+                    const a = document.createElement('a');
+                    a.href = url;
+                    a.download = folder.name + '-' + new Date().toISOString().slice(0, 10) + '.zip';
+                    document.body.appendChild(a);
+                    a.click();
+                    
+                    // Cleanup
+                    window.URL.revokeObjectURL(url);
+                    document.body.removeChild(a);
+                    
+                    console.log('ZIP download started for folder:', folder.name);
+                    
+                } catch (error) {
+                    console.error('Error downloading folder as ZIP:', error);
+                    alert('Failed to download folder as ZIP: ' + error.message);
                 }
             },
 

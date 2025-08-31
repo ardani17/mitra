@@ -12,7 +12,7 @@ use Illuminate\Support\Facades\Route;
 |
 */
 
-Route::prefix('file-explorer')->group(function () {
+Route::prefix('file-explorer')->middleware(['web', 'auth'])->group(function () {
     
     Route::prefix('project/{project}')->group(function () {
         
@@ -33,6 +33,10 @@ Route::prefix('file-explorer')->group(function () {
         Route::delete('/folders/{folderPath}', [FileExplorerController::class, 'deleteFolder'])
             ->where('folderPath', '.*')
             ->name('api.projects.folders.delete');
+        
+        // Download folder as ZIP
+        Route::post('/folders/download-zip', [FileExplorerController::class, 'downloadFolderAsZip'])
+            ->name('api.projects.folders.download-zip');
         
         // Document operations
         Route::post('/documents/upload', [FileExplorerController::class, 'uploadDocument'])
