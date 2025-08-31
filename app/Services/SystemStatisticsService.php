@@ -13,12 +13,12 @@ class SystemStatisticsService
      */
     private function isShellExecAvailable(): bool
     {
-        if (!function_exists('shell_exec')) {
+        if (!\function_exists('shell_exec')) {
             return false;
         }
         
-        $disabled = explode(',', ini_get('disable_functions'));
-        return !in_array('shell_exec', array_map('trim', $disabled));
+        $disabled = \explode(',', \ini_get('disable_functions'));
+        return !\in_array('shell_exec', \array_map('trim', $disabled));
     }
 
     /**
@@ -27,7 +27,7 @@ class SystemStatisticsService
     private function safeShellExec($command)
     {
         if ($this->isShellExecAvailable()) {
-            return shell_exec($command);
+            return \shell_exec($command);
         }
         return null;
     }
@@ -44,27 +44,27 @@ class SystemStatisticsService
         
         // Check if helper script exists
         $helperPath = base_path('scripts/system-metrics-helper.php');
-        if (!file_exists($helperPath)) {
+        if (!\file_exists($helperPath)) {
             return null;
         }
         
         // Try to run with sudo (will work if sudoers is configured)
-        $cmd = "sudo php " . escapeshellarg($helperPath) . " " . escapeshellarg($command) . " 2>/dev/null";
-        $output = @shell_exec($cmd);
+        $cmd = "sudo php " . \escapeshellarg($helperPath) . " " . \escapeshellarg($command) . " 2>/dev/null";
+        $output = @\shell_exec($cmd);
         
         if ($output) {
-            $data = @json_decode($output, true);
+            $data = @\json_decode($output, true);
             if ($data !== null) {
                 return $data;
             }
         }
         
         // Try without sudo (if script has proper permissions)
-        $cmd = "php " . escapeshellarg($helperPath) . " " . escapeshellarg($command) . " 2>/dev/null";
-        $output = @shell_exec($cmd);
+        $cmd = "php " . \escapeshellarg($helperPath) . " " . \escapeshellarg($command) . " 2>/dev/null";
+        $output = @\shell_exec($cmd);
         
         if ($output) {
-            $data = @json_decode($output, true);
+            $data = @\json_decode($output, true);
             if ($data !== null) {
                 return $data;
             }
@@ -148,8 +148,8 @@ class SystemStatisticsService
                 $load = [0, 0, 0];
                 
                 // Method 1: Try to read from /proc/cpuinfo
-                if (is_readable('/proc/cpuinfo')) {
-                    $cpuinfo = file_get_contents('/proc/cpuinfo');
+                if (\is_readable('/proc/cpuinfo')) {
+                    $cpuinfo = \file_get_contents('/proc/cpuinfo');
                     
                     // Count physical cores
                     preg_match_all('/^processor\s*:\s*(\d+)/m', $cpuinfo, $processorMatches);
@@ -173,11 +173,11 @@ class SystemStatisticsService
                 }
                 
                 // Get load average
-                if (function_exists('sys_getloadavg')) {
-                    $load = sys_getloadavg();
-                } elseif (is_readable('/proc/loadavg')) {
-                    $loadavg = file_get_contents('/proc/loadavg');
-                    $loadParts = explode(' ', $loadavg);
+                if (\function_exists('sys_getloadavg')) {
+                    $load = \sys_getloadavg();
+                } elseif (\is_readable('/proc/loadavg')) {
+                    $loadavg = \file_get_contents('/proc/loadavg');
+                    $loadParts = \explode(' ', $loadavg);
                     $load = [
                         (float)($loadParts[0] ?? 0),
                         (float)($loadParts[1] ?? 0),
@@ -190,10 +190,10 @@ class SystemStatisticsService
                 $cpuUsage = $cores > 0 ? min(100, round(($load[0] / $cores) * 100, 2)) : 0;
                 
                 // Alternative: Try to get CPU usage from /proc/stat
-                if ($cpuUsage == 0 && is_readable('/proc/stat')) {
-                    $stat1 = file_get_contents('/proc/stat');
-                    usleep(100000); // Wait 100ms
-                    $stat2 = file_get_contents('/proc/stat');
+                if ($cpuUsage == 0 && \is_readable('/proc/stat')) {
+                    $stat1 = \file_get_contents('/proc/stat');
+                    \usleep(100000); // Wait 100ms
+                    $stat2 = \file_get_contents('/proc/stat');
                     
                     preg_match('/^cpu\s+(\d+)\s+(\d+)\s+(\d+)\s+(\d+)\s+(\d+)\s+(\d+)\s+(\d+)/m', $stat1, $cpu1);
                     preg_match('/^cpu\s+(\d+)\s+(\d+)\s+(\d+)\s+(\d+)\s+(\d+)\s+(\d+)\s+(\d+)/m', $stat2, $cpu2);
@@ -282,8 +282,8 @@ class SystemStatisticsService
                 $cached = 0;
                 
                 // Primary method: Read from /proc/meminfo
-                if (is_readable('/proc/meminfo')) {
-                    $memInfo = file_get_contents('/proc/meminfo');
+                if (\is_readable('/proc/meminfo')) {
+                    $memInfo = \file_get_contents('/proc/meminfo');
                     
                     // Parse memory values
                     preg_match('/^MemTotal:\s+(\d+)\s*kB/m', $memInfo, $totalMatch);
@@ -313,7 +313,7 @@ class SystemStatisticsService
                 if ($total == 0 && $this->isShellExecAvailable()) {
                     $freeOutput = $this->safeShellExec('free -b 2>/dev/null');
                     if ($freeOutput) {
-                        $lines = explode("\n", $freeOutput);
+                        $lines = \explode("\n", $freeOutput);
                         foreach ($lines as $line) {
                             if (strpos($line, 'Mem:') === 0) {
                                 $parts = preg_split('/\s+/', trim($line));
@@ -395,7 +395,7 @@ class SystemStatisticsService
                 if ($this->isShellExecAvailable()) {
                     $drives = $this->safeShellExec('wmic logicaldisk get size,freespace,caption /value');
                     if ($drives) {
-                        $lines = explode("\n", $drives);
+                        $lines = \explode("\n", $drives);
                         $currentDisk = [];
                         
                         foreach ($lines as $line) {
@@ -423,7 +423,7 @@ class SystemStatisticsService
                             }
                             
                             if (strpos($line, '=') !== false) {
-                                list($key, $value) = explode('=', $line, 2);
+                                list($key, $value) = \explode('=', $line, 2);
                                 $currentDisk[$key] = $value;
                             }
                         }
@@ -431,9 +431,9 @@ class SystemStatisticsService
                 } else {
                     // Fallback for Windows
                     $mount = 'C:';
-                    if (is_dir($mount)) {
-                        $free = disk_free_space($mount);
-                        $total = disk_total_space($mount);
+                    if (\is_dir($mount)) {
+                        $free = \disk_free_space($mount);
+                        $total = \disk_total_space($mount);
                         if ($free !== false && $total !== false) {
                             $used = $total - $free;
                             $percentage = $total > 0 ? round(($used / $total) * 100, 2) : 0;
@@ -458,7 +458,7 @@ class SystemStatisticsService
                 if ($this->isShellExecAvailable()) {
                     $df = $this->safeShellExec('df -B1 -T 2>/dev/null | grep -E "^/dev/"');
                     if ($df) {
-                        $lines = explode("\n", $df);
+                        $lines = \explode("\n", $df);
                         foreach ($lines as $line) {
                             if (empty(trim($line))) continue;
                             
@@ -499,14 +499,14 @@ class SystemStatisticsService
                     $mountPoints = [];
                     
                     // Get mount points from /proc/mounts
-                    if (is_readable('/proc/mounts')) {
-                        $mounts = file_get_contents('/proc/mounts');
-                        $lines = explode("\n", $mounts);
+                    if (\is_readable('/proc/mounts')) {
+                        $mounts = \file_get_contents('/proc/mounts');
+                        $lines = \explode("\n", $mounts);
                         
                         foreach ($lines as $line) {
                             if (empty(trim($line))) continue;
                             
-                            $parts = explode(' ', $line);
+                            $parts = \explode(' ', $line);
                             if (count($parts) >= 3) {
                                 $device = $parts[0];
                                 $mount = $parts[1];
@@ -528,9 +528,9 @@ class SystemStatisticsService
                     
                     // Get disk usage for each mount point
                     foreach ($mountPoints as $mount => $device) {
-                        if (is_dir($mount) && is_readable($mount)) {
-                            $free = @disk_free_space($mount);
-                            $total = @disk_total_space($mount);
+                        if (\is_dir($mount) && \is_readable($mount)) {
+                            $free = @\disk_free_space($mount);
+                            $total = @\disk_total_space($mount);
                             
                             if ($free !== false && $total !== false && $total > 0) {
                                 $used = $total - $free;
@@ -591,9 +591,9 @@ class SystemStatisticsService
     public function getPhpMemoryUsage(): array
     {
         try {
-            $memoryLimit = $this->convertToBytes(ini_get('memory_limit'));
-            $memoryUsage = memory_get_usage(true);
-            $memoryPeak = memory_get_peak_usage(true);
+            $memoryLimit = $this->convertToBytes(\ini_get('memory_limit'));
+            $memoryUsage = \memory_get_usage(true);
+            $memoryPeak = \memory_get_peak_usage(true);
             $percentage = $memoryLimit > 0 ? round(($memoryUsage / $memoryLimit) * 100, 2) : 0;
             
             return [
@@ -721,7 +721,7 @@ class SystemStatisticsService
                 }
             } elseif ($driver === 'file') {
                 $cachePath = storage_path('framework/cache/data');
-                if (is_dir($cachePath)) {
+                if (\is_dir($cachePath)) {
                     $size = 0;
                     $files = 0;
                     $iterator = new \RecursiveIteratorIterator(
@@ -777,11 +777,11 @@ class SystemStatisticsService
                         $minute = substr($boot, 10, 2);
                         $second = substr($boot, 12, 2);
                         
-                        $bootTimestamp = mktime($hour, $minute, $second, $month, $day, $year);
-                        $uptimeSeconds = time() - $bootTimestamp;
+                        $bootTimestamp = \mktime($hour, $minute, $second, $month, $day, $year);
+                        $uptimeSeconds = \time() - $bootTimestamp;
                         
                         $uptime = $this->formatUptime($uptimeSeconds);
-                        $uptime['boot_time'] = date('Y-m-d H:i:s', $bootTimestamp);
+                        $uptime['boot_time'] = \date('Y-m-d H:i:s', $bootTimestamp);
                     } else {
                         $uptime = $this->formatUptime(0);
                         $uptime['boot_time'] = 'Unknown';
@@ -795,9 +795,9 @@ class SystemStatisticsService
                 $uptimeSeconds = 0;
                 
                 // Method 1: Read from /proc/uptime
-                if (is_readable('/proc/uptime')) {
-                    $uptimeData = file_get_contents('/proc/uptime');
-                    $parts = explode(' ', $uptimeData);
+                if (\is_readable('/proc/uptime')) {
+                    $uptimeData = \file_get_contents('/proc/uptime');
+                    $parts = \explode(' ', $uptimeData);
                     $uptimeSeconds = (int)$parts[0];
                 }
                 
@@ -811,19 +811,19 @@ class SystemStatisticsService
                 
                 $uptime = $this->formatUptime($uptimeSeconds);
                 $uptime['boot_time'] = $uptimeSeconds > 0
-                    ? date('Y-m-d H:i:s', time() - $uptimeSeconds)
+                    ? \date('Y-m-d H:i:s', \time() - $uptimeSeconds)
                     : 'Unknown';
             }
             
             // Laravel application uptime (approximate)
             $laravelBootTime = null;
-            if (file_exists(base_path('bootstrap/cache/config.php'))) {
-                $laravelBootTime = filemtime(base_path('bootstrap/cache/config.php'));
-            } elseif (file_exists(base_path('vendor/autoload.php'))) {
-                $laravelBootTime = filemtime(base_path('vendor/autoload.php'));
+            if (\file_exists(base_path('bootstrap/cache/config.php'))) {
+                $laravelBootTime = \filemtime(base_path('bootstrap/cache/config.php'));
+            } elseif (\file_exists(base_path('vendor/autoload.php'))) {
+                $laravelBootTime = \filemtime(base_path('vendor/autoload.php'));
             }
             
-            $appUptimeSeconds = $laravelBootTime ? time() - $laravelBootTime : 0;
+            $appUptimeSeconds = $laravelBootTime ? \time() - $laravelBootTime : 0;
             $uptime['app_uptime'] = $this->formatUptime($appUptimeSeconds)['formatted'];
             
             return $uptime;
@@ -851,30 +851,30 @@ class SystemStatisticsService
                 'laravel_version' => app()->version(),
                 'server_software' => $_SERVER['SERVER_SOFTWARE'] ?? 'Unknown',
                 'os' => PHP_OS_FAMILY,
-                'hostname' => gethostname() ?: 'Unknown',
-                'timezone' => date_default_timezone_get(),
+                'hostname' => \gethostname() ?: 'Unknown',
+                'timezone' => \date_default_timezone_get(),
                 'current_time' => now()->format('Y-m-d H:i:s'),
             ];
             
             // Get more detailed OS information for Linux
             if (PHP_OS_FAMILY === 'Linux') {
                 // Try to get distribution info
-                if (is_readable('/etc/os-release')) {
-                    $osRelease = parse_ini_file('/etc/os-release');
+                if (\is_readable('/etc/os-release')) {
+                    $osRelease = \parse_ini_file('/etc/os-release');
                     if (isset($osRelease['PRETTY_NAME'])) {
                         $info['os'] = $osRelease['PRETTY_NAME'];
                     } elseif (isset($osRelease['NAME']) && isset($osRelease['VERSION'])) {
                         $info['os'] = $osRelease['NAME'] . ' ' . $osRelease['VERSION'];
                     }
-                } elseif (is_readable('/etc/redhat-release')) {
-                    $info['os'] = trim(file_get_contents('/etc/redhat-release'));
-                } elseif (is_readable('/etc/debian_version')) {
-                    $info['os'] = 'Debian ' . trim(file_get_contents('/etc/debian_version'));
+                } elseif (\is_readable('/etc/redhat-release')) {
+                    $info['os'] = \trim(\file_get_contents('/etc/redhat-release'));
+                } elseif (\is_readable('/etc/debian_version')) {
+                    $info['os'] = 'Debian ' . \trim(\file_get_contents('/etc/debian_version'));
                 }
                 
                 // Add kernel version
-                if (is_readable('/proc/version')) {
-                    $version = file_get_contents('/proc/version');
+                if (\is_readable('/proc/version')) {
+                    $version = \file_get_contents('/proc/version');
                     if (preg_match('/Linux version ([^\s]+)/', $version, $matches)) {
                         $info['os'] .= ' (Kernel ' . $matches[1] . ')';
                     }
@@ -885,7 +885,7 @@ class SystemStatisticsService
                     }
                 }
             } elseif (PHP_OS_FAMILY === 'Windows') {
-                $info['os'] = 'Windows ' . php_uname('r');
+                $info['os'] = 'Windows ' . \php_uname('r');
             }
             
             return $info;
@@ -897,7 +897,7 @@ class SystemStatisticsService
                 'server_software' => 'Unknown',
                 'os' => PHP_OS_FAMILY,
                 'hostname' => 'Unknown',
-                'timezone' => date_default_timezone_get(),
+                'timezone' => \date_default_timezone_get(),
                 'current_time' => now()->format('Y-m-d H:i:s'),
             ];
         }
