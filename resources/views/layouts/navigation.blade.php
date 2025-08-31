@@ -173,6 +173,12 @@
                                     </svg>
                                     Pengaturan Sistem
                                 </a>
+                                <a href="{{ route('system-statistics.index') }}" class="flex items-center px-4 py-2 text-sm text-gray-700 hover:bg-indigo-50 hover:text-indigo-700 transition duration-150 ease-in-out {{ request()->routeIs('system-statistics.*') ? 'bg-indigo-50 text-indigo-700 font-medium' : '' }}">
+                                    <svg class="mr-3 h-4 w-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 19v-6a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2a2 2 0 002-2zm0 0V9a2 2 0 012-2h2a2 2 0 012 2v10m-6 0a2 2 0 002 2h2a2 2 0 002-2m0 0V5a2 2 0 012-2h2a2 2 0 012 2v14a2 2 0 01-2 2h-2a2 2 0 01-2-2z"/>
+                                    </svg>
+                                    Statistik Sistem
+                                </a>
                             </div>
                         </div>
                     </div>
@@ -361,6 +367,12 @@
                             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z"/>
                         </svg>
                         {{ __('Pengaturan Sistem') }}
+                    </x-responsive-nav-link>
+                    <x-responsive-nav-link :href="route('system-statistics.index')" :active="request()->routeIs('system-statistics.*')" class="responsive-nav-item {{ request()->routeIs('system-statistics.*') ? 'active' : '' }}">
+                        <svg class="mr-3 h-5 w-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 19v-6a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2a2 2 0 002-2zm0 0V9a2 2 0 012-2h2a2 2 0 012 2v10m-6 0a2 2 0 002 2h2a2 2 0 002-2m0 0V5a2 2 0 012-2h2a2 2 0 012 2v14a2 2 0 01-2 2h-2a2 2 0 01-2-2z"/>
+                        </svg>
+                        {{ __('Statistik Sistem') }}
                     </x-responsive-nav-link>
                 </div>
             @endif

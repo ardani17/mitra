@@ -59,6 +59,12 @@ Route::middleware('auth')->group(function () {
         Route::patch('/settings/salary-cutoff', [App\Http\Controllers\SettingController::class, 'updateSalaryCutoff'])->name('settings.update-salary-cutoff');
         Route::patch('/settings/reset-default', [App\Http\Controllers\SettingController::class, 'resetToDefault'])->name('settings.reset-default');
         Route::get('/api/settings', [App\Http\Controllers\SettingController::class, 'getSettings'])->name('api.settings');
+        
+        // System Statistics routes (Only for Direktur)
+        Route::get('/system-statistics', [App\Http\Controllers\SystemStatisticsController::class, 'index'])->name('system-statistics.index');
+        Route::get('/api/system-statistics/metrics', [App\Http\Controllers\SystemStatisticsController::class, 'metrics'])->name('api.system-statistics.metrics');
+        Route::get('/system-statistics/export', [App\Http\Controllers\SystemStatisticsController::class, 'export'])->name('system-statistics.export');
+        Route::post('/api/system-statistics/clear-cache', [App\Http\Controllers\SystemStatisticsController::class, 'clearCache'])->name('api.system-statistics.clear-cache');
     });
     
     // Company routes
