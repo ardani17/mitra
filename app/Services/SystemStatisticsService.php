@@ -26,8 +26,9 @@ class SystemStatisticsService
      */
     private function safeShellExec($command)
     {
-        if ($this->isShellExecAvailable()) {
-            return \shell_exec($command);
+        // Double check shell_exec is available
+        if ($this->isShellExecAvailable() && \function_exists('shell_exec')) {
+            return @\shell_exec($command);
         }
         return null;
     }
@@ -48,25 +49,28 @@ class SystemStatisticsService
             return null;
         }
         
-        // Try to run with sudo (will work if sudoers is configured)
-        $cmd = "sudo php " . \escapeshellarg($helperPath) . " " . \escapeshellarg($command) . " 2>/dev/null";
-        $output = @\shell_exec($cmd);
-        
-        if ($output) {
-            $data = @\json_decode($output, true);
-            if ($data !== null) {
-                return $data;
+        // Check if shell_exec is available before using it
+        if ($this->isShellExecAvailable()) {
+            // Try to run with sudo (will work if sudoers is configured)
+            $cmd = "sudo php " . \escapeshellarg($helperPath) . " " . \escapeshellarg($command) . " 2>/dev/null";
+            $output = @\shell_exec($cmd);
+            
+            if ($output) {
+                $data = @\json_decode($output, true);
+                if ($data !== null) {
+                    return $data;
+                }
             }
-        }
-        
-        // Try without sudo (if script has proper permissions)
-        $cmd = "php " . \escapeshellarg($helperPath) . " " . \escapeshellarg($command) . " 2>/dev/null";
-        $output = @\shell_exec($cmd);
-        
-        if ($output) {
-            $data = @\json_decode($output, true);
-            if ($data !== null) {
-                return $data;
+            
+            // Try without sudo (if script has proper permissions)
+            $cmd = "php " . \escapeshellarg($helperPath) . " " . \escapeshellarg($command) . " 2>/dev/null";
+            $output = @\shell_exec($cmd);
+            
+            if ($output) {
+                $data = @\json_decode($output, true);
+                if ($data !== null) {
+                    return $data;
+                }
             }
         }
         
