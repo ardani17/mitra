@@ -11,14 +11,14 @@ class TelegramBotTest {
     private $apiUrl;
     private $chatId;
     
-    public function __construct($botToken, $useLocalServer = true) {
+    public function __construct($botToken, $useLocalServer = true, $host = '103.195.190.235', $port = '8081') {
         $this->botToken = $botToken;
         
         // Gunakan local server atau official API
         if ($useLocalServer) {
             // Local server yang sudah diinstall
-            $this->apiUrl = "http://localhost:8081/bot{$botToken}";
-            echo "✅ Using LOCAL telegram-bot-api server at localhost:8081\n";
+            $this->apiUrl = "http://{$host}:{$port}/bot{$botToken}";
+            echo "✅ Using LOCAL telegram-bot-api server at {$host}:{$port}\n";
         } else {
             // Official Telegram API
             $this->apiUrl = "https://api.telegram.org/bot{$botToken}";
@@ -353,10 +353,14 @@ class TelegramBotTest {
 // ============================================
 
 // Your bot token from @BotFather
-$BOT_TOKEN = 'YOUR_BOT_TOKEN_HERE';  // <-- Ganti dengan token bot Anda!
+$BOT_TOKEN = '8281280313:AAG0B4mu6tEzs3N0_BSO3VGatHov7t0klls';  // <-- Ganti dengan token bot Anda!
 
 // Use local server? (true = local, false = official API)
 $USE_LOCAL_SERVER = true;  // Set ke true untuk test local server
+
+// Local server configuration
+$LOCAL_SERVER_HOST = '103.195.190.235';  // IP public VPS Anda
+$LOCAL_SERVER_PORT = '8081';
 
 // Optional: Specific chat ID for testing (leave null to auto-detect)
 $CHAT_ID = null;  // Atau masukkan chat ID Anda langsung
@@ -373,7 +377,7 @@ if ($BOT_TOKEN === 'YOUR_BOT_TOKEN_HERE') {
 }
 
 // Create test instance
-$bot = new TelegramBotTest($BOT_TOKEN, $USE_LOCAL_SERVER);
+$bot = new TelegramBotTest($BOT_TOKEN, $USE_LOCAL_SERVER, $LOCAL_SERVER_HOST, $LOCAL_SERVER_PORT);
 
 // Run all tests
 $bot->runAllTests();
@@ -423,7 +427,7 @@ while (true) {
             
         case '5':
             $USE_LOCAL_SERVER = !$USE_LOCAL_SERVER;
-            $bot = new TelegramBotTest($BOT_TOKEN, $USE_LOCAL_SERVER);
+            $bot = new TelegramBotTest($BOT_TOKEN, $USE_LOCAL_SERVER, $LOCAL_SERVER_HOST, $LOCAL_SERVER_PORT);
             $bot->testGetMe();
             break;
             

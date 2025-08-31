@@ -11,8 +11,12 @@ echo "========================================\n\n";
 // Check 1: Test koneksi ke port 8081
 echo "1. Checking server connection...\n";
 
-$host = 'localhost';
+// Configuration - bisa test localhost atau IP public
+$host = '103.195.190.235';  // Ganti dengan 'localhost' untuk test lokal
 $port = 8081;
+
+echo "   Host: {$host}\n";
+echo "   Port: {$port}\n\n";
 
 $connection = @fsockopen($host, $port, $errno, $errstr, 5);
 
@@ -51,9 +55,16 @@ if ($connection) {
     
     // Check 3: Test dengan bot token (optional)
     echo "\n3. Testing with bot token...\n";
-    echo "   Enter your bot token (or press Enter to skip): ";
     
-    $token = trim(fgets(STDIN));
+    // Use predefined token or ask for input
+    $token = '8281280313:AAG0B4mu6tEzs3N0_BSO3VGatHov7t0klls';
+    
+    if (empty($token) || $token === 'YOUR_BOT_TOKEN_HERE') {
+        echo "   Enter your bot token (or press Enter to skip): ";
+        $token = trim(fgets(STDIN));
+    } else {
+        echo "   Using configured token: " . substr($token, 0, 10) . "...\n";
+    }
     
     if (!empty($token) && $token !== '') {
         $botUrl = "http://{$host}:{$port}/bot{$token}/getMe";

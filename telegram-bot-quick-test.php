@@ -8,15 +8,19 @@
 $BOT_TOKEN = '8281280313:AAG0B4mu6tEzs3N0_BSO3VGatHov7t0klls';  // <-- Ganti dengan token bot Anda!
 $USE_LOCAL = true;  // true = local server, false = official API
 
+// Server configuration
+$LOCAL_SERVER_HOST = '103.195.190.235';  // IP public VPS Anda
+$LOCAL_SERVER_PORT = '8081';
+
 // API URL
-$API_URL = $USE_LOCAL 
-    ? "http://localhost:8081/bot{$BOT_TOKEN}"
+$API_URL = $USE_LOCAL
+    ? "http://{$LOCAL_SERVER_HOST}:{$LOCAL_SERVER_PORT}/bot{$BOT_TOKEN}"
     : "https://api.telegram.org/bot{$BOT_TOKEN}";
 
 echo "========================================\n";
 echo "TELEGRAM BOT QUICK TEST\n";
 echo "========================================\n";
-echo "Server: " . ($USE_LOCAL ? "LOCAL (localhost:8081)" : "OFFICIAL") . "\n";
+echo "Server: " . ($USE_LOCAL ? "LOCAL ({$LOCAL_SERVER_HOST}:{$LOCAL_SERVER_PORT})" : "OFFICIAL") . "\n";
 echo "Token: " . substr($BOT_TOKEN, 0, 10) . "...\n\n";
 
 // Function to make API request
