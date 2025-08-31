@@ -665,7 +665,12 @@ document.addEventListener('DOMContentLoaded', function() {
                     currentFile: null
                 };
                 
-                const folderName = this.currentFolder.path.split('/').pop();
+                // Get the full folder path relative to project
+                let folderPath = this.currentFolder.path;
+                const projectPrefix = 'proyek/{{ Str::slug($project->name) }}/';
+                if (folderPath.startsWith(projectPrefix)) {
+                    folderPath = folderPath.substring(projectPrefix.length);
+                }
                 
                 // Upload files with XMLHttpRequest for progress tracking
                 for (let i = 0; i < this.selectedFiles.length; i++) {
@@ -674,7 +679,7 @@ document.addEventListener('DOMContentLoaded', function() {
                     this.uploadProgress.currentFile = file.name;
                     
                     try {
-                        await this.uploadSingleFile(file, folderName);
+                        await this.uploadSingleFile(file, folderPath);
                         this.uploadResults.push(file.name);
                     } catch (error) {
                         console.error('Upload error for ' + file.name + ':', error);
@@ -704,13 +709,13 @@ document.addEventListener('DOMContentLoaded', function() {
                 }
             },
             
-            uploadSingleFile(file, folderName) {
+            uploadSingleFile(file, folderPath) {
                 return new Promise((resolve, reject) => {
                     const xhr = new XMLHttpRequest();
                     const formData = new FormData();
                     
                     formData.append('file', file);
-                    formData.append('folder', folderName);
+                    formData.append('folder', folderPath);
                     
                     // Track upload progress for individual file
                     xhr.upload.addEventListener('progress', (e) => {

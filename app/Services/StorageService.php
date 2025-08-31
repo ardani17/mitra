@@ -55,11 +55,25 @@ class StorageService
     {
         $projectPath = $this->getProjectPath($project);
         
-        // Use category as-is if it contains slash (already a path)
-        // Otherwise use the mapping
+        // Handle category/folder path
+        // If it contains slash, it's already a path (e.g., "dokumen/teknis/tes")
         if (strpos($category, '/') !== false) {
-            $categoryPath = $category;
+            // Clean the path - remove any "proyek/slug" prefix if present
+            $projectSlug = Str::slug($project->name);
+            $prefixToRemove = "proyek/{$projectSlug}/";
+            
+            if (strpos($category, $prefixToRemove) === 0) {
+                $categoryPath = substr($category, strlen($prefixToRemove));
+            } else {
+                // Use the path as-is since it's already relative to project
+                $categoryPath = $category;
+            }
+            
+            // Ensure the path doesn't escape the project directory
+            $categoryPath = str_replace('..', '', $categoryPath);
+            $categoryPath = ltrim($categoryPath, '/');
         } else {
+            // Single category name, use mapping
             $categoryPath = $this->getCategoryPath($category);
         }
         
@@ -163,19 +177,21 @@ class StorageService
             'other' => 'dokumen/lainnya',
             'image' => 'gambar',
             'video' => 'video',
-            // Add direct folder mappings - these should map to dokumen subfolder
+            // Direct folder mappings
             'dokumen' => 'dokumen',
             'teknis' => 'dokumen/teknis',
             'keuangan' => 'dokumen/keuangan',
             'laporan' => 'dokumen/laporan',
             'foto' => 'foto',
             'lainnya' => 'dokumen/lainnya',
-            // Add new mappings for root folders
             'kontrak' => 'dokumen/kontrak',
-            'tes' => 'tes'
+            'gambar' => 'gambar',
+            // Remove 'tes' => 'tes' mapping to prevent root level folder creation
         ];
         
-        return $mapping[$category] ?? $category;
+        // If no mapping found, treat it as a subfolder under dokumen
+        // This ensures dynamic folders stay within their parent structure
+        return $mapping[$category] ?? "dokumen/{$category}";
     }
     
     /**

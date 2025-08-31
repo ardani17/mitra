@@ -486,7 +486,7 @@ class FileExplorerController extends Controller
     /**
      * Download document by path
      */
-    public function downloadDocumentByPath(Request $request, Project $project): \Symfony\Component\HttpFoundation\BinaryFileResponse|\Illuminate\Http\JsonResponse
+    public function downloadDocumentByPath(Request $request, Project $project)
     {
         // For GET request, get path from query parameter
         $filePath = $request->query('path');
@@ -520,7 +520,19 @@ class FileExplorerController extends Controller
                 $fileName = $document->original_name ?? $document->name;
             }
             
-            return Storage::disk($this->disk)->download($filePath, $fileName);
+            // Get the full file path
+            $fullPath = Storage::disk($this->disk)->path($filePath);
+            
+            // Check if the physical file exists
+            if (!file_exists($fullPath)) {
+                return response()->json([
+                    'success' => false,
+                    'message' => 'Physical file not found'
+                ], 404);
+            }
+            
+            // Return file download response
+            return response()->download($fullPath, $fileName);
             
         } catch (\Exception $e) {
             Log::error('Error downloading document by path', [
