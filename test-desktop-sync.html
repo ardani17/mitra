@@ -1,0 +1,47 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Test Desktop Sync</title>
+    <meta charset="utf-8">
+</head>
+<body>
+    <h1>Test Desktop Sync Button</h1>
+    <p>To test the desktop sync button:</p>
+    <ol>
+        <li>Open your browser and go to: <code>http://localhost:8000/projects/28</code> (or your project URL)</li>
+        <li>Open Browser Developer Console (F12)</li>
+        <li>Click on the "Cek Sinkronisasi" button</li>
+        <li>Check the console for any errors</li>
+    </ol>
+    
+    <h2>Expected Behavior:</h2>
+    <ul>
+        <li>Button should show loading spinner while checking</li>
+        <li>If synced: Button turns green with "Tersinkronisasi"</li>
+        <li>If not synced: Button turns orange with "Sinkronkan (X)" where X is the number of issues</li>
+        <li>Alert should show summary of issues if any found</li>
+    </ul>
+    
+    <h2>Common Issues:</h2>
+    <ul>
+        <li><strong>Button not responding:</strong> Check console for JavaScript errors</li>
+        <li><strong>404 Error:</strong> API endpoint not found - check routes</li>
+        <li><strong>500 Error:</strong> Server error - check Laravel logs</li>
+    </ul>
+    
+    <h2>Manual API Test:</h2>
+    <p>You can also test the API directly in browser console:</p>
+    <pre>
+// Test check sync API
+fetch('/api/file-explorer/project/28/check-sync', {
+    headers: {
+        'Accept': 'application/json',
+        'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]').content
+    }
+})
+.then(response => response.json())
+.then(data => console.log('Sync Status:', data))
+.catch(error => console.error('Error:', error));
+    </pre>
+</body>
+</html>

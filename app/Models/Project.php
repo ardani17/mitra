@@ -98,9 +98,40 @@ class Project extends Model
         return $this->hasMany(ProjectDocument::class);
     }
 
+    public function folders(): HasMany
+    {
+        return $this->hasMany(ProjectFolder::class);
+    }
+
+    public function syncLogs()
+    {
+        return $this->morphMany(SyncLog::class, 'syncable');
+    }
+
     public function cashflowEntries(): HasMany
     {
         return $this->hasMany(CashflowEntry::class);
+    }
+
+    /**
+     * Check if project is active
+     */
+    public function isActive(): bool
+    {
+        return in_array($this->status, ['planning', 'in_progress']);
+    }
+
+    /**
+     * Calculate total value for billing
+     */
+    public function calculateTotalValue(): float
+    {
+        // Prioritas: final_total_value > planned_total_value
+        if ($this->final_total_value && $this->final_total_value > 0) {
+            return $this->final_total_value;
+        }
+        
+        return $this->planned_total_value ?? 0;
     }
 
     /**

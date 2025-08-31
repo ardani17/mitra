@@ -304,3 +304,8 @@ Route::middleware('auth')->group(function () {
 require __DIR__.'/expense-modifications.php';
 
 require __DIR__.'/auth.php';
+
+// Include test routes (only in development)
+if (app()->environment('local', 'development')) {
+    require __DIR__.'/web-test.php';
+}

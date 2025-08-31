@@ -903,92 +903,71 @@
 
             <!-- Tab Dokumen -->
             <div id="content-dokumen" class="tab-content hidden">
-                <div class="flex justify-between items-center mb-4">
-                    <h3 class="text-lg font-semibold text-gray-800">Dokumen Proyek</h3>
-                    <button onclick="openUploadModal()" class="bg-blue-600 hover:bg-blue-700 text-white font-bold py-2 px-4 rounded text-sm">
-                        Upload Dokumen
-                    </button>
-                </div>
+                @php
+                    // Server-side mobile detection using User-Agent
+                    $userAgent = $_SERVER['HTTP_USER_AGENT'] ?? '';
+                    $isMobile = preg_match('/(android|bb\d+|meego).+mobile|avantgo|bada\/|blackberry|blazer|compal|elaine|fennec|hiptop|iemobile|ip(hone|od)|iris|kindle|lge |maemo|midp|mmp|mobile.+firefox|netfront|opera m(ob|in)i|palm( os)?|phone|p(ixi|re)\/|plucker|pocket|psp|series(4|6)0|symbian|treo|up\.(browser|link)|vodafone|wap|windows ce|xda|xiino/i', $userAgent);
+                    $isTablet = preg_match('/(tablet|ipad|playbook)|(android(?!.*(mobi|opera mini)))/i', $userAgent);
+                    
+                    // For tablets, we'll use the desktop version as they have larger screens
+                    $useMobileComponent = $isMobile && !$isTablet;
+                @endphp
 
-                <!-- Filter Dokumen -->
-                <div class="mb-4 flex space-x-4">
-                    <select id="documentTypeFilter" class="border border-gray-300 rounded-md px-3 py-2 text-sm">
-                        <option value="">Semua Tipe</option>
-                        <option value="contract">Kontrak</option>
-                        <option value="technical">Teknis</option>
-                        <option value="financial">Keuangan</option>
-                        <option value="report">Laporan</option>
-                        <option value="other">Lainnya</option>
-                    </select>
-                    <input type="text" id="documentSearch" placeholder="Cari dokumen..." class="border border-gray-300 rounded-md px-3 py-2 text-sm flex-1">
-                </div>
-                
-                @if($project->documents->count() > 0)
-                <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4" id="documentsGrid">
-                    @foreach($project->documents as $document)
-                    <div class="bg-white border border-gray-200 rounded-lg p-4 hover:shadow-md transition-shadow document-item" data-type="{{ $document->document_type }}">
-                        <div class="flex items-start justify-between">
-                            <div class="flex items-start space-x-3 flex-1">
-                                <div class="flex-shrink-0">
-                                    <svg class="w-8 h-8 {{ $document->file_icon }}" fill="currentColor" viewBox="0 0 24 24">
-                                        <path d="M14,2H6A2,2 0 0,0 4,4V20A2,2 0 0,0 6,22H18A2,2 0 0,0 20,20V8L14,2M18,20H6V4H13V9H18V20Z"></path>
-                                    </svg>
-                                </div>
-                                <div class="flex-1 min-w-0">
-                                    <h4 class="text-sm font-medium text-gray-900 truncate">{{ $document->name }}</h4>
-                                    <p class="text-xs text-gray-500 mt-1">{{ $document->original_name }}</p>
-                                    <div class="flex items-center mt-2 space-x-2">
-                                        <span class="inline-flex px-2 py-1 text-xs font-semibold rounded-full bg-blue-100 text-blue-800">
-                                            {{ $document->document_type_label }}
-                                        </span>
-                                        <span class="text-xs text-gray-500">{{ $document->formatted_file_size }}</span>
-                                    </div>
-                                    <p class="text-xs text-gray-500 mt-1">
-                                        Oleh {{ $document->uploader->name }} • {{ $document->created_at->diffForHumans() }}
-                                    </p>
-                                    @if($document->description)
-                                    <p class="text-xs text-gray-600 mt-2">{{ Str::limit($document->description, 100) }}</p>
-                                    @endif
-                                </div>
-                            </div>
-                            <div class="flex-shrink-0 ml-2">
-                                <div class="relative">
-                                    <button onclick="toggleDocumentMenu({{ $document->id }})" class="text-gray-400 hover:text-gray-600">
-                                        <svg class="w-5 h-5" fill="currentColor" viewBox="0 0 24 24">
-                                            <path d="M12,16A2,2 0 0,1 14,18A2,2 0 0,1 12,20A2,2 0 0,1 10,18A2,2 0 0,1 12,16M12,10A2,2 0 0,1 14,12A2,2 0 0,1 12,14A2,2 0 0,1 10,12A2,2 0 0,1 12,10M12,4A2,2 0 0,1 14,6A2,2 0 0,1 12,8A2,2 0 0,1 10,6A2,2 0 0,1 12,4Z"></path>
-                                        </svg>
-                                    </button>
-                                    <div id="menu-{{ $document->id }}" class="hidden absolute right-0 mt-2 w-48 bg-white rounded-md shadow-lg z-10 border">
-                                        <a href="{{ route('documents.show', $document) }}" target="_blank" class="block px-4 py-2 text-sm text-gray-700 hover:bg-gray-100">
-                                            Lihat
-                                        </a>
-                                        <a href="{{ route('documents.download', $document) }}" class="block px-4 py-2 text-sm text-gray-700 hover:bg-gray-100">
-                                            Download
-                                        </a>
-                                        @can('delete', $document)
-                                        <button onclick="deleteDocument({{ $document->id }})" class="block w-full text-left px-4 py-2 text-sm text-red-600 hover:bg-gray-100">
-                                            Hapus
-                                        </button>
-                                        @endcan
-                                    </div>
-                                </div>
-                            </div>
-                        </div>
-                    </div>
-                    @endforeach
-                </div>
+                @if($useMobileComponent)
+                    {{-- Mobile-optimized Vue File Explorer Component --}}
+                    @include('components.vue-file-explorer-mobile', ['project' => $project])
                 @else
-                <div class="text-center py-8">
-                    <svg class="mx-auto h-12 w-12 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"></path>
-                    </svg>
-                    <h3 class="mt-2 text-sm font-medium text-gray-900">Belum ada dokumen</h3>
-                    <p class="mt-1 text-sm text-gray-500">Mulai dengan mengunggah dokumen proyek.</p>
-                    <button onclick="openUploadModal()" class="mt-4 bg-blue-600 hover:bg-blue-700 text-white font-bold py-2 px-4 rounded text-sm">
-                        Upload Dokumen Pertama
-                    </button>
-                </div>
+                    {{-- Desktop/Tablet Vue File Explorer Component with Advanced Features --}}
+                    @include('components.vue-file-explorer-advanced', ['project' => $project])
                 @endif
+
+                {{-- Client-side responsive fallback using CSS --}}
+                <style>
+                    /* Hide desktop component on small screens if JS detection fails */
+                    @media (max-width: 767px) {
+                        #vue-file-explorer-app.desktop-only {
+                            display: none !important;
+                        }
+                    }
+                    /* Hide mobile component on larger screens */
+                    @media (min-width: 768px) {
+                        #vue-file-explorer-app.mobile-only {
+                            display: none !important;
+                        }
+                    }
+                </style>
+
+                {{-- JavaScript fallback for dynamic detection --}}
+                <script>
+                    document.addEventListener('DOMContentLoaded', function() {
+                        // Additional client-side check for responsive behavior
+                        const checkResponsive = function() {
+                            const vueApp = document.querySelector('#vue-file-explorer-app');
+                            if (!vueApp) return;
+                            
+                            const isMobileView = window.innerWidth < 768;
+                            const isServerMobile = {{ $useMobileComponent ? 'true' : 'false' }};
+                            
+                            // If there's a mismatch between server and client detection
+                            if (isMobileView !== isServerMobile) {
+                                // Add classes to help with CSS fallback
+                                if (isMobileView) {
+                                    vueApp.classList.add('force-mobile');
+                                } else {
+                                    vueApp.classList.add('force-desktop');
+                                }
+                            }
+                        };
+                        
+                        // Check on load and resize
+                        checkResponsive();
+                        let resizeTimer;
+                        window.addEventListener('resize', function() {
+                            clearTimeout(resizeTimer);
+                            resizeTimer = setTimeout(checkResponsive, 250);
+                        });
+                    });
+                </script>
             </div>
         </div>
     </div>

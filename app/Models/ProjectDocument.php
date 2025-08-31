@@ -16,14 +16,23 @@ class ProjectDocument extends Model
         'name',
         'original_name',
         'file_path',
+        'storage_path',
+        'rclone_path',
         'file_type',
         'file_size',
         'document_type',
         'description',
+        'sync_status',
+        'sync_error',
+        'last_sync_at',
+        'checksum',
+        'folder_structure'
     ];
 
     protected $casts = [
         'file_size' => 'integer',
+        'folder_structure' => 'array',
+        'last_sync_at' => 'datetime'
     ];
 
     /**
@@ -102,5 +111,88 @@ class ProjectDocument extends Model
             'other' => 'Lainnya',
             default => 'Lainnya'
         };
+    }
+
+    /**
+     * Relasi ke SyncLog (polymorphic)
+     */
+    public function syncLogs()
+    {
+        return $this->morphMany(SyncLog::class, 'syncable');
+    }
+
+    /**
+     * Get file extension attribute
+     */
+    public function getFileExtensionAttribute(): string
+    {
+        return pathinfo($this->original_name, PATHINFO_EXTENSION);
+    }
+
+    /**
+     * Check if document is synced
+     */
+    public function getIsSyncedAttribute(): bool
+    {
+        return $this->sync_status === 'synced';
+    }
+
+    /**
+     * Get sync status badge color
+     */
+    public function getSyncStatusBadgeColorAttribute(): string
+    {
+        return match($this->sync_status) {
+            'synced' => 'bg-green-100 text-green-800',
+            'syncing' => 'bg-blue-100 text-blue-800',
+            'pending' => 'bg-yellow-100 text-yellow-800',
+            'failed' => 'bg-red-100 text-red-800',
+            'out_of_sync' => 'bg-orange-100 text-orange-800',
+            default => 'bg-gray-100 text-gray-800'
+        };
+    }
+
+    /**
+     * Get sync status label
+     */
+    public function getSyncStatusLabelAttribute(): string
+    {
+        return match($this->sync_status) {
+            'synced' => 'Synced',
+            'syncing' => 'Syncing...',
+            'pending' => 'Pending',
+            'failed' => 'Failed',
+            'out_of_sync' => 'Out of Sync',
+            default => 'Unknown'
+        };
+    }
+
+    /**
+     * Scope for documents needing sync
+     */
+    public function scopeNeedingSync($query)
+    {
+        return $query->whereIn('sync_status', ['pending', 'failed', 'out_of_sync']);
+    }
+
+    /**
+     * Scope for synced documents
+     */
+    public function scopeSynced($query)
+    {
+        return $query->where('sync_status', 'synced');
+    }
+
+    /**
+     * Get mime type attribute
+     */
+    public function getMimeTypeAttribute(): string
+    {
+        if (isset($this->attributes['mime_type'])) {
+            return $this->attributes['mime_type'];
+        }
+        
+        // Fallback to file_type if mime_type not set
+        return $this->file_type ?? 'application/octet-stream';
     }
 }

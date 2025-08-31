@@ -21,6 +21,9 @@ Route::middleware('auth:sanctum')->get('/user', function (Request $request) {
     return $request->user();
 });
 
+// Include File Explorer API routes
+require __DIR__ . '/api/file-explorer.php';
+
 // API routes untuk Project Billing dan Payment Schedule
 Route::middleware('auth')->group(function () {
     // Project Billing API endpoints
