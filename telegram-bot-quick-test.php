@@ -9,7 +9,8 @@ $BOT_TOKEN = '8281280313:AAG0B4mu6tEzs3N0_BSO3VGatHov7t0klls';  // <-- Ganti den
 $USE_LOCAL = true;  // true = local server, false = official API
 
 // Server configuration
-$LOCAL_SERVER_HOST = 'localhost';  // IP public VPS Anda
+// Gunakan localhost karena script dijalankan dari server yang sama
+$LOCAL_SERVER_HOST = 'localhost';  // Gunakan localhost untuk akses internal
 $LOCAL_SERVER_PORT = '8081';
 
 // API URL
@@ -20,7 +21,7 @@ $API_URL = $USE_LOCAL
 echo "========================================\n";
 echo "TELEGRAM BOT QUICK TEST\n";
 echo "========================================\n";
-echo "Server: " . ($USE_LOCAL ? "LOCAL ({$LOCAL_SERVER_HOST}:{$LOCAL_SERVER_PORT})" : "OFFICIAL") . "\n";
+echo "Server: " . ($USE_LOCAL ? "LOCAL (localhost:8081 - internal access)" : "OFFICIAL") . "\n";
 echo "Token: " . substr($BOT_TOKEN, 0, 10) . "...\n\n";
 
 // Function to make API request
@@ -32,25 +33,52 @@ function apiRequest($method, $params = []) {
         'http' => [
             'method' => 'POST',
             'header' => 'Content-Type: application/json',
-            'content' => json_encode($params)
+            'content' => json_encode($params),
+            'timeout' => 10,
+            'ignore_errors' => true
         ]
     ];
     
-    $response = @file_get_contents($url, false, stream_context_create($options));
-    return $response ? json_decode($response, true) : null;
+    $context = stream_context_create($options);
+    $response = @file_get_contents($url, false, $context);
+    
+    if ($response === false) {
+        echo "❌ Failed to connect to API\n";
+        echo "   URL: {$url}\n";
+        $error = error_get_last();
+        if ($error) {
+            echo "   Error: " . $error['message'] . "\n";
+        }
+        return null;
+    }
+    
+    return json_decode($response, true);
 }
 
 // Test 1: Get Bot Info
 echo "1. Testing Bot Connection...\n";
-$me = apiRequest('getMe');
 
-if ($me && $me['ok']) {
-    echo "✅ Bot Connected: @{$me['result']['username']}\n";
-    echo "   Name: {$me['result']['first_name']}\n";
-    echo "   ID: {$me['result']['id']}\n\n";
-} else {
-    echo "❌ Failed to connect to bot!\n";
-    echo "   Check your token and server status.\n";
+try {
+    $me = apiRequest('getMe');
+    
+    if ($me && isset($me['ok']) && $me['ok']) {
+        echo "✅ Bot Connected: @{$me['result']['username']}\n";
+        echo "   Name: {$me['result']['first_name']}\n";
+        echo "   ID: {$me['result']['id']}\n\n";
+    } else {
+        echo "❌ Failed to connect to bot!\n";
+        if ($me && isset($me['description'])) {
+            echo "   Error: {$me['description']}\n";
+        }
+        echo "   Check your token and server status.\n";
+        echo "\n   Troubleshooting:\n";
+        echo "   1. Pastikan telegram-bot-api server berjalan\n";
+        echo "   2. Cek token bot sudah benar\n";
+        echo "   3. Coba akses: http://{$LOCAL_SERVER_HOST}:{$LOCAL_SERVER_PORT}/bot{$BOT_TOKEN}/getMe\n";
+        exit(1);
+    }
+} catch (Exception $e) {
+    echo "❌ Exception: " . $e->getMessage() . "\n";
     exit(1);
 }
 

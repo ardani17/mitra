@@ -359,7 +359,7 @@ $BOT_TOKEN = '8281280313:AAG0B4mu6tEzs3N0_BSO3VGatHov7t0klls';  // <-- Ganti den
 $USE_LOCAL_SERVER = true;  // Set ke true untuk test local server
 
 // Local server configuration
-$LOCAL_SERVER_HOST = '103.195.190.235';  // IP public VPS Anda
+$LOCAL_SERVER_HOST = 'localhost';  // Gunakan localhost untuk akses internal
 $LOCAL_SERVER_PORT = '8081';
 
 // Optional: Specific chat ID for testing (leave null to auto-detect)

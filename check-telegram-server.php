@@ -11,8 +11,8 @@ echo "========================================\n\n";
 // Check 1: Test koneksi ke port 8081
 echo "1. Checking server connection...\n";
 
-// Configuration - bisa test localhost atau IP public
-$host = '103.195.190.235';  // Ganti dengan 'localhost' untuk test lokal
+// Configuration - gunakan localhost untuk akses internal
+$host = 'localhost';  // Akses internal ke server yang sama
 $port = 8081;
 
 echo "   Host: {$host}\n";
