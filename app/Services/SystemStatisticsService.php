@@ -9,6 +9,30 @@ use Illuminate\Support\Facades\Log;
 class SystemStatisticsService
 {
     /**
+     * Check if shell_exec is available
+     */
+    private function isShellExecAvailable(): bool
+    {
+        if (!function_exists('shell_exec')) {
+            return false;
+        }
+        
+        $disabled = explode(',', ini_get('disable_functions'));
+        return !in_array('shell_exec', array_map('trim', $disabled));
+    }
+
+    /**
+     * Safe shell exec with fallback
+     */
+    private function safeShellExec($command)
+    {
+        if ($this->isShellExecAvailable()) {
+            return shell_exec($command);
+        }
+        return null;
+    }
+
+    /**
      * Get all system metrics with caching
      */
     public function getAllMetrics(): array
@@ -37,19 +61,26 @@ class SystemStatisticsService
             
             if (PHP_OS_FAMILY === 'Windows') {
                 // Windows-specific CPU usage using wmic
-                $cpuLoad = shell_exec('wmic cpu get loadpercentage /value');
-                preg_match('/LoadPercentage=(\d+)/', $cpuLoad, $matches);
-                $cpuUsage = isset($matches[1]) ? (int)$matches[1] : 0;
-                
-                // Get number of cores
-                $coreCount = shell_exec('wmic cpu get NumberOfCores /value');
-                preg_match('/NumberOfCores=(\d+)/', $coreCount, $coreMatches);
-                $cores = isset($coreMatches[1]) ? (int)$coreMatches[1] : 1;
-                
-                // Get logical processors
-                $logicalProcessors = shell_exec('wmic cpu get NumberOfLogicalProcessors /value');
-                preg_match('/NumberOfLogicalProcessors=(\d+)/', $logicalProcessors, $logicalMatches);
-                $threads = isset($logicalMatches[1]) ? (int)$logicalMatches[1] : $cores;
+                if ($this->isShellExecAvailable()) {
+                    $cpuLoad = $this->safeShellExec('wmic cpu get loadpercentage /value');
+                    preg_match('/LoadPercentage=(\d+)/', $cpuLoad ?? '', $matches);
+                    $cpuUsage = isset($matches[1]) ? (int)$matches[1] : 0;
+                    
+                    // Get number of cores
+                    $coreCount = $this->safeShellExec('wmic cpu get NumberOfCores /value');
+                    preg_match('/NumberOfCores=(\d+)/', $coreCount ?? '', $coreMatches);
+                    $cores = isset($coreMatches[1]) ? (int)$coreMatches[1] : 1;
+                    
+                    // Get logical processors
+                    $logicalProcessors = $this->safeShellExec('wmic cpu get NumberOfLogicalProcessors /value');
+                    preg_match('/NumberOfLogicalProcessors=(\d+)/', $logicalProcessors ?? '', $logicalMatches);
+                    $threads = isset($logicalMatches[1]) ? (int)$logicalMatches[1] : $cores;
+                } else {
+                    // Fallback values for Windows
+                    $cpuUsage = 0;
+                    $cores = 1;
+                    $threads = 1;
+                }
                 
                 $cpuInfo = [
                     'usage' => $cpuUsage,
@@ -59,11 +90,25 @@ class SystemStatisticsService
                 ];
             } else {
                 // Linux/Unix CPU usage
-                $load = sys_getloadavg();
+                $load = function_exists('sys_getloadavg') ? sys_getloadavg() : [0, 0, 0];
+                
+                // Try to get CPU cores count
+                $cores = 1;
+                if ($this->isShellExecAvailable()) {
+                    $cores = (int)$this->safeShellExec('nproc') ?: 1;
+                } elseif (is_readable('/proc/cpuinfo')) {
+                    // Alternative method using /proc/cpuinfo
+                    $cpuinfo = file_get_contents('/proc/cpuinfo');
+                    preg_match_all('/^processor/m', $cpuinfo, $matches);
+                    $cores = count($matches[0]) ?: 1;
+                }
+                
+                $cpuUsage = $cores > 0 ? round($load[0] * 100 / $cores, 2) : 0;
+                
                 $cpuInfo = [
-                    'usage' => round($load[0] * 100 / shell_exec('nproc'), 2),
-                    'cores' => (int)shell_exec('nproc'),
-                    'threads' => (int)shell_exec('nproc'),
+                    'usage' => $cpuUsage,
+                    'cores' => $cores,
+                    'threads' => $cores,
                     'load_average' => $load,
                 ];
             }
@@ -88,13 +133,19 @@ class SystemStatisticsService
         try {
             if (PHP_OS_FAMILY === 'Windows') {
                 // Windows-specific memory usage using wmic
-                $totalMemory = shell_exec('wmic OS get TotalVisibleMemorySize /value');
-                preg_match('/TotalVisibleMemorySize=(\d+)/', $totalMemory, $totalMatches);
-                $total = isset($totalMatches[1]) ? (int)$totalMatches[1] * 1024 : 0; // Convert KB to bytes
-                
-                $freeMemory = shell_exec('wmic OS get FreePhysicalMemory /value');
-                preg_match('/FreePhysicalMemory=(\d+)/', $freeMemory, $freeMatches);
-                $free = isset($freeMatches[1]) ? (int)$freeMatches[1] * 1024 : 0; // Convert KB to bytes
+                if ($this->isShellExecAvailable()) {
+                    $totalMemory = $this->safeShellExec('wmic OS get TotalVisibleMemorySize /value');
+                    preg_match('/TotalVisibleMemorySize=(\d+)/', $totalMemory ?? '', $totalMatches);
+                    $total = isset($totalMatches[1]) ? (int)$totalMatches[1] * 1024 : 0; // Convert KB to bytes
+                    
+                    $freeMemory = $this->safeShellExec('wmic OS get FreePhysicalMemory /value');
+                    preg_match('/FreePhysicalMemory=(\d+)/', $freeMemory ?? '', $freeMatches);
+                    $free = isset($freeMatches[1]) ? (int)$freeMatches[1] * 1024 : 0; // Convert KB to bytes
+                } else {
+                    // Fallback for Windows
+                    $total = 0;
+                    $free = 0;
+                }
                 
                 $used = $total - $free;
                 $percentage = $total > 0 ? round(($used / $total) * 100, 2) : 0;
@@ -110,12 +161,31 @@ class SystemStatisticsService
                 ];
             } else {
                 // Linux/Unix memory usage
-                $memInfo = file_get_contents('/proc/meminfo');
-                preg_match('/MemTotal:\s+(\d+)/', $memInfo, $totalMatches);
-                preg_match('/MemAvailable:\s+(\d+)/', $memInfo, $availableMatches);
+                $total = 0;
+                $available = 0;
                 
-                $total = isset($totalMatches[1]) ? (int)$totalMatches[1] * 1024 : 0;
-                $available = isset($availableMatches[1]) ? (int)$availableMatches[1] * 1024 : 0;
+                if (is_readable('/proc/meminfo')) {
+                    $memInfo = file_get_contents('/proc/meminfo');
+                    preg_match('/MemTotal:\s+(\d+)/', $memInfo, $totalMatches);
+                    preg_match('/MemAvailable:\s+(\d+)/', $memInfo, $availableMatches);
+                    
+                    $total = isset($totalMatches[1]) ? (int)$totalMatches[1] * 1024 : 0;
+                    $available = isset($availableMatches[1]) ? (int)$availableMatches[1] * 1024 : 0;
+                    
+                    // If MemAvailable is not present (older kernels), calculate it
+                    if ($available === 0) {
+                        preg_match('/MemFree:\s+(\d+)/', $memInfo, $freeMatches);
+                        preg_match('/Buffers:\s+(\d+)/', $memInfo, $buffersMatches);
+                        preg_match('/Cached:\s+(\d+)/', $memInfo, $cachedMatches);
+                        
+                        $free = isset($freeMatches[1]) ? (int)$freeMatches[1] * 1024 : 0;
+                        $buffers = isset($buffersMatches[1]) ? (int)$buffersMatches[1] * 1024 : 0;
+                        $cached = isset($cachedMatches[1]) ? (int)$cachedMatches[1] * 1024 : 0;
+                        
+                        $available = $free + $buffers + $cached;
+                    }
+                }
+                
                 $used = $total - $available;
                 $percentage = $total > 0 ? round(($used / $total) * 100, 2) : 0;
                 
@@ -153,21 +223,109 @@ class SystemStatisticsService
             
             if (PHP_OS_FAMILY === 'Windows') {
                 // Windows-specific disk usage
-                $drives = shell_exec('wmic logicaldisk get size,freespace,caption /value');
-                $lines = explode("\n", $drives);
-                $currentDisk = [];
+                if ($this->isShellExecAvailable()) {
+                    $drives = $this->safeShellExec('wmic logicaldisk get size,freespace,caption /value');
+                    if ($drives) {
+                        $lines = explode("\n", $drives);
+                        $currentDisk = [];
+                        
+                        foreach ($lines as $line) {
+                            $line = trim($line);
+                            if (empty($line)) {
+                                if (!empty($currentDisk) && isset($currentDisk['Caption'])) {
+                                    $total = isset($currentDisk['Size']) ? (int)$currentDisk['Size'] : 0;
+                                    $free = isset($currentDisk['FreeSpace']) ? (int)$currentDisk['FreeSpace'] : 0;
+                                    $used = $total - $free;
+                                    $percentage = $total > 0 ? round(($used / $total) * 100, 2) : 0;
+                                    
+                                    $disks[] = [
+                                        'mount' => $currentDisk['Caption'],
+                                        'total' => $total,
+                                        'total_formatted' => $this->formatBytes($total),
+                                        'used' => $used,
+                                        'used_formatted' => $this->formatBytes($used),
+                                        'free' => $free,
+                                        'free_formatted' => $this->formatBytes($free),
+                                        'percentage' => $percentage,
+                                    ];
+                                }
+                                $currentDisk = [];
+                                continue;
+                            }
+                            
+                            if (strpos($line, '=') !== false) {
+                                list($key, $value) = explode('=', $line, 2);
+                                $currentDisk[$key] = $value;
+                            }
+                        }
+                    }
+                } else {
+                    // Fallback: Use disk_free_space and disk_total_space for C: drive
+                    $mount = 'C:';
+                    if (is_dir($mount)) {
+                        $free = disk_free_space($mount);
+                        $total = disk_total_space($mount);
+                        $used = $total - $free;
+                        $percentage = $total > 0 ? round(($used / $total) * 100, 2) : 0;
+                        
+                        $disks[] = [
+                            'mount' => $mount,
+                            'total' => $total,
+                            'total_formatted' => $this->formatBytes($total),
+                            'used' => $used,
+                            'used_formatted' => $this->formatBytes($used),
+                            'free' => $free,
+                            'free_formatted' => $this->formatBytes($free),
+                            'percentage' => $percentage,
+                        ];
+                    }
+                }
+            } else {
+                // Linux/Unix disk usage
+                // Try using df command first
+                if ($this->isShellExecAvailable()) {
+                    $df = $this->safeShellExec('df -B1');
+                    if ($df) {
+                        $lines = explode("\n", $df);
+                        array_shift($lines); // Remove header
+                        
+                        foreach ($lines as $line) {
+                            if (empty($line)) continue;
+                            
+                            $parts = preg_split('/\s+/', $line);
+                            if (count($parts) >= 6) {
+                                $total = (int)$parts[1];
+                                $used = (int)$parts[2];
+                                $free = (int)$parts[3];
+                                $percentage = $total > 0 ? round(($used / $total) * 100, 2) : 0;
+                                
+                                $disks[] = [
+                                    'mount' => $parts[5],
+                                    'total' => $total,
+                                    'total_formatted' => $this->formatBytes($total),
+                                    'used' => $used,
+                                    'used_formatted' => $this->formatBytes($used),
+                                    'free' => $free,
+                                    'free_formatted' => $this->formatBytes($free),
+                                    'percentage' => $percentage,
+                                ];
+                            }
+                        }
+                    }
+                }
                 
-                foreach ($lines as $line) {
-                    $line = trim($line);
-                    if (empty($line)) {
-                        if (!empty($currentDisk) && isset($currentDisk['Caption'])) {
-                            $total = isset($currentDisk['Size']) ? (int)$currentDisk['Size'] : 0;
-                            $free = isset($currentDisk['FreeSpace']) ? (int)$currentDisk['FreeSpace'] : 0;
+                // Fallback: Use disk_free_space and disk_total_space for root
+                if (empty($disks)) {
+                    $mount = '/';
+                    if (is_dir($mount)) {
+                        $free = disk_free_space($mount);
+                        $total = disk_total_space($mount);
+                        if ($free !== false && $total !== false) {
                             $used = $total - $free;
                             $percentage = $total > 0 ? round(($used / $total) * 100, 2) : 0;
                             
                             $disks[] = [
-                                'mount' => $currentDisk['Caption'],
+                                'mount' => $mount,
                                 'total' => $total,
                                 'total_formatted' => $this->formatBytes($total),
                                 'used' => $used,
@@ -177,41 +335,6 @@ class SystemStatisticsService
                                 'percentage' => $percentage,
                             ];
                         }
-                        $currentDisk = [];
-                        continue;
-                    }
-                    
-                    if (strpos($line, '=') !== false) {
-                        list($key, $value) = explode('=', $line, 2);
-                        $currentDisk[$key] = $value;
-                    }
-                }
-            } else {
-                // Linux/Unix disk usage
-                $df = shell_exec('df -B1');
-                $lines = explode("\n", $df);
-                array_shift($lines); // Remove header
-                
-                foreach ($lines as $line) {
-                    if (empty($line)) continue;
-                    
-                    $parts = preg_split('/\s+/', $line);
-                    if (count($parts) >= 6) {
-                        $total = (int)$parts[1];
-                        $used = (int)$parts[2];
-                        $free = (int)$parts[3];
-                        $percentage = $total > 0 ? round(($used / $total) * 100, 2) : 0;
-                        
-                        $disks[] = [
-                            'mount' => $parts[5],
-                            'total' => $total,
-                            'total_formatted' => $this->formatBytes($total),
-                            'used' => $used,
-                            'used_formatted' => $this->formatBytes($used),
-                            'free' => $free,
-                            'free_formatted' => $this->formatBytes($free),
-                            'percentage' => $percentage,
-                        ];
                     }
                 }
             }
@@ -286,8 +409,8 @@ class SystemStatisticsService
             
             // Get connection info
             $connectionQuery = DB::select("SELECT count(*) as active, max_conn.setting as max FROM pg_stat_activity, (SELECT setting FROM pg_settings WHERE name = 'max_connections') max_conn GROUP BY max_conn.setting");
-            $activeConnections = $connectionQuery[0]->active ?? 0;
-            $maxConnections = $connectionQuery[0]->max ?? 100;
+            $activeConnections = isset($connectionQuery[0]) ? $connectionQuery[0]->active : 0;
+            $maxConnections = isset($connectionQuery[0]) ? $connectionQuery[0]->max : 100;
             
             return [
                 'size' => $dbSize,
@@ -311,10 +434,10 @@ class SystemStatisticsService
                 $tables = $tableCount[0]->count ?? 0;
                 
                 $connectionQuery = DB::select("SHOW STATUS WHERE Variable_name = 'Threads_connected'");
-                $activeConnections = $connectionQuery[0]->Value ?? 0;
+                $activeConnections = isset($connectionQuery[0]) ? $connectionQuery[0]->Value : 0;
                 
                 $maxQuery = DB::select("SHOW VARIABLES WHERE Variable_name = 'max_connections'");
-                $maxConnections = $maxQuery[0]->Value ?? 100;
+                $maxConnections = isset($maxQuery[0]) ? $maxQuery[0]->Value : 100;
                 
                 return [
                     'size' => $dbSize,
@@ -387,6 +510,10 @@ class SystemStatisticsService
                     $stats['size_formatted'] = $this->formatBytes($size);
                     $stats['files'] = $files;
                 }
+            } elseif ($driver === 'database') {
+                // For database cache driver
+                $stats['driver'] = 'database';
+                $stats['status'] = 'Active';
             }
             
             return $stats;
@@ -409,31 +536,44 @@ class SystemStatisticsService
             
             if (PHP_OS_FAMILY === 'Windows') {
                 // Windows uptime using wmic
-                $bootTime = shell_exec('wmic os get lastbootuptime /value');
-                preg_match('/LastBootUpTime=(\d{14})/', $bootTime, $matches);
-                
-                if (isset($matches[1])) {
-                    $boot = $matches[1];
-                    $year = substr($boot, 0, 4);
-                    $month = substr($boot, 4, 2);
-                    $day = substr($boot, 6, 2);
-                    $hour = substr($boot, 8, 2);
-                    $minute = substr($boot, 10, 2);
-                    $second = substr($boot, 12, 2);
+                if ($this->isShellExecAvailable()) {
+                    $bootTime = $this->safeShellExec('wmic os get lastbootuptime /value');
+                    preg_match('/LastBootUpTime=(\d{14})/', $bootTime ?? '', $matches);
                     
-                    $bootTimestamp = mktime($hour, $minute, $second, $month, $day, $year);
-                    $uptimeSeconds = time() - $bootTimestamp;
-                    
-                    $uptime = $this->formatUptime($uptimeSeconds);
-                    $uptime['boot_time'] = date('Y-m-d H:i:s', $bootTimestamp);
+                    if (isset($matches[1])) {
+                        $boot = $matches[1];
+                        $year = substr($boot, 0, 4);
+                        $month = substr($boot, 4, 2);
+                        $day = substr($boot, 6, 2);
+                        $hour = substr($boot, 8, 2);
+                        $minute = substr($boot, 10, 2);
+                        $second = substr($boot, 12, 2);
+                        
+                        $bootTimestamp = mktime($hour, $minute, $second, $month, $day, $year);
+                        $uptimeSeconds = time() - $bootTimestamp;
+                        
+                        $uptime = $this->formatUptime($uptimeSeconds);
+                        $uptime['boot_time'] = date('Y-m-d H:i:s', $bootTimestamp);
+                    } else {
+                        $uptime = $this->formatUptime(0);
+                        $uptime['boot_time'] = 'Unknown';
+                    }
+                } else {
+                    $uptime = $this->formatUptime(0);
+                    $uptime['boot_time'] = 'Unknown';
                 }
             } else {
                 // Linux/Unix uptime
-                $uptimeData = file_get_contents('/proc/uptime');
-                $uptimeSeconds = (int)explode(' ', $uptimeData)[0];
-                
-                $uptime = $this->formatUptime($uptimeSeconds);
-                $uptime['boot_time'] = date('Y-m-d H:i:s', time() - $uptimeSeconds);
+                if (is_readable('/proc/uptime')) {
+                    $uptimeData = file_get_contents('/proc/uptime');
+                    $uptimeSeconds = (int)explode(' ', $uptimeData)[0];
+                    
+                    $uptime = $this->formatUptime($uptimeSeconds);
+                    $uptime['boot_time'] = date('Y-m-d H:i:s', time() - $uptimeSeconds);
+                } else {
+                    $uptime = $this->formatUptime(0);
+                    $uptime['boot_time'] = 'Unknown';
+                }
             }
             
             // Laravel application uptime (approximate)
@@ -441,7 +581,7 @@ class SystemStatisticsService
             if (!$laravelBootTime) {
                 $laravelBootTime = filemtime(base_path('vendor/autoload.php'));
             }
-            $appUptimeSeconds = time() - $laravelBootTime;
+            $appUptimeSeconds = $laravelBootTime ? time() - $laravelBootTime : 0;
             
             $uptime['app_uptime'] = $this->formatUptime($appUptimeSeconds)['formatted'];
             
@@ -470,7 +610,7 @@ class SystemStatisticsService
                 'laravel_version' => app()->version(),
                 'server_software' => $_SERVER['SERVER_SOFTWARE'] ?? 'Unknown',
                 'os' => PHP_OS_FAMILY . ' ' . php_uname('r'),
-                'hostname' => gethostname(),
+                'hostname' => gethostname() ?: 'Unknown',
                 'timezone' => date_default_timezone_get(),
                 'current_time' => now()->format('Y-m-d H:i:s'),
             ];
@@ -510,6 +650,10 @@ class SystemStatisticsService
     private function convertToBytes($value): int
     {
         $value = trim($value);
+        if (empty($value)) {
+            return 0;
+        }
+        
         $last = strtolower($value[strlen($value) - 1]);
         $value = (int)$value;
         
