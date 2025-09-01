@@ -9,7 +9,8 @@ export default defineConfig({
                 'resources/css/app.css',
                 'resources/js/app.js',
                 'resources/js/components/file-explorer.js',
-                'resources/js/components/vue-file-explorer.js'
+                'resources/js/components/vue-file-explorer.js',
+                'resources/js/telegram-folder-tree.js'
             ],
             refresh: true,
         }),

@@ -19,6 +19,7 @@ use App\Http\Controllers\EmployeeWorkScheduleController;
 use App\Http\Controllers\EmployeeCustomOffDayController;
 use App\Http\Controllers\DailySalaryController;
 use App\Http\Controllers\SalaryReleaseController;
+use App\Http\Controllers\TelegramBotController;
 use Illuminate\Support\Facades\Route;
 
 Route::get('/', function () {
@@ -75,6 +76,50 @@ Route::middleware('auth')->group(function () {
                 'memory_methods' => $debugService->testMemoryMethods(),
             ]);
         })->name('system-statistics.debug');
+        
+        // Telegram Bot Tools routes (Only for Direktur)
+        Route::prefix('telegram-bot')->name('telegram-bot.')->middleware(['auth', 'role:direktur'])->group(function () {
+            // Main pages
+            Route::get('/config', [TelegramBotController::class, 'config'])->name('config');
+            Route::post('/config', [TelegramBotController::class, 'saveConfig'])->name('config.save');
+            Route::get('/explorer', [TelegramBotController::class, 'explorer'])->name('explorer');
+            Route::get('/activity', [TelegramBotController::class, 'activity'])->name('activity');
+            
+            // File explorer endpoints
+            Route::get('/download', [TelegramBotController::class, 'downloadFile'])->name('download');
+            Route::get('/search-files', [TelegramBotController::class, 'searchFiles'])->name('search-files');
+            
+            // File management actions
+            Route::post('/rename-item', [TelegramBotController::class, 'renameItem'])->name('rename-item');
+            Route::post('/delete-item', [TelegramBotController::class, 'deleteItem'])->name('delete-item');
+            Route::post('/copy-item', [TelegramBotController::class, 'copyItem'])->name('copy-item');
+            Route::post('/move-item', [TelegramBotController::class, 'moveItem'])->name('move-item');
+            Route::post('/create-folder', [TelegramBotController::class, 'createFolder'])->name('create-folder');
+            Route::get('/folder-tree', [TelegramBotController::class, 'getFolderTree'])->name('folder-tree');
+            Route::get('/folder-tree-lazy', [TelegramBotController::class, 'getFolderTreeLazy'])->name('folder-tree-lazy');
+            
+            // Upload and sync endpoints
+            Route::post('/upload', [TelegramBotController::class, 'uploadFiles'])->name('upload');
+            Route::get('/check-sync', [TelegramBotController::class, 'checkSyncStatus'])->name('check-sync');
+            Route::post('/sync-storage', [TelegramBotController::class, 'syncStorage'])->name('sync-storage');
+            
+            // API endpoints
+            Route::post('/test-connection', [TelegramBotController::class, 'testConnection'])->name('test-connection');
+            Route::post('/set-webhook', [TelegramBotController::class, 'setWebhook'])->name('set-webhook');
+            Route::post('/delete-webhook', [TelegramBotController::class, 'deleteWebhook'])->name('delete-webhook');
+            Route::get('/activity-data', [TelegramBotController::class, 'activityData'])->name('activity-data');
+            Route::get('/storage-stats', [TelegramBotController::class, 'storageStats'])->name('storage-stats');
+            
+            // User management
+            Route::get('/allowed-users', [TelegramBotController::class, 'allowedUsers'])->name('allowed-users');
+            Route::post('/allowed-users', [TelegramBotController::class, 'addAllowedUser'])->name('allowed-users.add');
+            Route::delete('/allowed-users', [TelegramBotController::class, 'removeAllowedUser'])->name('allowed-users.remove');
+            
+            // Queue management
+            Route::post('/process-queue', [TelegramBotController::class, 'processQueue'])->name('process-queue');
+            Route::post('/retry-failed', [TelegramBotController::class, 'retryFailed'])->name('retry-failed');
+            Route::post('/clean-old-data', [TelegramBotController::class, 'cleanOldData'])->name('clean-old-data');
+        });
     });
     
     // Company routes

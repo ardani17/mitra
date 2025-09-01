@@ -5,6 +5,7 @@ use Illuminate\Support\Facades\Route;
 use App\Http\Controllers\ProjectBillingController;
 use App\Http\Controllers\ProjectPaymentScheduleController;
 use App\Http\Controllers\ProjectController;
+use App\Http\Controllers\TelegramWebhookController;
 
 /*
 |--------------------------------------------------------------------------
@@ -20,6 +21,11 @@ use App\Http\Controllers\ProjectController;
 Route::middleware('auth:sanctum')->get('/user', function (Request $request) {
     return $request->user();
 });
+
+// Telegram Bot Webhook (no auth required for webhook)
+Route::post('/telegram/webhook', [TelegramWebhookController::class, 'handle'])
+    ->name('telegram.webhook')
+    ->withoutMiddleware(['web', 'auth']);
 
 // Include File Explorer API routes
 require __DIR__ . '/api/file-explorer.php';

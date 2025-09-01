@@ -62,8 +62,8 @@
 
                     <!-- Billings Menu (Only for Finance Manager and Direktur) -->
                     @if(auth()->user()->hasAnyRole(['direktur', 'finance_manager']))
-                    <div class="relative inline-flex items-center" x-data="{ open: false }">
-                        <button @click="open = ! open" class="inline-flex items-center px-1 pt-1 border-b-2 text-sm font-medium leading-5 transition duration-150 ease-in-out focus:outline-none
+                    <div class="relative inline-flex items-center" x-data="{ billingOpen: false }" x-init="billingOpen = false">
+                        <button @click.stop="billingOpen = ! billingOpen" class="inline-flex items-center px-1 pt-1 border-b-2 text-sm font-medium leading-5 transition duration-150 ease-in-out focus:outline-none
                                {{ request()->routeIs('billing-batches.*', 'project-billings.*', 'billing-dashboard.*') ? 'border-white text-white focus:border-sky-200' : 'border-transparent text-sky-100 hover:text-white hover:border-sky-200 focus:text-white focus:border-sky-200' }}">
                             {{ __('Penagihan') }}
                             <svg class="ml-1 h-4 w-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -71,7 +71,7 @@
                             </svg>
                         </button>
                         
-                        <div x-show="open" @click.away="open = false" x-transition:enter="transition ease-out duration-200" x-transition:enter-start="opacity-0 scale-95" x-transition:enter-end="opacity-100 scale-100" x-transition:leave="transition ease-in duration-75" x-transition:leave-start="opacity-100 scale-100" x-transition:leave-end="opacity-0 scale-95" class="absolute left-0 mt-2 w-56 rounded-md shadow-lg bg-white ring-1 ring-black ring-opacity-5 z-50" style="top: 100%;">
+                        <div x-show="billingOpen" @click.away="billingOpen = false" x-cloak x-transition:enter="transition ease-out duration-200" x-transition:enter-start="opacity-0 scale-95" x-transition:enter-end="opacity-100 scale-100" x-transition:leave="transition ease-in duration-75" x-transition:leave-start="opacity-100 scale-100" x-transition:leave-end="opacity-0 scale-95" class="absolute left-0 mt-2 w-56 rounded-md shadow-lg bg-white ring-1 ring-black ring-opacity-5 z-50" style="top: 100%; display: none;">
                             <div class="py-1">
                                 <a href="{{ route('billing-batches.index') }}" class="flex items-center px-4 py-2 text-sm text-gray-700 hover:bg-indigo-50 hover:text-indigo-700 transition duration-150 ease-in-out {{ request()->routeIs('billing-batches.*') ? 'bg-indigo-50 text-indigo-700 font-medium' : '' }}">
                                     <svg class="mr-3 h-4 w-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -99,8 +99,8 @@
 
                     <!-- Financial Menu (Only for Finance Manager and Direktur) -->
                     @if(auth()->user()->hasAnyRole(['direktur', 'finance_manager']))
-                    <div class="relative inline-flex items-center" x-data="{ open: false }">
-                        <button @click="open = ! open" class="inline-flex items-center px-1 pt-1 border-b-2 text-sm font-medium leading-5 transition duration-150 ease-in-out focus:outline-none
+                    <div class="relative inline-flex items-center" x-data="{ financeOpen: false }" x-init="financeOpen = false">
+                        <button @click.stop="financeOpen = ! financeOpen" class="inline-flex items-center px-1 pt-1 border-b-2 text-sm font-medium leading-5 transition duration-150 ease-in-out focus:outline-none
                                {{ request()->routeIs('finance.*') ? 'border-white text-white focus:border-sky-200' : 'border-transparent text-sky-100 hover:text-white hover:border-sky-200 focus:text-white focus:border-sky-200' }}">
                             {{ __('Keuangan') }}
                             <svg class="ml-1 h-4 w-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -108,7 +108,7 @@
                             </svg>
                         </button>
                         
-                        <div x-show="open" @click.away="open = false" x-transition:enter="transition ease-out duration-200" x-transition:enter-start="opacity-0 scale-95" x-transition:enter-end="opacity-100 scale-100" x-transition:leave="transition ease-in duration-75" x-transition:leave-start="opacity-100 scale-100" x-transition:leave-end="opacity-0 scale-95" class="absolute left-0 mt-2 w-64 rounded-md shadow-lg bg-white ring-1 ring-black ring-opacity-5 z-50" style="top: 100%;">
+                        <div x-show="financeOpen" @click.away="financeOpen = false" x-cloak x-transition:enter="transition ease-out duration-200" x-transition:enter-start="opacity-0 scale-95" x-transition:enter-end="opacity-100 scale-100" x-transition:leave="transition ease-in duration-75" x-transition:leave-start="opacity-100 scale-100" x-transition:leave-end="opacity-0 scale-95" class="absolute left-0 mt-2 w-64 rounded-md shadow-lg bg-white ring-1 ring-black ring-opacity-5 z-50" style="top: 100%; display: none;">
                             <div class="py-1">
                                 <a href="{{ route('finance.dashboard') }}" class="flex items-center px-4 py-2 text-sm text-gray-700 hover:bg-indigo-50 hover:text-indigo-700 transition duration-150 ease-in-out {{ request()->routeIs('finance.dashboard') ? 'bg-indigo-50 text-indigo-700 font-medium' : '' }}">
                                     <svg class="mr-3 h-4 w-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -149,16 +149,16 @@
                     
                     <!-- User Management Menu (Only for Direktur) -->
                     @if(auth()->user()->hasRole('direktur'))
-                    <div class="relative inline-flex items-center" x-data="{ open: false }">
-                        <button @click="open = ! open" class="inline-flex items-center px-1 pt-1 border-b-2 text-sm font-medium leading-5 transition duration-150 ease-in-out focus:outline-none
-                               {{ request()->routeIs('users.*', 'settings.*') ? 'border-white text-white focus:border-sky-200' : 'border-transparent text-sky-100 hover:text-white hover:border-sky-200 focus:text-white focus:border-sky-200' }}">
+                    <div class="relative inline-flex items-center" x-data="{ managementOpen: false }" x-init="managementOpen = false">
+                        <button @click.stop="managementOpen = ! managementOpen" class="inline-flex items-center px-1 pt-1 border-b-2 text-sm font-medium leading-5 transition duration-150 ease-in-out focus:outline-none
+                               {{ request()->routeIs('users.*', 'settings.*', 'telegram-bot.*') ? 'border-white text-white focus:border-sky-200' : 'border-transparent text-sky-100 hover:text-white hover:border-sky-200 focus:text-white focus:border-sky-200' }}">
                             {{ __('Manajemen') }}
                             <svg class="ml-1 h-4 w-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"></path>
                             </svg>
                         </button>
                         
-                        <div x-show="open" @click.away="open = false" x-transition:enter="transition ease-out duration-200" x-transition:enter-start="opacity-0 scale-95" x-transition:enter-end="opacity-100 scale-100" x-transition:leave="transition ease-in duration-75" x-transition:leave-start="opacity-100 scale-100" x-transition:leave-end="opacity-0 scale-95" class="absolute left-0 mt-2 w-56 rounded-md shadow-lg bg-white ring-1 ring-black ring-opacity-5 z-50" style="top: 100%;">
+                        <div x-show="managementOpen" @click.away="managementOpen = false" x-cloak x-transition:enter="transition ease-out duration-200" x-transition:enter-start="opacity-0 scale-95" x-transition:enter-end="opacity-100 scale-100" x-transition:leave="transition ease-in duration-75" x-transition:leave-start="opacity-100 scale-100" x-transition:leave-end="opacity-0 scale-95" class="absolute left-0 mt-2 w-56 rounded-md shadow-lg bg-white ring-1 ring-black ring-opacity-5 z-50" style="top: 100%; display: none;">
                             <div class="py-1">
                                 <a href="{{ route('users.index') }}" class="flex items-center px-4 py-2 text-sm text-gray-700 hover:bg-indigo-50 hover:text-indigo-700 transition duration-150 ease-in-out {{ request()->routeIs('users.*') ? 'bg-indigo-50 text-indigo-700 font-medium' : '' }}">
                                     <svg class="mr-3 h-4 w-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -178,6 +178,28 @@
                                         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 19v-6a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2a2 2 0 002-2zm0 0V9a2 2 0 012-2h2a2 2 0 012 2v10m-6 0a2 2 0 002 2h2a2 2 0 002-2m0 0V5a2 2 0 012-2h2a2 2 0 012 2v14a2 2 0 01-2 2h-2a2 2 0 01-2-2z"/>
                                     </svg>
                                     Statistik Sistem
+                                </a>
+                                <div class="border-t border-gray-100 my-1"></div>
+                                <div class="px-4 py-1">
+                                    <div class="text-xs font-semibold text-gray-500 uppercase tracking-wider">Tools</div>
+                                </div>
+                                <a href="{{ route('telegram-bot.config') }}" class="flex items-center px-4 py-2 text-sm text-gray-700 hover:bg-indigo-50 hover:text-indigo-700 transition duration-150 ease-in-out {{ request()->routeIs('telegram-bot.config') ? 'bg-indigo-50 text-indigo-700 font-medium' : '' }}">
+                                    <svg class="mr-3 h-4 w-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 6V4m0 2a2 2 0 100 4m0-4a2 2 0 110 4m-6 8a2 2 0 100-4m0 4a2 2 0 110-4m0 4v2m0-6V4m6 6v10m6-2a2 2 0 100-4m0 4a2 2 0 110-4m0 4v2m0-6V4"/>
+                                    </svg>
+                                    Bot Configuration
+                                </a>
+                                <a href="{{ route('telegram-bot.explorer') }}" class="flex items-center px-4 py-2 text-sm text-gray-700 hover:bg-indigo-50 hover:text-indigo-700 transition duration-150 ease-in-out {{ request()->routeIs('telegram-bot.explorer') ? 'bg-indigo-50 text-indigo-700 font-medium' : '' }}">
+                                    <svg class="mr-3 h-4 w-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 7v10a2 2 0 002 2h14a2 2 0 002-2V9a2 2 0 00-2-2h-6l-2-2H5a2 2 0 00-2 2z"/>
+                                    </svg>
+                                    File Explorer
+                                </a>
+                                <a href="{{ route('telegram-bot.activity') }}" class="flex items-center px-4 py-2 text-sm text-gray-700 hover:bg-indigo-50 hover:text-indigo-700 transition duration-150 ease-in-out {{ request()->routeIs('telegram-bot.activity') ? 'bg-indigo-50 text-indigo-700 font-medium' : '' }}">
+                                    <svg class="mr-3 h-4 w-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2m-3 7h3m-3 4h3m-6-4h.01M9 16h.01"/>
+                                    </svg>
+                                    Bot Activity
                                 </a>
                             </div>
                         </div>
@@ -374,6 +396,30 @@
                         </svg>
                         {{ __('Statistik Sistem') }}
                     </x-responsive-nav-link>
+                    
+                    <div class="border-t border-gray-200 mt-2 pt-2">
+                        <div class="px-4 py-2">
+                            <div class="text-xs font-semibold text-gray-500 uppercase tracking-wider">Tools</div>
+                        </div>
+                        <x-responsive-nav-link :href="route('telegram-bot.config')" :active="request()->routeIs('telegram-bot.config')" class="responsive-nav-item {{ request()->routeIs('telegram-bot.config') ? 'active' : '' }}">
+                            <svg class="mr-3 h-5 w-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 6V4m0 2a2 2 0 100 4m0-4a2 2 0 110 4m-6 8a2 2 0 100-4m0 4a2 2 0 110-4m0 4v2m0-6V4m6 6v10m6-2a2 2 0 100-4m0 4a2 2 0 110-4m0 4v2m0-6V4"/>
+                            </svg>
+                            {{ __('Bot Configuration') }}
+                        </x-responsive-nav-link>
+                        <x-responsive-nav-link :href="route('telegram-bot.explorer')" :active="request()->routeIs('telegram-bot.explorer')" class="responsive-nav-item {{ request()->routeIs('telegram-bot.explorer') ? 'active' : '' }}">
+                            <svg class="mr-3 h-5 w-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 7v10a2 2 0 002 2h14a2 2 0 002-2V9a2 2 0 00-2-2h-6l-2-2H5a2 2 0 00-2 2z"/>
+                            </svg>
+                            {{ __('File Explorer') }}
+                        </x-responsive-nav-link>
+                        <x-responsive-nav-link :href="route('telegram-bot.activity')" :active="request()->routeIs('telegram-bot.activity')" class="responsive-nav-item {{ request()->routeIs('telegram-bot.activity') ? 'active' : '' }}">
+                            <svg class="mr-3 h-5 w-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2m-3 7h3m-3 4h3m-6-4h.01M9 16h.01"/>
+                            </svg>
+                            {{ __('Bot Activity') }}
+                        </x-responsive-nav-link>
+                    </div>
                 </div>
             @endif
         </div>
