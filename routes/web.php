@@ -110,10 +110,24 @@ Route::middleware('auth')->group(function () {
             Route::get('/activity-data', [TelegramBotController::class, 'activityData'])->name('activity-data');
             Route::get('/storage-stats', [TelegramBotController::class, 'storageStats'])->name('storage-stats');
             
-            // User management
+            // User management (Old - kept for backward compatibility)
             Route::get('/allowed-users', [TelegramBotController::class, 'allowedUsers'])->name('allowed-users');
             Route::post('/allowed-users', [TelegramBotController::class, 'addAllowedUser'])->name('allowed-users.add');
             Route::delete('/allowed-users', [TelegramBotController::class, 'removeAllowedUser'])->name('allowed-users.remove');
+            
+            // New User Management System
+            Route::get('/users', [App\Http\Controllers\TelegramBotUserController::class, 'index'])->name('users');
+            Route::get('/users/{id}', [App\Http\Controllers\TelegramBotUserController::class, 'show'])->name('users.show');
+            Route::patch('/users/{id}/role', [App\Http\Controllers\TelegramBotUserController::class, 'updateRole'])->name('users.update-role');
+            Route::post('/users/{id}/ban', [App\Http\Controllers\TelegramBotUserController::class, 'ban'])->name('users.ban');
+            Route::post('/users/{id}/unban', [App\Http\Controllers\TelegramBotUserController::class, 'unban'])->name('users.unban');
+            Route::post('/users/{id}/suspend', [App\Http\Controllers\TelegramBotUserController::class, 'suspend'])->name('users.suspend');
+            Route::get('/users/export', [App\Http\Controllers\TelegramBotUserController::class, 'export'])->name('users.export');
+            
+            // Registration Management
+            Route::get('/registrations', [App\Http\Controllers\TelegramBotUserController::class, 'registrations'])->name('registrations');
+            Route::post('/registrations/{id}/approve', [App\Http\Controllers\TelegramBotUserController::class, 'approve'])->name('users.approve');
+            Route::post('/registrations/{id}/reject', [App\Http\Controllers\TelegramBotUserController::class, 'reject'])->name('users.reject');
             
             // Queue management
             Route::post('/process-queue', [TelegramBotController::class, 'processQueue'])->name('process-queue');

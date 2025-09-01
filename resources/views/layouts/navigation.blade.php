@@ -201,6 +201,30 @@
                                     </svg>
                                     Bot Activity
                                 </a>
+                                <div class="border-t border-gray-100 my-1"></div>
+                                <div class="px-4 py-1">
+                                    <div class="text-xs font-semibold text-gray-500 uppercase tracking-wider">User Management</div>
+                                </div>
+                                <a href="{{ route('telegram-bot.users') }}" class="flex items-center px-4 py-2 text-sm text-gray-700 hover:bg-indigo-50 hover:text-indigo-700 transition duration-150 ease-in-out {{ request()->routeIs('telegram-bot.users*') ? 'bg-indigo-50 text-indigo-700 font-medium' : '' }}">
+                                    <svg class="mr-3 h-4 w-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 20h5v-2a3 3 0 00-5.356-1.857M17 20H7m10 0v-2c0-.656-.126-1.283-.356-1.857M7 20H2v-2a3 3 0 015.356-1.857M7 20v-2c0-.656.126-1.283.356-1.857m0 0a5.002 5.002 0 019.288 0M15 7a3 3 0 11-6 0 3 3 0 016 0zm6 3a2 2 0 11-4 0 2 2 0 014 0zM7 10a2 2 0 11-4 0 2 2 0 014 0z"/>
+                                    </svg>
+                                    Bot Users
+                                </a>
+                                <a href="{{ route('telegram-bot.registrations') }}" class="flex items-center px-4 py-2 text-sm text-gray-700 hover:bg-indigo-50 hover:text-indigo-700 transition duration-150 ease-in-out {{ request()->routeIs('telegram-bot.registrations') ? 'bg-indigo-50 text-indigo-700 font-medium' : '' }}">
+                                    <svg class="mr-3 h-4 w-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M18 9v3m0 0v3m0-3h3m-3 0h-3m-2-5a4 4 0 11-8 0 4 4 0 018 0zM3 20a6 6 0 0112 0v1H3v-1z"/>
+                                    </svg>
+                                    Registration Requests
+                                    @php
+                                        $pendingCount = \App\Models\BotRegistrationRequest::where('status', 'pending')->count();
+                                    @endphp
+                                    @if($pendingCount > 0)
+                                        <span class="ml-auto inline-flex items-center px-2 py-0.5 rounded-full text-xs font-medium bg-yellow-100 text-yellow-800">
+                                            {{ $pendingCount }}
+                                        </span>
+                                    @endif
+                                </a>
                             </div>
                         </div>
                     </div>
@@ -419,6 +443,32 @@
                             </svg>
                             {{ __('Bot Activity') }}
                         </x-responsive-nav-link>
+                        
+                        <div class="border-t border-gray-200 mt-2 pt-2">
+                            <div class="px-4 py-2">
+                                <div class="text-xs font-semibold text-gray-500 uppercase tracking-wider">User Management</div>
+                            </div>
+                            <x-responsive-nav-link :href="route('telegram-bot.users')" :active="request()->routeIs('telegram-bot.users*')" class="responsive-nav-item {{ request()->routeIs('telegram-bot.users*') ? 'active' : '' }}">
+                                <svg class="mr-3 h-5 w-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 20h5v-2a3 3 0 00-5.356-1.857M17 20H7m10 0v-2c0-.656-.126-1.283-.356-1.857M7 20H2v-2a3 3 0 015.356-1.857M7 20v-2c0-.656.126-1.283.356-1.857m0 0a5.002 5.002 0 019.288 0M15 7a3 3 0 11-6 0 3 3 0 016 0zm6 3a2 2 0 11-4 0 2 2 0 014 0zM7 10a2 2 0 11-4 0 2 2 0 014 0z"/>
+                                </svg>
+                                {{ __('Bot Users') }}
+                            </x-responsive-nav-link>
+                            <x-responsive-nav-link :href="route('telegram-bot.registrations')" :active="request()->routeIs('telegram-bot.registrations')" class="responsive-nav-item {{ request()->routeIs('telegram-bot.registrations') ? 'active' : '' }}">
+                                <svg class="mr-3 h-5 w-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M18 9v3m0 0v3m0-3h3m-3 0h-3m-2-5a4 4 0 11-8 0 4 4 0 018 0zM3 20a6 6 0 0112 0v1H3v-1z"/>
+                                </svg>
+                                {{ __('Registration Requests') }}
+                                @php
+                                    $pendingCount = \App\Models\BotRegistrationRequest::where('status', 'pending')->count();
+                                @endphp
+                                @if($pendingCount > 0)
+                                    <span class="ml-2 inline-flex items-center px-2 py-0.5 rounded-full text-xs font-medium bg-yellow-100 text-yellow-800">
+                                        {{ $pendingCount }}
+                                    </span>
+                                @endif
+                            </x-responsive-nav-link>
+                        </div>
                     </div>
                 </div>
             @endif

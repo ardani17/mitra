@@ -6,17 +6,27 @@ use App\Models\BotUserSession;
 use App\Models\BotActivity;
 use App\Models\BotCommandHistory;
 use App\Models\Project;
+use App\Models\BotUser;
+use App\Models\BotUserActivityLog;
 use Illuminate\Support\Facades\Log;
 
 class CommandHandler
 {
     protected $telegramService;
     protected $fileProcessingService;
+    protected $userManagementHandler;
     
-    public function __construct(TelegramService $telegramService, FileProcessingService $fileProcessingService)
-    {
+    // Public commands that don't require authentication
+    protected $publicCommands = ['start', 'help', 'register', 'status'];
+    
+    public function __construct(
+        TelegramService $telegramService,
+        FileProcessingService $fileProcessingService,
+        UserManagementCommandHandler $userManagementHandler = null
+    ) {
         $this->telegramService = $telegramService;
         $this->fileProcessingService = $fileProcessingService;
+        $this->userManagementHandler = $userManagementHandler ?: new UserManagementCommandHandler($telegramService);
     }
 
     /**
@@ -28,19 +38,41 @@ class CommandHandler
         $user = $message['from'];
         $text = $message['text'] ?? '';
         
-        // Check if user is allowed
-        if (!$this->telegramService->isUserAllowed($user['id'])) {
-            return $this->sendUnauthorizedMessage($chatId);
+        // Parse command and parameters
+        $parts = explode(' ', $text);
+        $command = str_replace('/', '', array_shift($parts));
+        $params = implode(' ', $parts);
+        
+        // Check if it's a user management command
+        if ($this->userManagementHandler->canHandle($command)) {
+            return $this->userManagementHandler->handle($message);
+        }
+        
+        // Check if command is public or user is authorized
+        if (!in_array($command, $this->publicCommands)) {
+            $botUser = BotUser::findByTelegramId($user['id']);
+            
+            if (!$botUser || !$botUser->isActive()) {
+                // Check old allowed_users for backward compatibility
+                if (!$this->telegramService->isUserAllowed($user['id'])) {
+                    return $this->sendUnauthorizedMessage($chatId);
+                }
+            }
+            
+            // Log activity for authorized users
+            if ($botUser) {
+                BotUserActivityLog::logActivity(
+                    $botUser->id,
+                    'command',
+                    "Executed command: /{$command}",
+                    ['command' => $command, 'params' => $params]
+                );
+            }
         }
         
         // Get or create user session
         $session = BotUserSession::getOrCreate($user, $chatId);
         $session->touchActivity();
-        
-        // Parse command and parameters
-        $parts = explode(' ', $text);
-        $command = str_replace('/', '', array_shift($parts));
-        $params = implode(' ', $parts);
         
         // Log command
         $logComplete = BotCommandHistory::logCommand($user, $chatId, $command, $params, $session->current_project_id);
@@ -53,7 +85,7 @@ class CommandHandler
                     break;
                     
                 case 'help':
-                    $result = $this->handleHelp($chatId);
+                    $result = $this->handleHelp($chatId, $user);
                     break;
                     
                 case 'cari':
@@ -139,21 +171,48 @@ class CommandHandler
     /**
      * Handle /help command
      */
-    protected function handleHelp($chatId)
+    protected function handleHelp($chatId, $user = null)
     {
         $message = "📚 <b>Daftar Perintah Bot</b>\n\n";
+        
+        // Basic commands
+        $message .= "📌 <b>Perintah Dasar:</b>\n";
         $message .= "/start - Memulai bot\n";
         $message .= "/help - Menampilkan bantuan\n";
-        $message .= "/cari [keyword] - Mencari proyek\n";
-        $message .= "/pilih [kode_proyek] - Memilih proyek aktif\n";
-        $message .= "/status - Melihat status saat ini\n";
-        $message .= "/list - Melihat daftar file dalam proyek\n";
-        $message .= "/folder [nama] - Membuat folder baru\n";
-        $message .= "/clear - Hapus proyek aktif\n\n";
-        $message .= "💡 <b>Tips:</b>\n";
-        $message .= "• Kirim file untuk upload ke proyek aktif\n";
-        $message .= "• Gunakan /pilih untuk memilih proyek sebelum upload\n";
-        $message .= "• File akan otomatis diorganisir berdasarkan tipe\n";
+        $message .= "/register - Daftar sebagai pengguna baru\n";
+        $message .= "/status - Melihat status saat ini\n\n";
+        
+        // Check if user has access to project commands
+        $botUser = $user ? BotUser::findByTelegramId($user['id']) : null;
+        
+        if ($botUser && $botUser->isActive()) {
+            $message .= "📁 <b>Perintah Proyek:</b>\n";
+            $message .= "/cari [keyword] - Mencari proyek\n";
+            $message .= "/pilih [kode_proyek] - Memilih proyek aktif\n";
+            $message .= "/list - Melihat daftar file dalam proyek\n";
+            $message .= "/folder [nama] - Membuat folder baru\n";
+            $message .= "/clear - Hapus proyek aktif\n\n";
+            
+            // Admin commands
+            if ($botUser->hasRole('admin') || $botUser->hasRole('super_admin')) {
+                $message .= "👮 <b>Perintah Admin:</b>\n";
+                $message .= "/pending - Lihat pendaftaran pending\n";
+                $message .= "/approve [telegram_id] - Setujui pengguna\n";
+                $message .= "/reject [telegram_id] - Tolak pengguna\n";
+                $message .= "/ban [telegram_id] - Ban pengguna\n";
+                $message .= "/unban [telegram_id] - Unban pengguna\n";
+                $message .= "/users - Lihat daftar pengguna\n\n";
+            }
+            
+            $message .= "💡 <b>Tips:</b>\n";
+            $message .= "• Kirim file untuk upload ke proyek aktif\n";
+            $message .= "• Gunakan /pilih untuk memilih proyek sebelum upload\n";
+            $message .= "• File akan otomatis diorganisir berdasarkan tipe\n";
+        } else {
+            $message .= "ℹ️ <b>Info:</b>\n";
+            $message .= "Anda belum terdaftar atau menunggu persetujuan.\n";
+            $message .= "Gunakan /register untuk mendaftar.\n";
+        }
         
         $this->telegramService->sendMessage($chatId, $message);
         
@@ -275,6 +334,27 @@ class CommandHandler
     protected function handleStatus($chatId, $session)
     {
         $message = "📊 <b>Status Saat Ini</b>\n\n";
+        
+        // Show user registration status
+        $user = $session->toArray();
+        if (isset($user['telegram_user_id'])) {
+            $botUser = BotUser::findByTelegramId($user['telegram_user_id']);
+            if ($botUser) {
+                $statusEmoji = match($botUser->status) {
+                    'active' => '✅',
+                    'pending' => '⏳',
+                    'suspended' => '⚠️',
+                    'banned' => '🚫',
+                    default => '❓'
+                };
+                
+                $message .= "👤 <b>Status Akun:</b> {$statusEmoji} {$botUser->status}\n";
+                if ($botUser->role) {
+                    $message .= "🎭 <b>Role:</b> {$botUser->role->display_name}\n";
+                }
+                $message .= "\n";
+            }
+        }
         
         if ($session->current_project_id) {
             $project = Project::find($session->current_project_id);
@@ -453,10 +533,21 @@ class CommandHandler
      */
     protected function sendUnauthorizedMessage($chatId)
     {
-        $this->telegramService->sendMessage($chatId, 
+        $keyboard = [
+            [
+                ['text' => '📝 Daftar Sekarang', 'callback_data' => 'start_registration'],
+                ['text' => '❓ Bantuan', 'callback_data' => 'show_help']
+            ]
+        ];
+        
+        $this->telegramService->sendMessageWithKeyboard($chatId,
             "🚫 <b>Akses Ditolak</b>\n\n" .
-            "Anda tidak memiliki izin untuk menggunakan bot ini.\n" .
-            "Silakan hubungi administrator untuk mendapatkan akses."
+            "Anda tidak memiliki izin untuk menggunakan bot ini.\n\n" .
+            "Untuk mendapatkan akses:\n" .
+            "1. Klik tombol 'Daftar Sekarang' atau gunakan /register\n" .
+            "2. Tunggu persetujuan dari administrator\n" .
+            "3. Anda akan menerima notifikasi setelah disetujui",
+            $keyboard
         );
         
         return false;
